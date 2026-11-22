@@ -160,6 +160,8 @@ def beat(sh, t, d):
     ty = sh['type']; s = []; cam = (1.0, 540, 830); shake = 0.0; flash = 0.0
     import cung_svg
     if ty in cung_svg.CUNG: return cung_svg.beat(sh, t, d)   # bo canh cung dinh / bi an lich su
+    import bian_svg
+    if ty in bian_svg.CUNG: return bian_svg.beat(sh, t, d)   # bo canh bi an (CCK)
     if ty == 'chui_road':       # Chi Pheo vua di vua chui, dan lang nup sau rao
         s.append(village(t, dusk=True))
         for k, (nm, x) in enumerate([('dan1', 40), ('dan2', 900), ('dan1', 1060)]):
@@ -374,5 +376,6 @@ def install(M):
     """thay beat/SFX/GROUND cua module may dung (ksc_svg dang chay)."""
     import cung_svg
     M.beat = beat
-    M.SFX_PLAN.update(SFX); M.SFX_PLAN.update(cung_svg.SFX)
-    for k in list(SFX) + list(cung_svg.SFX): M.GROUND[k] = GY
+    import bian_svg
+    M.SFX_PLAN.update(SFX); M.SFX_PLAN.update(cung_svg.SFX); M.SFX_PLAN.update(bian_svg.SFX)
+    for k in list(SFX) + list(cung_svg.SFX) + list(bian_svg.SFX): M.GROUND[k] = GY

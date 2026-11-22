@@ -775,7 +775,7 @@ def _init(g):
     if g.get('sp', {}).get('engine') == 'vh':   # tien trinh con (forkserver/spawn) khong giu ban va tu main -> nap lai
         import vh_svg; vh_svg.install(sys.modules[__name__])
     if g.get('sp', {}).get('chars') == 'roinuoc':
-        import rn_chars; rn_chars.install(sys.modules[__name__])
+        import rn_chars; rn_chars.install(sys.modules[__name__], g['sp'].get('cast'))
 
 
 TRIM = ('silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.04,areverse,'
@@ -828,7 +828,7 @@ def main():
     if sp.get('engine') == 'vh':   # bo canh van hoc (lang que, gia dinh, so do) – editor/vh_svg.py
         import vh_svg; vh_svg.install(sys.modules[__name__])
     if sp.get('chars') == 'roinuoc':   # nhan vat roi nuoc son son (dau an AVF tu 22/11) – editor/rn_chars.py
-        import rn_chars; rn_chars.install(sys.modules[__name__])
+        import rn_chars; rn_chars.install(sys.modules[__name__], sp.get('cast'))
     shots = sp['shots']; n = len(shots); voice = None; srt = []
     if not sp.get('voice_urls') and sp.get('tts'):   # tu goi W87 cho tung canh (giong Nhat Khoa, ngat nghi theo cau)
         sp['voice_urls'] = tts_shots(sp)
