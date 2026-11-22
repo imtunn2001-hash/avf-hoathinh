@@ -4,7 +4,8 @@ Khung 1080x1920 (Reels/TikTok/Shorts), bo cuc KHOA CUNG: chu trong SAFE (80..940
 spec: {series, badge, hook_text, next, voice_urls?, srt_urls?, cues?, durs?,
        shots: [{type, label, say, sfx?}]}  type: fleet_arrive | bait_row | melee | crash_stakes | victory | tide_board | prep_stakes | general
 """
-import json, math, os, random, re, subprocess, sys
+import json
+import doc_so, math, os, random, re, subprocess, sys
 from multiprocessing import Pool
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -802,7 +803,7 @@ def tts_shots(sp):
     import urllib.request
     from multiprocessing.pool import ThreadPool
     def one(i):
-        sh = sp['shots'][i]; body = json.dumps({'text': sh.get('tts') or sh['say'], 'speed': sp.get('speed', 1.0), 'tag': f"{sp.get('tag', 'ksc')}-{i}"}).encode()
+        sh = sp['shots'][i]; body = json.dumps({'text': doc_so.doc_tts(sh.get('tts') or sh['say']), 'speed': sp.get('speed', 1.0), 'tag': f"{sp.get('tag', 'ksc')}-{i}"}).encode()
         for k in range(3):
             try:
                 req = urllib.request.Request(W87, data=body, headers={'Content-Type': 'application/json', 'X-AVF-Key': os.environ.get('AVF_KEY', '')})
@@ -829,6 +830,17 @@ def main():
         import vh_svg; vh_svg.install(sys.modules[__name__])
     if sp.get('chars') == 'roinuoc':   # nhan vat roi nuoc son son (dau an AVF tu 22/11) – editor/rn_chars.py
         import rn_chars; rn_chars.install(sys.modules[__name__], sp.get('cast'))
+    def _cd(o):   # chuan chinh ta moi chu hien tren hinh (hòa, tòa, thủy...)
+        if isinstance(o, dict): return {k: (v if 'url' in k else _cd(v)) for k, v in o.items()}
+        if isinstance(o, list): return [_cd(x) for x in o]
+        return doc_so.chuan_dau(o) if isinstance(o, str) else o
+    sp['shots'] = _cd(sp['shots'])
+    for sh_ in sp['shots']:   # 23/11: giong doc dung ban chu (tts), phu de dung ban SO (2026, 59.000, 19:20)
+        if sh_.get('say'):
+            if not sh_.get('tts'): sh_['tts'] = sh_['say']
+            sh_['say'] = doc_so.chu_so(sh_['say'])
+    for k_ in ('series', 'badge', 'hook_text', 'next', 'cta'):
+        if isinstance(sp.get(k_), str): sp[k_] = doc_so.chuan_dau(sp[k_])
     shots = sp['shots']; n = len(shots); voice = None; srt = []
     if not sp.get('voice_urls') and sp.get('tts'):   # tu goi W87 cho tung canh (giong Nhat Khoa, ngat nghi theo cau)
         sp['voice_urls'] = tts_shots(sp)
@@ -869,10 +881,11 @@ def main():
             for k in range(n):
                 se = SENT.get(k) or []
                 txts = [x[2] for x in se]
-                if se and not all(txts):   # thieu text tung cau -> tach cau tu 'say' (khop so cau thi dung)
-                    parts_ = [x.strip() for x in re.findall(r'[^.!?…]+[.!?…]*', re.sub(r'\[\[(.+?)\]\]', r'\1', shots[k].get('say', ''))) if x.strip()]
+                if se:   # 23/11: phu de LUON lay chu tu 'say' (so viet bang chu so, ten goc), KHONG lay chu W87 tra ve (da doi so -> chu, phien am)
+                    say_k = re.sub(r'\[\[(.+?)\]\]', r'\1', shots[k].get('say', ''))
+                    parts_ = [x.strip() for x in re.findall(r'.+?(?:[.!?…]+(?=\s|$)|$)', say_k) if x.strip()]
                     if len(parts_) == len(se): se = [(a, b, t_) for (a, b, _), t_ in zip(se, parts_)]
-                    else: se = []
+                    else: se = [(se[0][0], se[-1][1], say_k)]   # lech so cau: ca canh 1 khoi, van dung chu 'say'
                 if se:   # phu de theo DUNG tung cau: chu hien khi cau bat dau, het khi cau doc xong (22/11: anh/chu chay truoc loi)
                     shots[k]['_sent'] = [a for a, b, t_ in se]
                     for a, b, t_ in se: subs += timed_chunks(st[k] + a, st[k] + b, t_)
