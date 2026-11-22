@@ -710,6 +710,8 @@ def tags_svg(tags, z, cx, cy, X0, Y0, top, bot):
     for Ds, b, txt, fs in items:
         if txt in seen or any(not (b[2] + 10 < p[0] or p[2] + 10 < b[0] or b[3] + 8 < p[1] or p[3] + 8 < b[1]) for p in placed): continue
         seen.add(txt); placed.append(b); x = (b[0] + b[2]) / 2
+        if TAG_STYLE == 'go':
+            import rn_chars; o.append(rn_chars.plaque(esc(txt), x, b[3], fs)); continue
         o.append(f'<rect x="{f_(b[0])}" y="{f_(b[1])}" width="{f_(b[2] - b[0])}" height="{f_(b[3] - b[1])}" rx="{f_(fs * .4)}" fill="#111" opacity=".85"/>'
                  f'<text x="{f_(x)}" y="{f_(b[3] - 9)}" font-family="{FONT}" font-weight="800" font-size="{f_(fs)}" fill="#ffd400" text-anchor="middle">{esc(txt)}</text>')
     return ''.join(o)
@@ -728,6 +730,7 @@ def end_svg(sp, q):
 
 # ---------------- dung ----------------
 G = {}
+TAG_STYLE = 'den'   # 'go' = bien go treo day (nhan vat roi nuoc)
 
 
 def frame_svg(fi):
@@ -771,6 +774,8 @@ def _init(g):
     G.update(g); FMT = g.get('fmt', 'vertical'); W, H = (1080, 1080) if FMT == 'square' else (1080, 1920)
     if g.get('sp', {}).get('engine') == 'vh':   # tien trinh con (forkserver/spawn) khong giu ban va tu main -> nap lai
         import vh_svg; vh_svg.install(sys.modules[__name__])
+    if g.get('sp', {}).get('chars') == 'roinuoc':
+        import rn_chars; rn_chars.install(sys.modules[__name__])
 
 
 TRIM = ('silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.04,areverse,'
@@ -822,6 +827,8 @@ def main():
         sp = json.load(open(os.path.join(ROOT, dd, 'spec.json'), encoding='utf-8'))
     if sp.get('engine') == 'vh':   # bo canh van hoc (lang que, gia dinh, so do) – editor/vh_svg.py
         import vh_svg; vh_svg.install(sys.modules[__name__])
+    if sp.get('chars') == 'roinuoc':   # nhan vat roi nuoc son son (dau an AVF tu 22/11) – editor/rn_chars.py
+        import rn_chars; rn_chars.install(sys.modules[__name__])
     shots = sp['shots']; n = len(shots); voice = None; srt = []
     if not sp.get('voice_urls') and sp.get('tts'):   # tu goi W87 cho tung canh (giong Nhat Khoa, ngat nghi theo cau)
         sp['voice_urls'] = tts_shots(sp)

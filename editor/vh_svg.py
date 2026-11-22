@@ -29,6 +29,9 @@ def ch(name, x, y, D, facing=1, expr='normal', hands=None, **kw):
     g, tips = CH.character(name, x, y, D * SCALE, facing, expr, hands, **kw); return g
 
 
+def ROI(): return getattr(CH.character, '__module__', '') == 'rn_chars'   # dang dung nhan vat roi nuoc
+
+
 def at(sh, i, default):
     """moc giay (trong canh) khi cau thu i bat dau doc; chua co moc thi dung default. Hanh dong phai khop LOI, khong chay truoc."""
     se = sh.get('_sent') or []
@@ -162,8 +165,10 @@ def beat(sh, t, d):
             s.append(ch(nm, x, GY - 20 + (1 - peek) * 90, 92, 1 if x < 540 else -1, 'scared', tag=False, t=t, hidden_below=GY - 90))
         x = lerp(-120, 640, ease(t / max(1, d))); bob = walk(t)
         sway = osc(t, .7) * 7
-        s.append(ch('chipheo', x, GY + 60 - bob, 190, 1, 'angry', [(.7, -.35 + .1 * osc(t, 1.1), None)], lean=sway, t=t, tag=t > 1.0))
-        s.append(bottle(x - 150, GY - 70 - bob, 1.1, -25 + sway))
+        if ROI(): s.append(ch('chipheo', x, GY + 60 - bob, 190, 1, 'angry', [(.7, -.35 + .1 * osc(t, 1.1), None), (-.55, -.05, 'bottle')], lean=sway, t=t, tag=t > 1.0))
+        else:
+            s.append(ch('chipheo', x, GY + 60 - bob, 190, 1, 'angry', [(.7, -.35 + .1 * osc(t, 1.1), None)], lean=sway, t=t, tag=t > 1.0))
+            s.append(bottle(x - 150, GY - 70 - bob, 1.1, -25 + sway))
         if int(t * 2) % 2 == 0: s.append(waves(x + 120, GY - 330, t))
         cam = (lerp(1.12, 1.0, ease(t / 1.2)), x + 60, 880)
     elif ty == 'chui_steps':    # so do leo thang: troi -> doi -> ca lang
@@ -281,8 +286,10 @@ def beat(sh, t, d):
         s.append(f'<rect x="380" y="1060" width="420" height="180" fill="#8a5a34" stroke="{INK}" stroke-width="7"/><path d="M340,1060 L840,1060 L780,960 L400,960 Z" fill="#c9a46a" stroke="{INK}" stroke-width="7"/>')
         for k in range(5): s.append(bottle(420 + k * 80, 1060, .8, (k - 2) * 8))
         sway = osc(t, .6) * 9
-        s.append(ch('chipheo', 600, GY + 60, 200, 1, 'sad' if int(t) % 3 == 2 else 'angry', [(.6, -.3, None)], lean=sway, t=t))
-        s.append(bottle(700, GY - 120, 1.0, 40 + sway))
+        if ROI(): s.append(ch('chipheo', 600, GY + 60, 200, 1, 'sad' if int(t) % 3 == 2 else 'angry', [(.6, -.3, 'bottle'), (-.45, .3, None)], lean=sway, t=t))
+        else:
+            s.append(ch('chipheo', 600, GY + 60, 200, 1, 'sad' if int(t) % 3 == 2 else 'angry', [(.6, -.3, None)], lean=sway, t=t))
+            s.append(bottle(700, GY - 120, 1.0, 40 + sway))
         for k, (nm, xx) in enumerate([('dan1', 60), ('dan2', 1080)]):
             s.append(ch(nm, xx + (k * 2 - 1) * t * 40, GY + 40, 110, -1 if k == 0 else 1, 'scared', t=t, tag=False))
         cam = (1.05, 600, 880)
