@@ -15,7 +15,8 @@ Canh:
 - lab       : phong thi nghiem: chuoi ADN xoay, kinh hien vi; sh.who (nha khoa hoc), sh.result (the ket qua o cau sh.result_at)
 - tree      : cay pha he no ra, sh.count (vd '4.000 NGƯỜI'), sh.name (nhanh sang len o cau sh.name_at)
 - grave     : nghia trang luc chieu, bia da sh.stone (vd 'NGƯỜI VÔ DANH'); sh.dig_at -> hoa tuoi/den
-- stage     : san khau tu do: sh.bg (beach|station|street|room|lab|paper|night), sh.cast=[{c, x, D, expr, face, at, from}], sh.cards=[{t, x, y, at, col}]
+- petition  : don keu oan chat chong theo nam (sh.y0, sh.y1, sh.who, sh.title)
+- stage     : san khau tu do: sh.bg (beach|station|street|room|lab|paper|night|village|village_night|shop|shop_day|prison|court), sh.desk (ban xu), sh.icons=[{icon,x,y,s,at}], sh.cast=[{c, x, D, expr, face, at, from}], sh.cards=[{t, x, y, at, col}]
 """
 import math
 import random
@@ -112,7 +113,51 @@ def lab_bg(t):
     return ''.join(o)
 
 
-BG = {'beach': lambda t: sea_beach(t), 'beach_night': lambda t: sea_beach(t, True), 'station': station_bg, 'street': street_night,
+def shop_bg(t, night=True):
+    """quan tap hoa nong thon: mai ngoi, tu kinh, den vang"""
+    o = [V.village(t, night=night)]
+    o.append(f'<rect x="250" y="{GY - 420}" width="580" height="380" fill="#c9a46a" stroke="{INK}" stroke-width="8"/>'
+             f'<path d="M210,{GY - 420} L540,{GY - 560} L870,{GY - 420} Z" fill="#a8563a" stroke="{INK}" stroke-width="8" stroke-linejoin="round"/>'
+             f'<rect x="300" y="{GY - 340}" width="300" height="300" fill="#2a1e14" stroke="{INK}" stroke-width="7"/>'
+             f'<rect x="630" y="{GY - 230}" width="170" height="190" fill="#bfe0ec" fill-opacity=".7" stroke="{INK}" stroke-width="7"/>')
+    for j in range(3):
+        o.append(f'<path d="M635,{GY - 180 + j * 50} l160,0" stroke="{INK}" stroke-width="4"/>'
+                 + ''.join(f'<rect x="{645 + k * 38}" y="{GY - 212 + j * 50}" width="24" height="30" fill="{("#e8822a", "#3a7ac4", "#9ad88a", "#f08a8a")[(j + k) % 4]}" stroke="{INK}" stroke-width="3"/>' for k in range(4)))
+    gl = .55 + .15 * osc(t, .7)
+    o.append(f'<circle cx="450" cy="{GY - 300}" r="22" fill="#ffd98a" stroke="{INK}" stroke-width="5"/><circle cx="450" cy="{GY - 300}" r="120" fill="#ffd98a" opacity="{f_(gl * .35)}"/>'
+             f'<rect x="330" y="{GY - 405}" width="240" height="56" rx="8" fill="#f4ecd6" stroke="{INK}" stroke-width="6"/>'
+             f'<text x="450" y="{GY - 365}" font-family="{FONT}" font-weight="900" font-size="32" fill="#7a1f1a" text-anchor="middle">TẠP HOÁ</text>')
+    return ''.join(o)
+
+
+def prison_bg(t):
+    """trai giam: tuong gach, o cua song sat"""
+    o = [f'<rect x="-900" y="-500" width="2880" height="2900" fill="#8a8a86"/>']
+    for r_ in range(14):
+        for c_ in range(-8, 16):
+            o.append(f'<rect x="{c_ * 150 + (r_ % 2) * 75}" y="{400 + r_ * 60}" width="150" height="60" fill="none" stroke="#6e6e6a" stroke-width="3"/>')
+    o.append(f'<rect x="340" y="600" width="400" height="240" fill="#3a4458" stroke="{INK}" stroke-width="8"/>')
+    for k in range(7): o.append(f'<path d="M{370 + k * 56},600 L{370 + k * 56},840" stroke="{INK}" stroke-width="12"/>')
+    o.append(f'<rect x="-900" y="{GY - 40}" width="2880" height="1000" fill="#5e5e5a" stroke="{INK}" stroke-width="6"/>')
+    return ''.join(o)
+
+
+def court_bg(t):
+    """phong xu: tuong go, ban dai mau do"""
+    o = [f'<rect x="-900" y="-500" width="2880" height="2900" fill="#c9a87a"/>']
+    for k in range(-10, 20): o.append(f'<path d="M{k * 110},400 L{k * 110},{GY - 40}" stroke="#b08e60" stroke-width="5"/>')
+    o.append(f'<rect x="-900" y="{GY - 40}" width="2880" height="1000" fill="#7a5a3a" stroke="{INK}" stroke-width="6"/>')
+    return ''.join(o)
+
+
+def court_desk():
+    """ban xu dat TRUOC nhan vat (che than duoi)"""
+    return (f'<rect x="40" y="{GY - 150}" width="1000" height="190" fill="#8a2a1e" stroke="{INK}" stroke-width="8"/>'
+            f'<rect x="20" y="{GY - 170}" width="1040" height="28" fill="#6e4a2e" stroke="{INK}" stroke-width="6"/>')
+
+
+BG = {'shop': lambda t: shop_bg(t), 'shop_day': lambda t: shop_bg(t, False), 'prison': prison_bg, 'court': court_bg,
+      'beach': lambda t: sea_beach(t), 'beach_night': lambda t: sea_beach(t, True), 'station': station_bg, 'street': street_night,
       'room': room_bg, 'lab': lab_bg, 'paper': lambda t: paper(), 'night': lambda t: night_sky() + f'<rect x="-900" y="{GY - 40}" width="2880" height="1000" fill="#2a3428" stroke="{INK}" stroke-width="6"/>',
       'village': lambda t: V.village(t), 'village_night': lambda t: V.village(t, night=True)}
 
@@ -173,6 +218,32 @@ def icon(kind, x, y, s=1.0):
     if k == 'car':
         return (f'<path d="M{f_(x - 90 * s)},{f_(y + 20 * s)} L{f_(x - 80 * s)},{f_(y - 20 * s)} L{f_(x - 40 * s)},{f_(y - 25 * s)} L{f_(x - 20 * s)},{f_(y - 60 * s)} L{f_(x + 40 * s)},{f_(y - 60 * s)} L{f_(x + 60 * s)},{f_(y - 25 * s)} L{f_(x + 90 * s)},{f_(y - 15 * s)} L{f_(x + 90 * s)},{f_(y + 20 * s)} Z" fill="#3a4a5a" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
                 f'<circle cx="{f_(x - 50 * s)}" cy="{f_(y + 22 * s)}" r="{f_(18 * s)}" fill="#222" stroke="{INK}" stroke-width="{f_(4 * s)}"/><circle cx="{f_(x + 55 * s)}" cy="{f_(y + 22 * s)}" r="{f_(18 * s)}" fill="#222" stroke="{INK}" stroke-width="{f_(4 * s)}"/>')
+    if k == 'footprint':
+        return ''.join(f'<g transform="translate({f_(x + dx * s)} {f_(y + dy * s)}) rotate({rt})"><ellipse cx="0" cy="0" rx="{f_(20 * s)}" ry="{f_(42 * s)}" fill="#6e5a42" stroke="{INK}" stroke-width="{f_(4 * s)}"/>'
+                       + ''.join(f'<circle cx="{f_((j - 2) * 9 * s)}" cy="{f_(-52 * s - abs(j - 2) * -3 * s)}" r="{f_(6 * s)}" fill="#6e5a42" stroke="{INK}" stroke-width="{f_(2 * s)}"/>' for j in range(5)) + '</g>'
+                       for dx, dy, rt in ((-30, 20, -8), (30, -30, 8)))
+    if k == 'fingerprint':
+        return ''.join(f'<ellipse cx="{f_(x)}" cy="{f_(y)}" rx="{f_((14 + j * 10) * s)}" ry="{f_((20 + j * 12) * s)}" fill="none" stroke="#3a5a8a" stroke-width="{f_(5 * s)}" stroke-dasharray="{f_(18 * s)} {f_(6 * s)}"/>' for j in range(4))
+    if k == 'bottle':
+        return (f'<path d="M{f_(x - 18 * s)},{f_(y - 70 * s)} l{f_(36 * s)},0 l0,{f_(30 * s)} q{f_(22 * s)},{f_(14 * s)} {f_(22 * s)},{f_(40 * s)} l0,{f_(70 * s)} l{f_(-80 * s)},0 l0,{f_(-70 * s)} q0,{f_(-26 * s)} {f_(22 * s)},{f_(-40 * s)} Z" fill="#4a8a4a" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<rect x="{f_(x - 30 * s)}" y="{f_(y + 10 * s)}" width="{f_(60 * s)}" height="{f_(36 * s)}" fill="#f2dc8a" stroke="{INK}" stroke-width="{f_(3 * s)}"/>')
+    if k == 'recorder':
+        return (f'<rect x="{f_(x - 55 * s)}" y="{f_(y - 75 * s)}" width="{f_(110 * s)}" height="{f_(150 * s)}" rx="{f_(12 * s)}" fill="#3a3a44" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<rect x="{f_(x - 38 * s)}" y="{f_(y - 58 * s)}" width="{f_(76 * s)}" height="{f_(40 * s)}" fill="#9fd8a0" stroke="{INK}" stroke-width="{f_(4 * s)}"/>'
+                f'<circle cx="{f_(x)}" cy="{f_(y + 30 * s)}" r="{f_(24 * s)}" fill="#c4281f" stroke="{INK}" stroke-width="{f_(4 * s)}"/>')
+    if k == 'redbook':
+        return (f'<rect x="{f_(x - 55 * s)}" y="{f_(y - 70 * s)}" width="{f_(110 * s)}" height="{f_(140 * s)}" rx="{f_(5 * s)}" fill="#c4281f" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<circle cx="{f_(x)}" cy="{f_(y - 15 * s)}" r="{f_(22 * s)}" fill="none" stroke="#f2dc8a" stroke-width="{f_(5 * s)}"/>'
+                f'<path d="M{f_(x - 30 * s)},{f_(y + 30 * s)} l{f_(60 * s)},0" stroke="#f2dc8a" stroke-width="{f_(5 * s)}"/>')
+    if k == 'bike':
+        return (f'<circle cx="{f_(x - 55 * s)}" cy="{f_(y + 25 * s)}" r="{f_(38 * s)}" fill="none" stroke="{INK}" stroke-width="{f_(7 * s)}"/><circle cx="{f_(x + 55 * s)}" cy="{f_(y + 25 * s)}" r="{f_(38 * s)}" fill="none" stroke="{INK}" stroke-width="{f_(7 * s)}"/>'
+                f'<path d="M{f_(x - 55 * s)},{f_(y + 25 * s)} L{f_(x - 10 * s)},{f_(y - 25 * s)} L{f_(x + 40 * s)},{f_(y - 25 * s)} L{f_(x + 55 * s)},{f_(y + 25 * s)} M{f_(x - 10 * s)},{f_(y - 25 * s)} L{f_(x)},{f_(y + 25 * s)} L{f_(x + 40 * s)},{f_(y - 25 * s)}" stroke="#2e5a8a" stroke-width="{f_(7 * s)}" fill="none"/>'
+                f'<rect x="{f_(x + 30 * s)}" y="{f_(y - 80 * s)}" width="{f_(46 * s)}" height="{f_(54 * s)}" rx="{f_(6 * s)}" fill="#f6f2e8" stroke="{INK}" stroke-width="{f_(4 * s)}"/>'
+                f'<rect x="{f_(x - 80 * s)}" y="{f_(y - 80 * s)}" width="{f_(46 * s)}" height="{f_(54 * s)}" rx="{f_(6 * s)}" fill="#f6f2e8" stroke="{INK}" stroke-width="{f_(4 * s)}"/>')
+    if k == 'scale':
+        return (f'<path d="M{f_(x)},{f_(y - 70 * s)} L{f_(x)},{f_(y + 60 * s)} M{f_(x - 40 * s)},{f_(y + 60 * s)} l{f_(80 * s)},0 M{f_(x - 70 * s)},{f_(y - 50 * s)} L{f_(x + 70 * s)},{f_(y - 50 * s)}" stroke="#8a6a2a" stroke-width="{f_(8 * s)}"/>'
+                f'<path d="M{f_(x - 95 * s)},{f_(y)} q{f_(25 * s)},{f_(30 * s)} {f_(50 * s)},0 Z M{f_(x + 45 * s)},{f_(y)} q{f_(25 * s)},{f_(30 * s)} {f_(50 * s)},0 Z" fill="#d8a93a" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
+                f'<path d="M{f_(x - 70 * s)},{f_(y - 50 * s)} L{f_(x - 95 * s)},{f_(y)} M{f_(x - 70 * s)},{f_(y - 50 * s)} L{f_(x - 45 * s)},{f_(y)} M{f_(x + 70 * s)},{f_(y - 50 * s)} L{f_(x + 45 * s)},{f_(y)} M{f_(x + 70 * s)},{f_(y - 50 * s)} L{f_(x + 95 * s)},{f_(y)}" stroke="#8a6a2a" stroke-width="{f_(3 * s)}"/>')
     return f'<circle cx="{f_(x)}" cy="{f_(y)}" r="{f_(40 * s)}" fill="#ddd" stroke="{INK}" stroke-width="6"/>'
 
 
@@ -182,7 +253,7 @@ def suitcase_open(x, y, q):
             f'<g transform="rotate({f_(lid)} {x - 150} {y - 60})"><rect x="{x - 150}" y="{y - 120}" width="300" height="60" rx="12" fill="#9a6a34" stroke="{INK}" stroke-width="8"/></g>')
 
 
-CUNG = ('beach', 'station', 'items', 'scrap', 'car', 'code', 'door', 'board', 'timeline', 'spy', 'lab', 'tree', 'grave', 'stage')
+CUNG = ('beach', 'station', 'items', 'scrap', 'car', 'code', 'door', 'board', 'timeline', 'spy', 'lab', 'tree', 'grave', 'stage', 'petition')
 
 
 def beat(sh, t, d):
@@ -350,6 +421,18 @@ def beat(sh, t, d):
         if t >= td:
             s.append(pop(540, GY + 20, (t - td) / .4, ''.join(f'<circle cx="{500 + k * 26}" cy="{GY + 10 - (k % 2) * 16}" r="16" fill="{("#f08a8a", "#ffd400", "#f6f2e8")[k % 3]}" stroke="{INK}" stroke-width="4"/>' for k in range(4))))
         cam = (lerp(1.0, 1.1, ease(t / max(1, d))), 540, 980)
+    elif ty == 'petition':   # don keu oan chat chong theo nam: sh.y0..sh.y1, sh.who (nguoi dung canh), sh.title
+        s.append(room_bg(t, '#d8c8a8'))
+        y0, y1 = sh.get('y0', 2004), sh.get('y1', 2013)
+        q = ease(min(1, t / max(1.0, d * .75))); yr = int(round(lerp(y0, y1, q)))
+        n = 3 + int(q * 18)
+        for j in range(n):
+            r_ = random.Random(j); xx = 640 + r_.uniform(-14, 14); yy = GY - 50 - j * 15
+            s.append(f'<g transform="rotate({f_(r_.uniform(-5, 5))} {f_(xx)} {f_(yy)})"><rect x="{f_(xx - 120)}" y="{f_(yy - 14)}" width="240" height="20" fill="#fbf6e6" stroke="{INK}" stroke-width="4"/></g>')
+        s.append(card(640, GY - 110 - n * 15, f'ĐƠN NĂM {yr}', '#f2dc8a', '#111', 40))
+        if sh.get('title'): s.append(card(540, 600, sh['title'], '#c4281f', '#fff', 44))
+        if sh.get('who'): s.append(ch(sh['who'], 270, GY + 40, sh.get('D', 165), 1, sh.get('expr', 'sad'), [(.6, -.25, 'scroll')], t=t))
+        cam = (1.0, 540, 900)
     elif ty == 'stage':
         s.append(BG.get(sh.get('bg', 'paper'), BG['paper'])(t))
         for k, c in enumerate(sh.get('cast', [])):
@@ -361,6 +444,10 @@ def beat(sh, t, d):
             else: bob = 0
             g = ch(c['c'], x, c.get('y', GY + 40) - bob, c.get('D', 160), c.get('face', 1), c.get('expr', 'normal'), c.get('hands'), t=t, tag=c.get('tag', True))
             s.append(pop(x, c.get('y', GY + 40) - 100, (t - ta) / .35, g) if (c.get('at') and fx is None) else g)
+        if sh.get('desk'): s.append(court_desk())
+        for k, ic in enumerate(sh.get('icons', [])):   # vat chung dat trong canh: {icon, x, y, s, at}
+            ta = V.at(sh, int(ic.get('at', 0)), .3)
+            if t >= ta: s.append(pop(ic.get('x', 540), ic.get('y', 760), (t - ta) / .35, icon(ic['icon'], ic.get('x', 540), ic.get('y', 760), ic.get('s', 1.0))))
         for k, cd in enumerate(sh.get('cards', [])):
             ta = V.at(sh, int(cd.get('at', k)), .3 + k)
             if t >= ta: s.append(pop(cd.get('x', 540), cd.get('y', 760), (t - ta) / .35, card(cd.get('x', 540), cd.get('y', 760), cd['t'], cd.get('col', '#f2dc8a'), cd.get('tc', '#111'), cd.get('fs', 44))))
@@ -376,5 +463,5 @@ SFX = {
     'scrap': [('f0.1', 'whoosh', .5), ('f0.5', 'sting', .7)], 'car': [('f0.45', 'thud', .6), ('f0.5', 'ding', .5)],
     'code': [('every:0.25@0.2', 'tick', .15)], 'door': [('f0.1', 'thud', .5), ('f0.15', 'thud', .5), ('f0.4', 'pop', .5)],
     'board': [('every:1.4@0.3', 'pop', .5)], 'timeline': [('every:1.4@0.3', 'pop', .5)], 'spy': [('f0.1', 'sting', .6)],
-    'lab': [('f0.6', 'ding', .6)], 'tree': [('every:0.6', 'tick', .2), ('f0.7', 'ding', .6)], 'grave': [], 'stage': [],
+    'lab': [('f0.6', 'ding', .6)], 'tree': [('every:0.6', 'tick', .2), ('f0.7', 'ding', .6)], 'grave': [], 'stage': [], 'petition': [('every:0.8@0.2', 'tick', .2)],
 }
