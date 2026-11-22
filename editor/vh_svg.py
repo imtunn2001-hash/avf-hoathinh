@@ -22,8 +22,18 @@ def esc(s): return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&g
 def hold2(t, seed=0): return random.Random(int(t * 15) * 31 + seed)
 
 
+SCALE = .8   # 22/11: nhan vat dang qua to
+
+
 def ch(name, x, y, D, facing=1, expr='normal', hands=None, **kw):
-    g, tips = CH.character(name, x, y, D, facing, expr, hands, **kw); return g
+    g, tips = CH.character(name, x, y, D * SCALE, facing, expr, hands, **kw); return g
+
+
+def at(sh, i, default):
+    """moc giay (trong canh) khi cau thu i bat dau doc; chua co moc thi dung default. Hanh dong phai khop LOI, khong chay truoc."""
+    se = sh.get('_sent') or []
+    if i < 0: i = len(se) + i
+    return se[i] if 0 <= i < len(se) else default
 
 
 # ---------------- nen ----------------
@@ -160,7 +170,7 @@ def beat(sh, t, d):
         s.append('<rect x="-900" y="-500" width="2880" height="2900" fill="#f2ead6"/>')
         steps = [('TRỜI', '#8ec0e0', 'Trời có của riêng ai'), ('ĐỜI', '#e9b25a', 'Đời là tất cả'), ('CẢ LÀNG', '#c4281f', 'Làng Vũ Đại')]
         for k, (tt, col, sub) in enumerate(steps):
-            q = back_ease(min(1, (t - .3 - k * d * .25) / .35)); x = 260 + k * 280; y = 1080 - k * 210
+            t0 = at(sh, (1, 3, 5)[k], .3 + k * d * .25); q = back_ease(min(1, (t - t0) / .35)); x = 260 + k * 280; y = 1180 - k * 190
             if q > 0:
                 s.append(f'<g transform="translate({x} {y}) scale({f_(q)}) translate({-x} {-y})">{card(x, y, 250, 170, tt, "", col, 0, "#fff" if k == 2 else "#111")}</g>')
                 if k: s.append(f'<path d="M{x - 200},{y + 150} Q{x - 140},{y + 40} {x - 120},{y + 70}" stroke="{INK}" stroke-width="10" fill="none" marker-end=""/><polygon points="{x - 128},{y + 40} {x - 100},{y + 86} {x - 150},{y + 84}" fill="{INK}"/>')
@@ -169,10 +179,10 @@ def beat(sh, t, d):
     elif ty == 'ke':            # nguoi ke noi voi nguoi xem (canh co dinh cua kenh)
         s.append('<rect x="-900" y="-500" width="2880" height="2900" fill="#efe7d2"/>')
         s.append(f'<rect x="-900" y="{GY}" width="2880" height="900" fill="#d8c9a4" stroke="{INK}" stroke-width="6"/>')
-        s.append(f'<rect x="80" y="520" width="560" height="380" rx="16" fill="#2f4a3a" stroke="#6b4a2a" stroke-width="16"/>')
+        s.append(f'<rect x="80" y="660" width="560" height="380" rx="16" fill="#2f4a3a" stroke="#6b4a2a" stroke-width="16"/>')
         txt = sh.get('board', '')
         if txt:
-            for j, ln in enumerate(txt.split('|')): s.append(f'<text x="360" y="{640 + j * 80}" font-family="{FONT}" font-weight="700" font-size="56" fill="#f4f0e0" text-anchor="middle">{esc(ln)}</text>')
+            for j, ln in enumerate(txt.split('|')): s.append(f'<text x="360" y="{780 + j * 80}" font-family="{FONT}" font-weight="700" font-size="56" fill="#f4f0e0" text-anchor="middle">{esc(ln)}</text>')
         nod = (int(t * 30 / 3) % 4 in (1, 2)) * 3; bob = abs(osc(t, 1.6)) * 10
         s.append(ch('nguoike', 800, GY - bob, 175, -1, sh.get('expr', 'happy'), [(.85, .05 * abs(osc(t, .9)), 'board', 200 + 12 * osc(t, .9)), (-.55, .05)], head_rot=nod, t=t))
         if sh.get('ask'):
@@ -190,13 +200,13 @@ def beat(sh, t, d):
         cam = (lerp(1.0, 1.1, ease(t / d)), 560, 900)
     elif ty == 'book_swap':     # nha xuat ban doi ten sach
         s.append('<rect x="-900" y="-500" width="2880" height="2900" fill="#e9dcc0"/>')
-        sw = ease((t - d * .4) / .5)
-        s.append(card(lerp(540, 250, sw), 880, 340, 470, 'CÁI LÒ', 'GẠCH CŨ', '#a8563a', lerp(0, -12, sw), '#fff'))
+        t1 = at(sh, 1, d * .4); sw = ease((t - t1) / .5)
+        s.append(card(lerp(320, 250, sw), 1000, 340, 470, 'CÁI LÒ', 'GẠCH CŨ', '#a8563a', lerp(0, -12, sw), '#fff'))
         if sw > 0:
-            q = back_ease(min(1, (t - d * .4) / .4))
-            s.append(f'<g transform="translate(800 880) scale({f_(q)}) translate(-800 -880)">{card(800, 880, 340, 470, "ĐÔI LỨA", "XỨNG ĐÔI", "#e8607a", 8, "#fff")}<text x="800" y="1060" font-size="120" text-anchor="middle">❤</text></g>')
-            if t - d * .4 < .2: flash = .4
-        s.append(ch('namcao', 260, 1500, 150, 1, 'sad' if sw > .5 else 'surprised', [(.2, -1.05, None)], t=t))
+            q = back_ease(min(1, (t - t1) / .4))
+            s.append(f'<g transform="translate(800 1000) scale({f_(q)}) translate(-800 -1000)">{card(800, 1000, 340, 470, "ĐÔI LỨA", "XỨNG ĐÔI", "#e8607a", 8, "#fff")}<text x="800" y="1180" font-size="120" text-anchor="middle">❤</text></g>')
+            if t - t1 < .2: flash = .4
+        s.append(ch('namcao', 560, 1420, 150, 1, 'sad' if sw > .5 else 'surprised', [(.2, -1.05, None)], t=t))
         cam = (1.0, 540, 1000)
     elif ty == 'kiln':          # cai lo gach bo hoang luc hoang hon
         s.append(sky('#c86a42', '#f2c27a')); s.append(hills(900, '#8a8a5a', '#6e6e46'))
@@ -212,10 +222,10 @@ def beat(sh, t, d):
         s.append(kiln(300, 1200, 1.1))
         wig = osc(t, 2.2) * 4
         s.append(f'<ellipse cx="{f_(560 + wig)}" cy="1170" rx="70" ry="38" fill="#c8b48a" stroke="{INK}" stroke-width="6"/><circle cx="{f_(612 + wig)}" cy="1150" r="30" fill="#f0c49c" stroke="{INK}" stroke-width="6"/>')
-        x = lerp(1250, 860, ease(t / 1.4)); stop = t > 1.4
+        tb = at(sh, 1, 1.4); x = lerp(1250, 860, ease(t / max(.6, tb))); stop = t > tb
         s.append(ch('nongdan', x, GY + 20 - (0 if stop else walk(t)), 170, -1, 'surprised' if stop else 'normal', [(.6, .1, 'oar', 70)], t=t, tag=stop))
         for k in range(3): s.append(f'<ellipse cx="{f_(x + 60 + k * 30)}" cy="{GY - 10}" rx="16" ry="42" fill="#9a7a44" stroke="{INK}" stroke-width="5"/>')
-        if stop and t < 1.8: shake = 6
+        if stop and t < tb + .4: shake = 6
         cam = (1.08, 640, 900)
     elif ty == 'passed':        # dua be bi chuyen tay
         s.append(village(t))
@@ -245,13 +255,13 @@ def beat(sh, t, d):
         for k in range(3): s.append(f'<rect x="{790 + k * 130}" y="730" width="110" height="{GY - 760}" fill="#d4a85a" stroke="{INK}" stroke-width="5"/>')
         s.append(ch('baba', 200, GY + 20, 160, 1, 'happy', [(.8, -.2, None)], t=t))
         s.append(ch('chitre', 520, GY + 30, 170, -1, 'scared', [(.4, .1, None)], t=t, tag=False))
-        peek = ease((t - d * .35) / .5)
+        peek = ease((t - at(sh, 2, d * .35)) / .5)
         if peek > 0:
             s.append(ch('bakien', lerp(1100, 980, peek), GY + 20, 190, -1, 'angry', t=t, tag=peek > .8))
         cam = (1.0, 560, 900)
     elif ty == 'arrest':        # linh le giai di
         s.append(village(t))
-        x = lerp(380, 1250, ease((t - .6) / max(.8, d - .8))); bob = walk(t) if t > .6 else 0
+        t0 = at(sh, 3, .6); x = lerp(380, 1250, ease((t - t0) / max(.8, d - t0))); bob = walk(t) if t > t0 else 0
         s.append(ch('bakien', 120, GY + 40, 190, 1, 'normal', t=t, tag=t < d * .6))
         s.append(ch('linhle', x - 210, GY + 50 - bob, 160, 1, 'angry', [(.6, -.1, 'spear', -60)], t=t, tag=False))
         s.append(ch('chitre', x, GY + 50 - bob, 165, 1, 'scared', [(-.3, .1, None)], t=t, tag=False))
@@ -259,13 +269,13 @@ def beat(sh, t, d):
         cam = (1.0, lerp(540, 680, ease(t / d)), 880)
     elif ty == 'return':        # nguoi la tro ve: dau troc, rang cao trang, ngu xam
         s.append(village(t, dusk=True))
-        x = lerp(1300, 620, ease(t / 1.2)); arr = t > 1.2
+        ta = at(sh, 1, 1.2); x = lerp(1300, 620, ease(t / max(.6, ta))); arr = t > ta
         for k, (nm, xx) in enumerate([('dan1', 150), ('dan2', 330)]):
-            jump = back_ease(min(1, (t - 1.2) / .3)) if arr else 0
-            s.append(ch(nm, xx - 60 * jump, GY + 40 - 40 * max(0, 1 - abs((t - 1.35) / .15)), 130, 1, 'surprised' if arr else 'normal', t=t, tag=False))
+            jump = back_ease(min(1, (t - ta) / .3)) if arr else 0
+            s.append(ch(nm, xx - 60 * jump, GY + 40 - 40 * max(0, 1 - abs((t - ta - .15) / .15)), 130, 1, 'surprised' if arr else 'normal', t=t, tag=False))
         s.append(ch('chipheo', x, GY + 60 - (0 if arr else walk(t)), 220, -1, 'normal', [(.5, .2, None)], t=t, tag=arr))
-        if arr and t < 1.45: flash = .45; shake = 10; s.append(star(x - 180, GY - 460, 60, t * 300))
-        cam = (lerp(1.0, 1.15, ease((t - 1.2) / .6)), lerp(700, 560, ease(t / 1.4)), 820)
+        if arr and t < ta + .25: flash = .45; shake = 10; s.append(star(x - 150, GY - 380, 60, t * 300))
+        cam = (lerp(1.0, 1.15, ease((t - ta) / .6)), lerp(700, 560, ease(t / (ta + .2))), 820)
     elif ty == 'drunk':         # quan ruou, dan lang tranh xa
         s.append(village(t, dusk=True))
         s.append(f'<rect x="380" y="1060" width="420" height="180" fill="#8a5a34" stroke="{INK}" stroke-width="7"/><path d="M340,1060 L840,1060 L780,960 L400,960 Z" fill="#c9a46a" stroke="{INK}" stroke-width="7"/>')
@@ -279,7 +289,8 @@ def beat(sh, t, d):
     elif ty == 'alone':         # bat nghi: duong lang vang, cua dong, dau hoi
         s.append(village(t, dusk=True, shut=True))
         s.append(ch('chipheo', 560, GY + 60, 180, 1, 'sad', t=t, tag=False))
-        s.append(bigq(820, 900, t))
+        tq = at(sh, -1, 0.0)
+        if t >= tq: s.append(bigq(820, 900, t - tq))
         cam = (lerp(1.0, 1.18, ease(t / max(.5, d))), 600, 900)
     elif ty == 'echo':          # tieng chui di ra, khong co tieng nao quay ve
         s.append(sky('#2a3458', '#5a5a7a')); s.append(hills(900, '#4e6250', '#3a4e3e'))
@@ -299,17 +310,17 @@ def beat(sh, t, d):
         cam = (lerp(1.1, 1.0, ease(t / d)), 560, 860)
     elif ty == 'web':           # so do quan he: 3 nguoi that o lang Dai Hoang -> 1 nhan vat
         s.append('<rect x="-900" y="-500" width="2880" height="2900" fill="#f2ead6"/>')
-        s.append(f'<text x="540" y="560" font-family="{FONT}" font-weight="800" font-size="54" fill="#6b4a2a" text-anchor="middle">LÀNG ĐẠI HOÀNG</text>')
-        pos = [(220, 820), (540, 760), (860, 820)]
+        s.append(f'<text x="540" y="820" font-family="{FONT}" font-weight="800" font-size="54" fill="#6b4a2a" text-anchor="middle">LÀNG ĐẠI HOÀNG</text>')
+        pos = [(220, 1010), (540, 960), (860, 1010)]
         for k, (x, y) in enumerate(pos):
-            q = back_ease(min(1, (t - .2 - k * .35) / .35))
+            q = back_ease(min(1, (t - at(sh, 1, .2) - k * .35) / .35))
             if q > 0:
                 s.append(f'<g transform="translate({x} {y}) scale({f_(q)}) translate({-x} {-y})"><circle cx="{x}" cy="{y}" r="95" fill="#d8c9a4" stroke="{INK}" stroke-width="7"/>'
                          f'<circle cx="{x}" cy="{y - 25}" r="32" fill="#6e5a4a"/><path d="M{x - 55},{y + 60} Q{x},{y - 10} {x + 55},{y + 60} Z" fill="#6e5a4a"/>'
                          f'<text x="{x}" y="{y + 140}" font-family="{FONT}" font-weight="800" font-size="40" fill="#111" text-anchor="middle">NGƯỜI THẬT {k + 1}</text></g>')
-        m = ease((t - 1.4) / .6)
+        m = ease((t - at(sh, 2, 1.4)) / .6)
         if m > 0:
-            for x, y in pos: s.append(f'<path d="M{x},{y + 160} L{f_(lerp(x, 540, m))},{f_(lerp(y + 160, 1180, m))}" stroke="#c4281f" stroke-width="10" stroke-dasharray="20 12"/>')
+            for x, y in pos: s.append(f'<path d="M{x},{y + 160} L{f_(lerp(x, 540, m))},{f_(lerp(y + 160, 1300, m))}" stroke="#c4281f" stroke-width="10" stroke-dasharray="20 12"/>')
             s.append(f'<g opacity="{f_(m)}">' + ch('chipheo', 540, 1480, 160, 1, 'normal', t=t, tag=False) + '</g>')
         cam = (1.0, 540, 1000)
     elif ty == 'night_gate':    # dem, Chi cam dao den cong nha cu Ba

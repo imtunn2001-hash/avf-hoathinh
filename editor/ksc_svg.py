@@ -789,6 +789,7 @@ def pause_after(sh):
     return base + float(sh.get('gap', 0))
 
 
+SENT = {}   # moc tung cau trong canh: {canh: [(bat_dau, ket_thuc, chu)]}
 W87 = os.environ.get('AVF_TTS_URL', '')   # dia chi that nam trong GitHub Secrets, khong ghi vao code
 
 
@@ -803,7 +804,8 @@ def tts_shots(sp):
                 with urllib.request.urlopen(req, timeout=900) as r: j = json.loads(r.read())
                 if j.get('ok'):
                     for u in j['voice_urls']: print('::add-mask::' + u, flush=True)   # che link file giong khoi nhat ky
-                    return [[u, p] for u, p in zip(j['voice_urls'], j['pauses'])]
+                    tx = j.get('texts') or [''] * len(j['voice_urls'])
+                    return [[u, p, t_] for u, p, t_ in zip(j['voice_urls'], j['pauses'], tx)]
                 print('giong loi canh', i)
             except Exception as ex: print('giong that bai canh', i, k, type(ex).__name__)
         sys.exit(f'khong co giong canh {i}')
@@ -830,11 +832,15 @@ def main():
             wv = os.path.join(OUT, f'vp{i}.wav'); pa = pause_after(shots[i] if len(urls) == n else {})
             if isinstance(u, (list, tuple)):
                 # canh nhieu cau (W87): [[url, pause], ...] -> moi cau doc lien, nghi dung pause giua cau (chu chot 21/11)
-                subs_ = []
-                for k, (uu, pz) in enumerate(u):
+                subs_ = []; cur = 0.0; sent = []
+                for k, it in enumerate(u):
+                    uu, pz = it[0], it[1]; tx = it[2] if len(it) > 2 else ''
                     pk = get(uu, os.path.join(OUT, f'vp{i}_{k}.mp3')); wk = os.path.join(OUT, f'vp{i}_{k}.wav')
                     pad = pa if k == len(u) - 1 else max(0.0, float(pz or .45) - 0.1)
                     subprocess.check_call(['ffmpeg', '-y', '-v', 'error', '-i', pk, '-ar', str(SR), '-ac', '2', '-af', TRIM + ',apad=pad_dur=%.2f' % pad, wk]); subs_.append(wk)
+                    dk = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', wk]).decode().strip())
+                    sent.append((cur, cur + max(.2, dk - pad), tx)); cur += dk   # moc noi that cua tung cau (khong tinh khoang nghi)
+                SENT[i] = sent
                 l2 = os.path.join(OUT, f'vl{i}.txt'); open(l2, 'w').write(''.join(f"file '{x}'\n" for x in subs_))
                 subprocess.check_call(['ffmpeg', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', l2, '-c', 'copy', wv])
             else:
@@ -852,7 +858,22 @@ def main():
             st = []; acc = 0.0
             for wv in parts:
                 st.append(acc); acc += float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', wv]).decode().strip())
-            subs = [c for k in range(n) for c in timed_chunks(st[k], (st[k + 1] if k + 1 < n else dur) - .08, shots[k].get('say', ''))]
+            subs = []
+            for k in range(n):
+                se = SENT.get(k) or []
+                txts = [x[2] for x in se]
+                if se and not all(txts):   # thieu text tung cau -> tach cau tu 'say' (khop so cau thi dung)
+                    parts_ = [x.strip() for x in re.findall(r'[^.!?…]+[.!?…]*', re.sub(r'\[\[(.+?)\]\]', r'\1', shots[k].get('say', ''))) if x.strip()]
+                    if len(parts_) == len(se): se = [(a, b, t_) for (a, b, _), t_ in zip(se, parts_)]
+                    else: se = []
+                if se:   # phu de theo DUNG tung cau: chu hien khi cau bat dau, het khi cau doc xong (22/11: anh/chu chay truoc loi)
+                    shots[k]['_sent'] = [a for a, b, t_ in se]
+                    for a, b, t_ in se: subs += timed_chunks(st[k] + a, st[k] + b, t_)
+                else:
+                    subs += timed_chunks(st[k], (st[k + 1] if k + 1 < n else dur) - .08, shots[k].get('say', ''))
+            subs.sort(key=lambda c: c[0])
+            for j in range(len(subs) - 1):   # giu chu qua khoang nghi ngan giua 2 cau, tranh nhap nhay
+                if subs[j + 1][0] - subs[j][1] < .7: subs[j] = (subs[j][0], subs[j + 1][0] - .02, subs[j][2])
         else:
             st = scene_starts(sp, srt, n, dur); subs = srt
     else:
@@ -864,7 +885,7 @@ def main():
     nfr = int(D * FPS)
     if os.environ.get('BOARD'):   # bang khung hinh: moi canh 1 khung o moc 75%
         for k in range(n):
-            fi = int((LEAD + st[k] + .75 * (ends[k] - st[k])) * FPS)
+            fi = int((LEAD + st[k] + float(os.environ.get('BOARD_AT', '.75')) * (ends[k] - st[k])) * FPS)
             open(os.path.join(OUT, f'board_{k}.png'), 'wb').write(render_png(min(fi, nfr - 1)))
         print('board ok'); return
     raw = os.path.join(OUT, 'v_tmp.mp4')
