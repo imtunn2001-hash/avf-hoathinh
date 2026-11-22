@@ -24,6 +24,19 @@ EXTRA = {
     'thino': dict(tag='THỊ NỞ', skin='#d9a77a', hair='#140f0c', hair_style='bun', outfit='#6c5a8a', outfit2='#4c3e66', trim='#c8a24a', mark='bigface'),
     'thinoa': dict(tag='THỊ NỞ', skin='#d9a77a', hair='#140f0c', hair_style='bun', outfit='#6c5a8a', outfit2='#4c3e66', trim='#c8a24a', mark='bigface', prop='bowl'),
 }
+EXTRA.update({
+    'chieuhoang': dict(tag='LÝ CHIÊU HOÀNG', skin='#f0c49c', hair='#140f0c', hair_style='mien', outfit='#d9a52a', outfit2='#a87a18', trim='#c4281f', mark='bangs'),
+    'trancanh': dict(tag='TRẦN CẢNH', skin='#ecb88a', hair='#140f0c', hair_style='topknot', outfit='#2e5a8a', outfit2='#22436a', trim='#d8a93a'),
+    'thaitong': dict(tag='TRẦN THÁI TÔNG', skin='#e6b48a', hair='#140f0c', hair_style='mien', outfit='#d9a52a', outfit2='#a87a18', trim='#c4281f', beard=True),
+    'thudo': dict(tag='TRẦN THỦ ĐỘ', skin='#d9a070', hair='#140f0c', hair_style='khan', hat='#111', outfit='#7a1f1a', outfit2='#561410', trim='#d8a93a', w=1.12, beard=True, mark='brow'),
+    'thudogia': dict(tag='TRẦN THỦ ĐỘ', skin='#d9a070', hair='#e8e4da', hair_style='khan', hat='#111', outfit='#7a1f1a', outfit2='#561410', trim='#d8a93a', w=1.12, beard=True, mark='brow'),
+    'huetong': dict(tag='LÝ HUỆ TÔNG', skin='#e2b48a', hair='#140f0c', hair_style='mien', outfit='#c99a2a', outfit2='#9a7418', trim='#7a1f1a', mark='pale'),
+    'huequang': dict(tag='SƯ HUỆ QUANG', skin='#e2b48a', hair='#cfa078', hair_style='bald', outfit='#8a5a2a', outfit2='#6a4420', trim='#d8a93a', mark='pale'),
+    'tonthat': dict(tag='TÔN THẤT HỌ LÝ', skin='#e0aa7c', hair='#140f0c', hair_style='khan', hat='#2a2a3a', outfit='#5a6a8a', outfit2='#44506a', trim='#d8a93a'),
+    'quan': dict(tag='QUAN TRIỀU', skin='#dca476', hair='#140f0c', hair_style='khan', hat='#1a1a1a', outfit='#2e5a46', outfit2='#224436', trim='#d8a93a', beard=True),
+    'ngosilien': dict(tag='NGÔ SĨ LIÊN', skin='#e2ae80', hair='#d8d4ca', hair_style='khan', hat='#2a2a2a', outfit='#efe6cf', outfit2='#cfc3a3', trim='#7a5a2a', beard=True, mark='glasses'),
+    'thitu': dict(tag='NGƯỜI HẦU', skin='#ecb88a', hair='#140f0c', hair_style='bun', outfit='#8a3a5a', outfit2='#6a2a44', trim='#d8a93a'),
+})
 MARKS = {'chipheo': 'scar', 'namcao': 'glasses', 'bakien': 'mustache', 'baba': 'mole', 'thino': 'bigface'}
 
 
@@ -66,6 +79,17 @@ def _prop_extra(kind, hx, hy, D, facing):
         pts = ' '.join(f'L{_f(hx + facing * math.cos(math.radians(a)) * 70 * s)},{_f(hy + math.sin(math.radians(a)) * 70 * s)}' for a in range(-150, -29, 15))
         return (f'<path d="M{_f(hx)},{_f(hy)} {pts} Z" fill="#e8c66a" stroke="{INK}" stroke-width="{_f(5 * s)}"/>'
                 + ''.join(f'<path d="M{_f(hx)},{_f(hy)} L{_f(hx + facing * math.cos(math.radians(a)) * 68 * s)},{_f(hy + math.sin(math.radians(a)) * 68 * s)}" stroke="#8a6a2a" stroke-width="{_f(2.5 * s)}"/>' for a in range(-135, -40, 15))), (hx, hy - 70 * s)
+    if kind == 'towel':   # khan trau do
+        return (f'<path d="M{_f(hx - 10 * s)},{_f(hy - 10 * s)} q{_f(30 * s)},{_f(-30 * s)} {_f(60 * s)},{_f(-6 * s)} l{_f(-8 * s)},{_f(40 * s)} q{_f(-26 * s)},{_f(-14 * s)} {_f(-52 * s)},{_f(8 * s)} Z" fill="#c4281f" stroke="{INK}" stroke-width="{_f(4 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{_f(hx + 50 * s)},{_f(hy - 16 * s)} l{_f(8 * s)},{_f(10 * s)} M{_f(hx + 44 * s)},{_f(hy + 24 * s)} l{_f(8 * s)},{_f(8 * s)}" stroke="{GOLD}" stroke-width="{_f(3 * s)}"/>'), (hx + 50 * s, hy)
+    if kind == 'scroll':  # to chieu vang
+        return (f'<rect x="{_f(hx - 8 * s)}" y="{_f(hy - 90 * s)}" width="{_f(70 * s)}" height="{_f(90 * s)}" fill="#f2dc8a" stroke="{INK}" stroke-width="{_f(4 * s)}"/>'
+                + ''.join(f'<path d="M{_f(hx + 2 * s)},{_f(hy - (74 - k * 16) * s)} l{_f(50 * s)},0" stroke="#8a6a2a" stroke-width="{_f(3 * s)}"/>' for k in range(4))
+                + f'<rect x="{_f(hx - 14 * s)}" y="{_f(hy - 96 * s)}" width="{_f(82 * s)}" height="{_f(10 * s)}" rx="{_f(5 * s)}" fill="#7a1f1a" stroke="{INK}" stroke-width="{_f(3 * s)}"/>'
+                + f'<rect x="{_f(hx - 14 * s)}" y="{_f(hy - 4 * s)}" width="{_f(82 * s)}" height="{_f(10 * s)}" rx="{_f(5 * s)}" fill="#7a1f1a" stroke="{INK}" stroke-width="{_f(3 * s)}"/>'), (hx + 30 * s, hy - 90 * s)
+    if kind == 'weed':    # bui co nho ca re dai
+        return (f'<path d="M{_f(hx)},{_f(hy)} q{_f(-6 * s)},{_f(30 * s)} {_f(4 * s)},{_f(60 * s)} q{_f(-14 * s)},{_f(20 * s)} {_f(-4 * s)},{_f(46 * s)} M{_f(hx + 2 * s)},{_f(hy + 40 * s)} q{_f(16 * s)},{_f(12 * s)} {_f(20 * s)},{_f(34 * s)}" stroke="#8a6a3a" stroke-width="{_f(4 * s)}" fill="none"/>'
+                + ''.join(f'<path d="M{_f(hx)},{_f(hy)} q{_f(dx * s)},{_f(-30 * s)} {_f(dx * 2 * s)},{_f(-60 * s)}" stroke="#3e7a2c" stroke-width="{_f(7 * s)}" fill="none" stroke-linecap="round"/>' for dx in (-14, -4, 8, 16))), (hx, hy - 60 * s)
     if kind == 'pen':
         return (f'<path d="M{_f(hx)},{_f(hy)} l{_f(facing * 40 * s)},{_f(-60 * s)}" stroke="{INK}" stroke-width="{_f(14 * s)}" stroke-linecap="round"/>'
                 f'<path d="M{_f(hx)},{_f(hy)} l{_f(facing * 40 * s)},{_f(-60 * s)}" stroke="#7a2a20" stroke-width="{_f(7 * s)}" stroke-linecap="round"/>'), (hx + facing * 40 * s, hy - 60 * s)
@@ -135,6 +159,13 @@ def _face(c, name, hx, hy, rx, ry, D, facing, expr):
                  + f'<path d="M{_f(xs[0] + 17 * s)},{_f(hy - 2 * s)} L{_f(xs[1] - 17 * s)},{_f(hy - 2 * s)}" stroke="{INK}" stroke-width="{_f(3.5 * s)}"/>')
     if mark == 'mustache':  # ria tram + rau de cua Ba Kien
         o.append(f'<path d="M{_f(mx)},{_f(my - 8 * s)} q{_f(-18 * s)},{_f(-4 * s)} {_f(-30 * s)},{_f(12 * s)} M{_f(mx)},{_f(my - 8 * s)} q{_f(18 * s)},{_f(-4 * s)} {_f(30 * s)},{_f(12 * s)}" stroke="{INK}" stroke-width="{_f(4.5 * s)}" fill="none" stroke-linecap="round"/>')
+    if mark == 'brow':      # may rau sau dam, xech (Tran Thu Do)
+        for X in xs:
+            o.append(f'<path d="M{_f(X - 17 * s)},{_f(hy - 30 * s + (6 * s if (X - hx) * facing < rx * .2 else 0))} L{_f(X + 17 * s)},{_f(hy - 24 * s - (6 * s if (X - hx) * facing < rx * .2 else 0))}" stroke="{INK}" stroke-width="{_f(9 * s)}" stroke-linecap="round"/>')
+    if mark == 'pale':      # quang tham duoi mat (vua om yeu)
+        o.append(''.join(f'<path d="M{_f(X - 10 * s)},{_f(hy + 12 * s)} q{_f(10 * s)},{_f(6 * s)} {_f(20 * s)},0" stroke="#8a6a8a" stroke-width="{_f(3 * s)}" fill="none" opacity=".8"/>' for X in xs))
+    if mark == 'bangs':     # toc mai bang (be gai)
+        o.append(f'<path d="M{_f(hx - rx * .85)},{_f(hy - ry * .45)} Q{_f(hx)},{_f(hy - ry * .2)} {_f(hx + rx * .85)},{_f(hy - ry * .45)} L{_f(hx + rx * .8)},{_f(hy - ry * .6)} Q{_f(hx)},{_f(hy - ry * .75)} {_f(hx - rx * .8)},{_f(hy - ry * .6)} Z" fill="#140f0c"/>')
     if mark == 'mole':
         o.append(f'<circle cx="{_f(mx + facing * 20 * s)}" cy="{_f(my - 10 * s)}" r="{_f(4 * s)}" fill="{INK}"/>')
     if c.get('beard'):
@@ -166,6 +197,11 @@ def _head(c, hx, hy, rx, ry, D, facing):
         front.append(f'<path d="M{_f(hx - rx * 1.7)},{_f(hy - ry * .45)} L{_f(hx)},{_f(hy - ry * 1.75)} L{_f(hx + rx * 1.7)},{_f(hy - ry * .45)} Z" fill="{c.get("hat", "#d8bc78")}" stroke="{INK}" stroke-width="{_f(ow)}" stroke-linejoin="round"/>'
                      f'<path d="M{_f(hx - rx * .9)},{_f(hy - ry * .9)} L{_f(hx + rx * .9)},{_f(hy - ry * .9)}" stroke="#b8963e" stroke-width="{_f(3 * s)}"/>')
         extra = ry * .75
+    if hs == 'mien':   # mu mien vang (vua, nu vuong)
+        front.append(f'<path d="M{_f(hx - rx * .98)},{_f(hy - ry * .35)} Q{_f(hx - rx)},{_f(hy - ry * 1.1)} {_f(hx)},{_f(hy - ry)} Q{_f(hx + rx)},{_f(hy - ry * 1.1)} {_f(hx + rx * .98)},{_f(hy - ry * .35)} Q{_f(hx)},{_f(hy - ry * .6)} {_f(hx - rx * .98)},{_f(hy - ry * .35)} Z" fill="{hair}"/>'
+                     f'<path d="M{_f(hx - rx * .75)},{_f(hy - ry * .72)} L{_f(hx - rx * .8)},{_f(hy - ry * 1.45)} L{_f(hx - rx * .35)},{_f(hy - ry * 1.15)} L{_f(hx)},{_f(hy - ry * 1.6)} L{_f(hx + rx * .35)},{_f(hy - ry * 1.15)} L{_f(hx + rx * .8)},{_f(hy - ry * 1.45)} L{_f(hx + rx * .75)},{_f(hy - ry * .72)} Q{_f(hx)},{_f(hy - ry * .95)} {_f(hx - rx * .75)},{_f(hy - ry * .72)} Z" fill="{GOLD}" stroke="{INK}" stroke-width="{_f(ow)}" stroke-linejoin="round"/>'
+                     f'<circle cx="{_f(hx)}" cy="{_f(hy - ry * 1.05)}" r="{_f(rx * .13)}" fill="#c4281f" stroke="{INK}" stroke-width="{_f(ow * .5)}"/>')
+        extra = ry * .6
     if hs == 'helmet':
         front.append(f'<path d="M{_f(hx - rx * 1.1)},{_f(hy - ry * .1)} Q{_f(hx)},{_f(hy - ry * 1.6)} {_f(hx + rx * 1.1)},{_f(hy - ry * .1)} Z" fill="{c.get("helm", "#5e5440")}" stroke="{INK}" stroke-width="{_f(ow)}"/>'
                      f'<circle cx="{_f(hx)}" cy="{_f(hy - ry * 1.15)}" r="{_f(rx * .18)}" fill="#b8241e" stroke="{INK}" stroke-width="{_f(ow * .6)}"/>'); extra = ry * .4

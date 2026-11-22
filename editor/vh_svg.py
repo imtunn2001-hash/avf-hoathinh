@@ -158,6 +158,8 @@ def walk(t, speed=1.0):   # nhun 2 nhip / chu ky 20 khung (skill)
 # ---------------- canh ----------------
 def beat(sh, t, d):
     ty = sh['type']; s = []; cam = (1.0, 540, 830); shake = 0.0; flash = 0.0
+    import cung_svg
+    if ty in cung_svg.CUNG: return cung_svg.beat(sh, t, d)   # bo canh cung dinh / bi an lich su
     if ty == 'chui_road':       # Chi Pheo vua di vua chui, dan lang nup sau rao
         s.append(village(t, dusk=True))
         for k, (nm, x) in enumerate([('dan1', 40), ('dan2', 900), ('dan1', 1060)]):
@@ -370,6 +372,7 @@ SFX = {
 
 def install(M):
     """thay beat/SFX/GROUND cua module may dung (ksc_svg dang chay)."""
+    import cung_svg
     M.beat = beat
-    M.SFX_PLAN.update(SFX)
-    for k in SFX: M.GROUND[k] = GY
+    M.SFX_PLAN.update(SFX); M.SFX_PLAN.update(cung_svg.SFX)
+    for k in list(SFX) + list(cung_svg.SFX): M.GROUND[k] = GY
