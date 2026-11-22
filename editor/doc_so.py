@@ -79,7 +79,7 @@ def _thang(m):
 def doc_tts(text):
     """doi so trong cau sang chu de giong doc; giu nguyen phan chu."""
     t = text
-    t = re.sub(r'\[\[(.+?)\]\]', r'\1', t)
+    # giu nguyen [[ ]] (W87 dung de doc ten rieng)
     # khoang ngay: 25–30/1/1789
     t = re.sub(r'\b(\d{1,2})\s*[–-]\s*(\d{1,2})/(\d{1,2})/(\d{3,4})\b',
                lambda m: f'{_ngay(m[1])} đến {_ngay(m[2])} tháng {_thang(m[3])} năm {so_chu(m[4])}', t)
