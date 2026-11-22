@@ -1,0 +1,45 @@
+name: dung
+run-name: dung ${{ inputs.job_id }}
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:    { description: "ma video", required: true, type: string }
+      spec_json: { description: "kich ban + danh sach canh (JSON)", required: true, type: string }
+permissions:
+  contents: read
+concurrency:
+  group: dung-${{ inputs.job_id }}
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cai dat
+        run: |
+          sudo apt-get -o Acquire::Retries=2 update -y >/dev/null
+          sudo apt-get install -y --no-install-recommends ffmpeg librsvg2-bin fonts-inter >/dev/null
+          pip install -q numpy pillow
+          mkdir -p ~/.local/share/fonts
+          for w in SemiBold Bold ExtraBold; do curl -fsSL --max-time 60 -o ~/.local/share/fonts/BeVietnamPro-$w.ttf https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-$w.ttf || true; done
+          fc-cache -f >/dev/null 2>&1 || true
+      - name: Dung
+        env:
+          SPEC_JSON: ${{ inputs.spec_json }}
+          AVF_TTS_URL: ${{ secrets.AVF_TTS_URL }}
+          AVF_KEY: ${{ secrets.AVF_KEY }}
+          NPROC: "4"
+        run: python3 editor/ksc_svg.py
+      - name: Kiem tra
+        run: |
+          D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 out/out.mp4)
+          echo "thoi luong $D giay"
+          FPS=$(python3 -c "print(12/max(float('$D'),1))")
+          ffmpeg -v error -y -i out/out.mp4 -vf "fps=$FPS,scale=270:480,tile=4x3:padding=6:color=white" -frames:v 1 -q:v 4 out/qc.jpg || true
+      - name: Gui video ve kho
+        env:
+          AVF_UPLOAD_URL: ${{ secrets.AVF_UPLOAD_URL }}
+          AVF_KEY: ${{ secrets.AVF_KEY }}
+          JOB: ${{ inputs.job_id }}
+        run: |
+          curl -fsS --max-time 600 -H "X-AVF-Key: $AVF_KEY" --form-string "job=$JOB" -F "video=@out/out.mp4;type=video/mp4" -F "qc=@out/qc.jpg;type=image/jpeg" "$AVF_UPLOAD_URL" -o /dev/null -w "gui xong %{http_code}\n"
