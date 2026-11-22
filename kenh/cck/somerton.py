@@ -32,7 +32,7 @@ P1 = [
       say='Trong túi có một vé tàu chưa dùng, một cái lược làm ở Mỹ, một bao thuốc lá. Nhưng không ví, không giấy tờ, không một cái tên.'),
  dict(type='items', label='NHÃN MÁC BỊ CẮT', items=[dict(icon='shirt', t='MỌI NHÃN MÁC', at=1, x=True)], say='Lạ hơn nữa. Tất cả nhãn mác trên quần áo… đều đã bị cắt sạch. Như thể có ai đó không muốn ông được nhận ra.'),
  dict(type='stage', label='KHÁM NGHIỆM', bg='room', cast=[dict(c='bacsi', x=380, D=170, expr='normal', hands=[(.6, -.3, 'magnifier')])], cards=[dict(t='CHẤT ĐỘC?', x=760, y=800, at=1, col='#c4281f', tc='#fff'), dict(t='KHÔNG TÌM THẤY', x=760, y=960, at=2)],
-      say='Bác sĩ khám nghiệm kết luận ông không chết tự nhiên. Ông nghi là chất độc. Nhưng xét nghiệm… không tìm ra bất cứ chất độc nào.'),
+      say='Bác sĩ khám nghiệm kết luận ông không chết tự nhiên. Bác sĩ nghi là chất độc. Nhưng xét nghiệm… không tìm ra bất cứ chất độc nào.'),
  dict(type='ke', label='ANH EM NGHĨ SAO?', board='CHẾT VÌ GÌ?|AI LÀ AI?', expr='normal', ask=True, gap=1.2, say='Thử nghĩ xem. Một người khoẻ mạnh, quần áo chỉn chu, chết không rõ vì sao. Không ai đến nhận. Anh em sẽ tìm manh mối ở đâu đầu tiên?'),
  dict(type='station', label='GA ADELAIDE', who='canhsat', bag_at=1, cut=True, say='Tháng một năm 1949, nhà ga Adelaide báo có một chiếc vali nâu bị bỏ quên. Nó được gửi ngày ba mươi tháng mười một, đúng một ngày trước khi ông chết. Và nhãn của vali… cũng đã bị gỡ.'),
  dict(type='items', label='TRONG VALI', items=[dict(icon='thread', t='CHỈ MÀU CAM HIẾM', at=0), dict(icon='screwdriver', t='TUA VÍT THỢ ĐIỆN', at=0), dict(icon='letter', t='TÊN: KEANE', at=1), dict(icon='map', t='KHÔNG AI MẤT TÍCH', at=2, x=True)],
