@@ -16,7 +16,7 @@ Canh:
 - tree      : cay pha he no ra, sh.count (vd '4.000 NGƯỜI'), sh.name (nhanh sang len o cau sh.name_at)
 - grave     : nghia trang luc chieu, bia da sh.stone (vd 'NGƯỜI VÔ DANH'); sh.dig_at -> hoa tuoi/den
 - petition  : don keu oan chat chong theo nam (sh.y0, sh.y1, sh.who, sh.title)
-- stage     : san khau tu do: sh.bg (beach|station|street|room|lab|paper|night|village|village_night|shop|shop_day|prison|court|market|alley), sh.desk (ban xu), sh.icons=[{icon,x,y,s,at}], sh.cast=[{c, x, D, expr, face, at, from}], sh.cards=[{t, x, y, at, col}]
+- stage     : san khau tu do: sh.bg (beach|station|street|room|lab|paper|night|village|village_night|shop|shop_day|prison|court|market|alley|hall|hall_empty|hall_dim|pagoda|lychee|lychee_dawn|lake), sh.desk (ban xu), sh.icons=[{icon,x,y,s,at}], sh.cast=[{c, x, D, expr, face, at, from}], sh.cards=[{t, x, y, at, col}]
 """
 import math
 import random
@@ -189,7 +189,9 @@ def alley_bg(t):
 BG = {'shop': lambda t: shop_bg(t), 'shop_day': lambda t: shop_bg(t, False), 'prison': prison_bg, 'court': court_bg,
       'beach': lambda t: sea_beach(t), 'beach_night': lambda t: sea_beach(t, True), 'station': station_bg, 'street': street_night,
       'room': room_bg, 'lab': lab_bg, 'paper': lambda t: paper(), 'night': lambda t: night_sky() + f'<rect x="-900" y="{GY - 40}" width="2880" height="1000" fill="#2a3428" stroke="{INK}" stroke-width="6"/>',
-      'market': market_bg, 'alley': alley_bg, 'village': lambda t: V.village(t), 'village_night': lambda t: V.village(t, night=True)}
+      'market': market_bg, 'alley': alley_bg,
+      'hall': lambda t: __import__('cung_svg').hall(t), 'hall_empty': lambda t: __import__('cung_svg').hall(t, throne=False), 'hall_dim': lambda t: __import__('cung_svg').hall(t, .45, throne=False),
+      'pagoda': lambda t: __import__('cung_svg').garden(t), 'lychee': lambda t: __import__('cung_svg').lychee(t), 'lychee_dawn': lambda t: __import__('cung_svg').lychee(t, 1.0), 'lake': lambda t: __import__('cung_svg').lake(t), 'village': lambda t: V.village(t), 'village_night': lambda t: V.village(t, night=True)}
 
 
 # ---------------- icon vat chung ----------------

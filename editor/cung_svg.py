@@ -81,6 +81,82 @@ def garden(t, dusk=0.0):
     return ''.join(o)
 
 
+def lychee(t, dawn=0.0):
+    """vuon vai Le Chi ve dem: cay vai trai do, trai vua vang, den long; dawn>0 -> troi hung sang."""
+    o = [V.sky('#0e1630', '#2a3460', True) if dawn <= 0 else V.sky('#5a6a9a', '#f2b98a')]
+    o.append(V.hills(900, '#2e3e4a', '#24323e'))
+    for k, (x, sc) in enumerate(((60, 1.0), (330, .8), (1020, .9))):   # cay vai
+        sw = osc(t, .18, k) * 5
+        o.append(f'<path d="M{x},{GY} Q{x + 14},{GY - 160} {x - 6},{GY - 300 * sc}" stroke="{INK}" stroke-width="{f_(46 * sc)}" fill="none"/><path d="M{x},{GY} Q{x + 14},{GY - 160} {x - 6},{GY - 300 * sc}" stroke="#4a3220" stroke-width="{f_(30 * sc)}" fill="none"/>')
+        r = random.Random(11 + k)
+        for j in range(5):
+            cx = x + sw + (j - 2) * 80 * sc; cy = GY - 330 * sc - (60 if j % 2 else 0) * sc
+            o.append(f'<ellipse cx="{f_(cx)}" cy="{f_(cy)}" rx="{f_(110 * sc)}" ry="{f_(80 * sc)}" fill="#24502e" stroke="{INK}" stroke-width="6"/>')
+        for j in range(12):
+            fx = x + sw + r.uniform(-200, 200) * sc; fy = GY - 330 * sc + r.uniform(-90, 60) * sc
+            o.append(f'<circle cx="{f_(fx)}" cy="{f_(fy)}" r="{f_(11 * sc)}" fill="#d8402a" stroke="{INK}" stroke-width="3"/>')
+    # trai vua (man vang) + den long
+    x0 = 690
+    o.append(f'<path d="M{x0 - 190},{GY - 20} L{x0 - 150},{GY - 250} L{x0},{GY - 340} L{x0 + 150},{GY - 250} L{x0 + 190},{GY - 20} Z" fill="#d8a93a" stroke="{INK}" stroke-width="8" stroke-linejoin="round"/>'
+             f'<path d="M{x0 - 150},{GY - 250} L{x0 + 150},{GY - 250}" stroke="#7a1f1a" stroke-width="10"/>'
+             f'<path d="M{x0 - 60},{GY - 20} L{x0},{GY - 230} L{x0 + 60},{GY - 20} Z" fill="#7a1f1a" stroke="{INK}" stroke-width="6"/>')
+    gl = .25 + .08 * osc(t, 1.3)
+    o.append(f'<circle cx="{x0}" cy="{GY - 140}" r="120" fill="#ffcf6a" opacity="{f_(gl * (1 - dawn))}"/>')
+    o.append(f'<rect x="-900" y="{GY - 40}" width="2880" height="1000" fill="#2c3a24" stroke="{INK}" stroke-width="6"/>')
+    r = random.Random(9)
+    for k in range(10):   # dom dom
+        fx = r.randint(-100, 1180) + osc(t, .3, k) * 40; fy = r.randint(700, 1200) + osc(t, .25, k * 2) * 30
+        o.append(f'<circle cx="{f_(fx)}" cy="{f_(fy)}" r="5" fill="#f6f08a" opacity="{f_(.4 + .4 * abs(osc(t, .9, k)))}"/>')
+    if dawn > 0: o.append(f'<rect x="-900" y="-500" width="2880" height="2900" fill="#f2b98a" opacity="{f_(.12 * dawn)}"/>')
+    return ''.join(o)
+
+
+def boat(x, y, w=300, col='#8a5a2a'):
+    return (f'<path d="M{f_(x - w / 2)},{f_(y - 30)} Q{f_(x)},{f_(y + 50)} {f_(x + w / 2)},{f_(y - 30)} L{f_(x + w / 2 - 20)},{f_(y - 10)} Q{f_(x)},{f_(y + 30)} {f_(x - w / 2 + 20)},{f_(y - 10)} Z" fill="{col}" stroke="{INK}" stroke-width="7" stroke-linejoin="round"/>'
+            f'<path d="M{f_(x - w / 2 + 10)},{f_(y - 28)} Q{f_(x)},{f_(y + 30)} {f_(x + w / 2 - 10)},{f_(y - 28)}" fill="{col}" stroke="{INK}" stroke-width="7"/>')
+
+
+def tiger(x, y, s, t):
+    """con ho kieu roi: than cam soc den, dau tron, tai, mat du."""
+    b = osc(t, 1.4) * 4 * s
+    o = [f'<g transform="translate({f_(x)} {f_(y + b)}) scale({f_(s)})">']
+    o.append(f'<path d="M80,-40 q60,-30 70,-90" stroke="{INK}" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M80,-40 q60,-30 70,-90" stroke="#e8902a" stroke-width="12" fill="none" stroke-linecap="round"/>')
+    o.append(f'<ellipse cx="20" cy="-60" rx="110" ry="62" fill="#e8902a" stroke="{INK}" stroke-width="8"/>')
+    for k in range(4): o.append(f'<path d="M{-40 + k * 40},-118 q10,30 -4,56" stroke="{INK}" stroke-width="9" fill="none" stroke-linecap="round"/>')
+    o.append(f'<circle cx="-90" cy="-120" r="66" fill="#e8902a" stroke="{INK}" stroke-width="8"/>')
+    o.append(f'<path d="M-140,-170 l-6,-40 l38,22 Z M-40,-170 l6,-40 l-38,22 Z" fill="#e8902a" stroke="{INK}" stroke-width="7" stroke-linejoin="round"/>')
+    o.append(f'<ellipse cx="-90" cy="-96" rx="34" ry="24" fill="#f6eedd" stroke="{INK}" stroke-width="5"/>')
+    o.append(f'<path d="M-122,-138 l18,8 M-58,-138 l-18,8" stroke="{INK}" stroke-width="8" stroke-linecap="round"/><circle cx="-110" cy="-124" r="7" fill="{INK}"/><circle cx="-70" cy="-124" r="7" fill="{INK}"/>')
+    o.append(f'<path d="M-90,-104 l-8,-8 l16,0 Z" fill="{INK}"/><path d="M-104,-86 q14,10 28,0" stroke="{INK}" stroke-width="5" fill="none"/>')
+    o.append(f'<path d="M-150,-150 q20,6 26,22 M-30,-150 q-20,6 -26,22" stroke="{INK}" stroke-width="7" fill="none"/>')
+    o.append('</g>')
+    return ''.join(o)
+
+
+def lake(t):
+    o = [V.sky('#b8c8cc', '#e8ece6')]
+    o.append(V.hills(960, '#8aa294', '#6e8a7c'))
+    o.append(f'<rect x="-900" y="1000" width="2880" height="1400" fill="#4a7a8a" stroke="{INK}" stroke-width="6"/>')
+    for k in range(9):
+        y = 1040 + k * 45; ph = (t * 40 + k * 70) % 160
+        o.append(f'<path d="M{-200 + ph},{y} q40,-12 80,0 t80,0 t80,0 M{500 + ph},{y + 18} q40,-12 80,0 t80,0" stroke="#8ab4c2" stroke-width="5" fill="none"/>')
+    return ''.join(o)
+
+
+def net(x, y, w, h, q):
+    if q <= 0: return ''
+    k = min(1, q); yy = lerp(y - 500, y, ease(k))
+    o = [f'<g opacity=".95">']
+    for j in range(9):
+        xx = x - w / 2 + j * w / 8
+        o.append(f'<path d="M{f_(xx)},{f_(yy - h)} Q{f_(xx + 10)},{f_(yy - h / 2)} {f_(xx)},{f_(yy)}" stroke="#3a2a1a" stroke-width="4" fill="none"/>')
+    for j in range(7):
+        y2 = yy - h + j * h / 6
+        o.append(f'<path d="M{f_(x - w / 2)},{f_(y2)} Q{f_(x)},{f_(y2 + 14)} {f_(x + w / 2)},{f_(y2)}" stroke="#3a2a1a" stroke-width="4" fill="none"/>')
+    o.append('</g>')
+    return ''.join(o)
+
+
 def paper():
     return '<rect x="-900" y="-500" width="2880" height="2900" fill="#f2ead6"/>'
 
@@ -111,7 +187,7 @@ def dust(x, y, t, q, n=7):
 
 
 CUNG = ('child_throne', 'sick_king', 'pages', 'towel', 'whisper', 'wedding', 'swap', 'pagoda', 'empty_garden',
-        'collapse', 'doubt', 'mongol', 'scales')
+        'collapse', 'doubt', 'mongol', 'scales', 'damdam')
 
 
 def beat(sh, t, d):
@@ -291,6 +367,41 @@ def beat(sh, t, d):
             tq = V.at(sh, -1, d * .7)
             if t >= tq: s.append(V.bigq(900, 1150, t - tq))
         cam = (1.0, 540, 950)
+    elif ty == 'damdam':       # ho Dam Dam 1096: suong mu, thuyen lao toi, vua phong giao, ho trong thuyen, luoi trum, go luoi ra la Le Van Thinh
+        s.append(lake(t))
+        ph = sh.get('phase', 'fog')
+        # thuyen vua ben trai
+        tj = V.at(sh, int(sh['spear_at']), d * .1) if sh.get('spear_at') is not None else 1e9
+        s.append(ch('nhantong', 290, 1110, 125, 1, 'surprised' if t >= tj or ph != 'calm' else 'normal', [(.7, -.55 if t >= tj else -.1, 'spear', -40 if t >= tj else -70)] if ph != 'calm' else None, t=t))
+        s.append(boat(290, 1140, 340, '#a8261c'))
+        # thuyen la ben phai
+        if ph != 'calm':
+            ta = V.at(sh, int(sh.get('boat_at', 0)), .3); q = ease((t - ta) / 2.2) if ph == 'fog' else 1
+            bx = lerp(1250, 790, q)
+            tt = (V.at(sh, int(sh['tiger_at']), d * .3) if sh.get('tiger_at') is not None else 1e9) if ph == 'fog' else -9
+            tn = (V.at(sh, int(sh['net_at']), d * .6) if sh.get('net_at') is not None else 1e9) if ph != 'reveal' else -9
+            tr = V.at(sh, int(sh.get('reveal_at', 0)), d * .4) if ph == 'reveal' else 1e9
+            if t >= tr:
+                q2 = ease((t - tr) / .8)
+                s.append(ch('levanthinh', bx, 1110, 130, -1, 'scared', t=t))
+                s.append(f'<g opacity="{f_(1 - q2)}">' + net(bx, 1100, 360, 380, 1) + '</g>')
+            elif t >= tt:
+                s.append(tiger(bx + 30, 1100, .9, t))
+                s.append(net(bx + 10, 1110, 380, 360, (t - tn) / .7))
+            s.append(boat(bx, 1140, 320))
+            if ph == 'reveal' and t < tr: s.append(net(bx + 10, 1110, 380, 360, 1))
+            if t >= tn and ph != 'reveal': s.append(ch('mucthan', 1010, 1240, 130, -1, 'angry', [(.7, -.6, None), (-.6, -.5, None)], t=t)); s.append(boat(1010, 1270, 240, '#6b4a2a'))
+            if t >= tj and t < tj + .9:   # ngon giao bay
+                qq = (t - tj) / .9; x = lerp(380, bx, qq); y = lerp(900, 1000, qq) - math.sin(qq * 3.14) * 120
+                s.append(f'<path d="M{f_(x - 70)},{f_(y + 10)} L{f_(x + 60)},{f_(y)}" stroke="{INK}" stroke-width="12" stroke-linecap="round"/><path d="M{f_(x + 50)},{f_(y - 12)} l40,12 l-40,12 Z" fill="#c8ccd2" stroke="{INK}" stroke-width="5"/>')
+            # suong mu: day dac khi ph=fog cho toi luc ho hien
+            fog = 0.0
+            if ph == 'fog':
+                fog = min(1, max(0, (t - .2) / 1.5)) * (1 - min(1, max(0, (t - tt) / .8)))
+            for k in range(7):
+                fx = (k * 260 + t * 30) % 1600 - 300; fy = 860 + (k % 3) * 120
+                s.append(f'<ellipse cx="{f_(fx)}" cy="{fy}" rx="300" ry="90" fill="#f4f4f0" opacity="{f_(.75 * fog)}"/>')
+        cam = (1.0, 600, 950)
     return ''.join(s), cam, shake, flash
 
 
@@ -308,4 +419,5 @@ SFX = {
     'doubt': [('f0.2', 'thud', .8)],
     'mongol': [('every:1.2', 'drum', .6)],
     'scales': [('f0.1', 'pop', .6), ('f0.5', 'pop', .6)],
+    'damdam': [('f0.15', 'whoosh', .5), ('f0.6', 'sting', .6)],
 }
