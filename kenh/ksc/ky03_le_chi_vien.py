@@ -1,5 +1,5 @@
 import json, re
-# KÝ SỬ CHIẾN – BÍ ẨN LỊCH SỬ, kỳ 3: Vụ án Lệ Chi Viên (1442) – hạt nhân: người minh oan (Tư Thành) chào đời nửa tháng trước đêm vườn vải.
+# KÝ SỬ CHIẾN – BÍ ẨN LỊCH SỬ, kỳ 3: Vụ án Lệ Chi Viên (1442) – hạt nhân: người minh oan (Tư Thành) chào đời ~2 tuần trước đêm vườn vải.
 # Số viết bằng chữ số trong 'say' (máy tự đổi số -> chữ cho giọng, phụ đề giữ số).
 NAMES = ['Lê Thái Tông', 'Thái Tông', 'Nguyễn Trãi', 'Nguyễn Thị Lộ', 'Thị Lộ', 'Nguyễn Thị Anh', 'Thị Anh', 'Bang Cơ',
          'Lệ Chi Viên', 'Lệ Chi', 'Côn Sơn', 'Chí Linh', 'Gia Bình', 'Bắc Ninh', 'Bình Ngô đại cáo',
@@ -33,7 +33,7 @@ S = [
  dict(type='stage', bg='lychee', label='', zoom=1.12,
       cast=[dict(c='nguyentrai', x=300, D=165, face=1, expr='scared'), dict(c='lethaitong', x=790, D=150, face=-1, expr='normal', at=2)],
       cards=[dict(t='TRU DI 3 HỌ', x=540, y=700, at=1, col='#c4281f', tc='#fff'), dict(t='VƯỜN VẢI, 1442', x=540, y=830, at=2, col='#f2dc8a')],
-      say='Nguyễn Trãi bị xử chém cả 3 họ. Người minh oan cho ông… lúc ấy chưa đầy nửa tháng tuổi. Tất cả bắt đầu từ một đêm ở vườn vải, năm 1442.'),
+      say='Nguyễn Trãi bị xử chém cả 3 họ. Người sau này minh oan cho ông… lúc ấy chưa đầy 1 tháng tuổi. Tất cả bắt đầu từ một đêm ở vườn vải, năm 1442.'),
  dict(type='ke', label='AI GIẾT VUA?', board='AI GIẾT VUA?|ĐỨA BÉ LÀ AI?', expr='surprised', ask=True, gap=1.2,
       say='Đêm ấy vua chết. Một ông già 62 tuổi bị khép tội giết vua. Còn đứa bé kia là ai? Và vì sao phải đợi nó lớn?'),
  dict(type='stage', bg='pagoda', label='CÔN SƠN, CHÍ LINH',
@@ -47,10 +47,10 @@ S = [
  dict(type='stage', bg='hall', label='THÁNG 7 ÂM LỊCH',
       cast=[dict(c='ngocdao', x=420, D=165, face=1, expr='happy')],
       cards=[dict(t='TƯ THÀNH CHÀO ĐỜI', x=540, y=720, at=1, col='#f2dc8a', fs=42), dict(t='NGÀY 20/7 ÂM LỊCH', x=540, y=850, at=1, col='#1a1a1a', tc='#fff', fs=38)],
-      say='Tháng 7 âm lịch năm ấy, bà Ngô Thị Ngọc Dao sinh một con trai, tên Tư Thành. Anh em nhớ cái tên này nhé.'),
+      say='Còn trong cung, tháng 7 âm lịch năm ấy, bà Ngô Thị Ngọc Dao sinh một con trai, tên Tư Thành. Anh em nhớ cái tên này nhé.'),
  dict(type='stage', bg='pagoda', label='DUYỆT QUÂN',
       cast=[dict(c='nguyentrai', x=260, D=165, face=1, expr='happy'), dict(c='lethaitong', x=760, D=150, face=-1, expr='happy', from_=1300, at=1)],
-      say='Chỉ ít ngày sau, vua đi tuần miền đông, duyệt quân ở Chí Linh. Trên đường, vua ghé chùa Côn Sơn. Nguyễn Trãi ra đón.'),
+      say='Ít ngày sau, vua đi tuần miền đông, duyệt quân ở Chí Linh. Trên đường, vua ghé chùa Côn Sơn. Nguyễn Trãi ra đón.'),
  dict(type='stage', bg='lychee', label='LỆ CHI VIÊN',
       cast=[dict(c='lethaitong', x=780, D=150, face=-1, expr='happy'), dict(c='thilo', x=330, D=160, face=1, expr='normal', at=0)],
       cards=[dict(t='NGÀY 4/8 ÂM LỊCH', x=540, y=700, at=1, col='#f2dc8a')],
@@ -87,8 +87,8 @@ S = [
       say='Nhưng khoan kết luận. Có người cho rằng vua chết vì bệnh. Sử gia Ngô Sĩ Liên tin Nguyễn Trãi oan. Nhưng ông vẫn nghi bà Lộ.'),
  dict(type='stage', bg='village', label='MỘT NGƯỜI THOÁT',
       cast=[dict(c='phamthiman', x=420, D=160, face=1, expr='scared', from_=-150, at=1)],
-      cards=[dict(t='ĐANG MANG THAI', x=420, y=720, at=1, col='#f2dc8a', fs=40)],
-      say='Nhà Nguyễn Trãi chưa tuyệt. Bà Phạm Thị Mẫn, một người vợ của ông, đang mang thai. Bà trốn thoát. Sử chép, đứa con ấy tên Nguyễn Anh Vũ.'),
+      cards=[dict(t='TƯƠNG TRUYỀN', x=420, y=720, at=0, col='#f2dc8a', fs=40)],
+      say='Nhà Nguyễn Trãi chưa tuyệt. Tương truyền, bà Phạm Thị Mẫn, một người vợ của ông, trốn thoát khi đang mang thai. Đứa con ấy là Nguyễn Anh Vũ.'),
  dict(type='stage', bg='hall_dim', label='NĂM 1459', zoom=1.1,
       cast=[dict(c='nghidan', x=330, D=170, face=1, expr='angry', hands=[[.6, -.2, 'sword']]), dict(c='thianh', x=800, D=165, face=-1, expr='scared', at=1)],
       say='Năm 1459, Nghi Dân đem người vào cung lúc nửa đêm. Bang Cơ bị giết. Bà Thị Anh cũng không thoát.'),
@@ -103,7 +103,7 @@ S = [
  dict(type='stage', bg='lychee', label='PHÁN XỬ', ask=True, gap=1.2, qx=880,
       cast=[dict(c='thilo', x=720, D=165, face=-1, expr='sad')],
       cards=[dict(t='NGUYỄN TRÃI: OAN', x=330, y=720, at=0, col='#2a7a4a', tc='#fff', fs=38), dict(t='BÀ LỘ: ?', x=330, y=860, at=1, col='#c4281f', tc='#fff')],
-      say='Nhưng bà Lộ thì chưa từng được minh oan. Thủ phạm thật là ai, sử cũng im lặng. Anh em nghĩ vì sao vua không nói?'),
+      say='Nhưng bà Lộ thì chưa từng được minh oan. Thủ phạm thật là ai, sử cũng im lặng. Bà Lộ giết vua, hay chỉ là người gánh tội thay?'),
  dict(type='ke', label='KỲ SAU', board='NĂM 1005|NGỌA TRIỀU', expr='happy',
       say='Anh em bình luận nhé. Kỳ sau: năm 1005, một hoàng tử giết anh để cướp ngôi. Sử gọi ông là vua Ngọa Triều. Nhưng có thật ông nằm mà thiết triều?'),
 ]
