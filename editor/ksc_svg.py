@@ -10,6 +10,7 @@ from multiprocessing import Pool
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ksc_chars as CH  # noqa: E402
+import fx  # noqa: E402  23/11: chuyen canh whip, chu nhay theo tu, grade, ducking
 from ksc_anim import mix_audio, SR  # noqa: E402  (SFX tu tao bang numpy)
 from series import get, parse_srt, ease, word_times, _norm, scene_starts  # noqa: E402
 
@@ -656,7 +657,8 @@ def sub_top(txt):
     return bot - fs * 1.3 * len(lines) - 16
 
 
-def sub_svg(txt):
+def sub_svg(txt, cur=None, tv=None):
+    """cur=(a,b,txt), tv: 23/11 chu nhay theo tu: tu da doc sang ro, tu dang doc nhac len + vang, tu chua doc mo 45%."""
     if not txt: return ''
     lines = split_lines(txt, 28); fs = 44 if FMT == 'square' else 50
     while max(len(l) for l in lines) * fs * .56 > (900 if FMT == 'square' else TW) and fs > 40: fs -= 2
@@ -668,12 +670,21 @@ def sub_svg(txt):
         nxt_cap = i + 1 < len(allw) and allw[i + 1][:1].isupper()
         if re.search(r'\d', core) or (core.isupper() and len(core) > 1) or (core[:1].isupper() and (not start or nxt_cap)): yel_set.add(i)
         start = w.endswith(('.', '!', '?', ':'))
+    wt = None; ci = -1
+    if cur is not None and tv is not None:
+        wt = fx.word_times(allw, cur[0], cur[1]); ci = max([i for i, t0 in enumerate(wt) if t0 <= tv] or [-1])
     wi = 0
     for j, ln in enumerate(lines):
         spans = []
         for k, w in enumerate(ln.split(' ')):
-            yel = wi in yel_set; wi += 1
-            spans.append(f'<tspan fill="{"#ffd400" if yel else "#fff"}">{esc(w.replace(JN, " "))}</tspan>')
+            yel = wi in yel_set; i_ = wi; wi += 1
+            if wt is None: spans.append(f'<tspan fill="{"#ffd400" if yel else "#fff"}">{esc(w.replace(JN, " "))}</tspan>'); continue
+            if i_ == ci:
+                q = max(0.0, min(1.0, (tv - wt[i_]) / .16)); lift = 7 * (1 - q * q)
+                spans.append(f'<tspan fill="#ffd400" dy="{f_(-lift)}">{esc(w.replace(JN, " "))}</tspan><tspan dy="{f_(lift)}"></tspan>')
+            else:
+                op = '1' if i_ < ci else '.45'
+                spans.append(f'<tspan fill="{"#ffd400" if yel else "#fff"}" fill-opacity="{op}">{esc(w.replace(JN, " "))}</tspan>')
         out.append(f'<text xml:space="preserve" x="540" y="{f_(y0 + fs + j * lh)}" font-family="{FONT}" font-weight="800" font-size="{fs}" text-anchor="middle" stroke="#111" stroke-width="5" paint-order="stroke">{" ".join(spans)}</text>')
     return ''.join(out)
 
@@ -745,8 +756,29 @@ def frame_svg(fi):
     Y0 = 600 if FMT == 'square' else 830
     if FMT == 'square': cy = GROUND.get(sh['type'], cy) - 170 / z
     cam = f'translate({f_(540 + ox)} {f_(Y0 + oy)}) scale({f_(z)}) translate({f_(-cx)} {f_(-cy)})'
-    o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}"><rect width="{W}" height="{H}" fill="#2a2a30"/>',
-         f'<g transform="{cam}">{world}</g>']
+    o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}"><rect width="{W}" height="{H}" fill="#2a2a30"/>']
+    # 23/11 chuyen canh whip (chi khi doi boi canh): 0.12s cuoi canh cu + 0.16s dau canh moi, nhoe ngang theo huong lao
+    TA, TB = .12, .16; wp = None
+    if not sp.get('no_whip'):
+        nxt = sp['shots'][k + 1] if k + 1 < n else None
+        if nxt is not None and nxt['type'] != sh['type'] and st[k + 1] - tv < TA and tt < D - TAIL:
+            wp = (k, k + 1, (tv - (st[k + 1] - TA)) / (TA + TB))
+        elif k > 0 and sp['shots'][k - 1]['type'] != sh['type'] and ts < TB:
+            wp = (k - 1, k, (ts + TA) / (TA + TB))
+    if wp is None:
+        o.append(f'<g transform="{cam}">{world}</g>')
+    else:
+        a_, b_, p = wp; p = max(0.0, min(1.0, p)); e = p * p * (3 - 2 * p); bl = 2 + 46 * (1 - abs(2 * p - 1)) ** 1.5
+        dirn = -1 if (b_ % 2) else 1
+        o.append(f'<defs><filter id="mb" x="-20%" y="0" width="140%" height="100%"><feGaussianBlur stdDeviation="{f_(bl)} 0"/></filter>'
+                 f'<clipPath id="cw"><rect x="0" y="0" width="{W}" height="{H}"/></clipPath></defs>')
+        for kk, off in ((a_, dirn * e * W), (b_, dirn * (e - 1) * W)):
+            shk = sp['shots'][kk]; dk_ = ends[kk] - st[kk]; tk = max(0.0, min(dk_, tv - st[kk]))
+            CH.TAGS = []; wk, (zk, cxk, cyk), _, _ = beat(shk, tk, dk_); CH.TAGS = None
+            if FMT == 'square': cyk = GROUND.get(shk['type'], cyk) - 170 / zk
+            camk = f'translate(540 {f_(Y0)}) scale({f_(zk)}) translate({f_(-cxk)} {f_(-cyk)})'   # moi canh bi cat dung khung roi moi truot
+            o.append(f'<g filter="url(#mb)"><g transform="translate({f_(off)} 0)"><g clip-path="url(#cw)"><g transform="{camk}">{wk}</g></g></g></g>')
+        tags = []
     if flash > 0: o.append(f'<rect width="{W}" height="{H}" fill="#fff" opacity="{f_(min(.6, flash))}"/>')   # loe trang DUOI lop chu
     o.append(header_svg(sp))
     hooking = bool(sp.get('hook_text')) and tv < 2.6
@@ -758,7 +790,7 @@ def frame_svg(fi):
         top = (250 if lab_on else 132) if FMT == 'square' else (540 if lab_on else 420)
         bot = (sub_top(cur[2]) - 8) if cur else H - 20
         o.append(tags_svg(tags, z, cx, cy, 540 + ox, Y0 + oy, top, bot))
-    if cur: o.append(sub_svg(cur[2]))
+    if cur: o.append(sub_svg(cur[2], cur, tv))
     if hooking: o.append(hook_svg(sp.get('hook_text', ''), 1.0 if tv < 2.3 else max(0, 1 - (tv - 2.3) / .3)))
     if tt >= D - TAIL: o.append(end_svg(sp, ease((tt - (D - TAIL)) / .35)))
     o.append('</svg>')
@@ -903,13 +935,17 @@ def main():
     g = dict(sp=sp, st=st, ends=ends, D=D, LEAD=LEAD, TAIL=TAIL, subs=subs, fmt=sp.get('format', 'square'))
     _init(g)
     nfr = int(D * FPS)
+    if os.environ.get('FRAMES_AT'):   # 23/11: ve dung cac moc giay (vd "10.8,10.9") de soat chuyen canh
+        for j, x in enumerate(os.environ['FRAMES_AT'].split(',')):
+            open(os.path.join(OUT, f'at_{j:02d}.png'), 'wb').write(render_png(min(int(float(x) * FPS), nfr - 1)))
+        print('frames ok'); return
     if os.environ.get('BOARD'):   # bang khung hinh: moi canh 1 khung o moc 75%
         for k in range(n):
             fi = int((LEAD + st[k] + float(os.environ.get('BOARD_AT', '.75')) * (ends[k] - st[k])) * FPS)
             open(os.path.join(OUT, f'board_{k}.png'), 'wb').write(render_png(min(fi, nfr - 1)))
         print('board ok'); return
     raw = os.path.join(OUT, 'v_tmp.mp4')
-    pr = subprocess.Popen(['ffmpeg', '-y', '-v', 'error', '-f', 'image2pipe', '-framerate', str(FPS), '-i', '-', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
+    pr = subprocess.Popen(['ffmpeg', '-y', '-v', 'error', '-f', 'image2pipe', '-framerate', str(FPS), '-i', '-'] + (['-vf', fx.grade_vf(sp.get('grade', 'rn'))] if fx.grade_vf(sp.get('grade', 'rn')) else []) + ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
     import multiprocessing as _mp
     ctx = _mp.get_context('fork') if 'fork' in _mp.get_all_start_methods() else _mp   # Python 3.14 mac dinh forkserver -> mat ban va beat()
     with ctx.Pool(int(os.environ.get('NPROC', '2')), initializer=_init, initargs=(g,)) as pool:
@@ -921,7 +957,9 @@ def main():
     sw = mix_audio(ev, D, path=os.path.join(OUT, 'sfx.wav'))
     mus = os.path.join(ROOT, 'editor', 'story', sp.get('music', 'music_b.mp3')); tmp = os.path.join(OUT, 'out.tmp.mp4')
     if voice:
-        fc = f'[1:a]adelay={int(LEAD*1000)}|{int(LEAD*1000)}[v];[2:a]volume=0.6[s];[3:a]volume=0.06[m];[v][s][m]amix=inputs=3:duration=longest:normalize=0,loudnorm=I=-14:TP=-1.5[a]'
+        fc = (f'[1:a]adelay={int(LEAD*1000)}|{int(LEAD*1000)},highpass=f=85,equalizer=f=3200:t=q:w=1.2:g=2.5,acompressor=threshold=-20dB:ratio=3:attack=8:release=120:makeup=2[vx];'
+              '[vx]asplit=2[v][vk];[2:a]volume=0.6[s];[3:a]volume=0.13[m0];[m0][vk]sidechaincompress=threshold=0.03:ratio=8:attack=25:release=450[m];'   # 23/11: nhac tu ha khi co loi, len lai khi nghi
+              '[v][s][m]amix=inputs=3:duration=longest:normalize=0,loudnorm=I=-14:TP=-1.5[a]')
         ins = ['-i', voice, '-i', sw, '-stream_loop', '-1', '-i', mus]
     else:
         fc = '[1:a]volume=1.0[s];[2:a]volume=0.10[m];[s][m]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-14:TP=-1.5[a]'
