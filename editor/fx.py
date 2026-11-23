@@ -12,6 +12,8 @@ GRADE = {
             "colorbalance=rs=-0.03:bs=0.05:rh=0.05:bh=-0.04,eq=contrast=1.06:saturation=1.05,noise=alls=5:allf=t",
     # roi nuoc / ky su / lien thien: trong, tuoi, hoi am nhu giay do; khong hat
     'rn': "eq=contrast=1.04:saturation=1.08,colorbalance=rh=0.03:bh=-0.02,vignette=angle=PI/6",
+    # Chien Su Ky ban do: tong phim tai lieu – giay cu am, bot bao hoa, toi vien
+    'war': "eq=contrast=1.04:saturation=0.96,vignette=angle=PI/7",   # 23/11: ban dau ngam vang lam ban do duc -> chi giu tuong phan + toi vien nhe
     # Chuyen Dem: da co VHS trong code; chi ep den sau them + lanh nhe
     'cd': "curves=all='0/0 0.15/0.10 0.6/0.6 1/1',colorbalance=bs=0.04:gs=0.02",
 }
