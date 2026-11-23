@@ -103,6 +103,35 @@ def village(t, night=False, dusk=False, shut=False):
     return ''.join(s)
 
 
+
+def banana(x, y, s=1.0, t=0.0):
+    """cay chuoi: than thang, 5 la to rủ."""
+    o = [f'<path d="M{x - 22 * s},{y} L{x - 14 * s},{y - 330 * s} L{x + 14 * s},{y - 330 * s} L{x + 22 * s},{y} Z" fill="#7a8a4a" stroke="{INK}" stroke-width="6"/>']
+    for k, a in enumerate((-150, -115, -70, -30, 10)):
+        r = math.radians(a + 3 * osc(t, .3, k * .2)); L = 230 * s
+        ex, ey = x + math.cos(r) * L, y - 330 * s + math.sin(r) * L * .7 + 60 * s
+        cx, cy = x + math.cos(r) * L * .5, y - 330 * s - 90 * s
+        o.append(f'<path d="M{x},{y - 330 * s} Q{f_(cx)},{f_(cy)} {f_(ex)},{f_(ey)} Q{f_(cx + 10)},{f_(cy + 60 * s)} {x},{y - 320 * s} Z" fill="{("#4f8a3a", "#5e9a44")[k % 2]}" stroke="{INK}" stroke-width="5"/>')
+    return ''.join(o)
+
+
+def riverbank(t, night=True):
+    """bo song dem trang (Chi Pheo gap Thi No): trang, song lap lanh, bo co, cay chuoi."""
+    o = [sky('#0e1630', '#2a3458', True) if night else sky('#f2c27a', '#f6e6c0')]
+    o.append(f'<circle cx="150" cy="690" r="64" fill="#fff4c8" stroke="{INK}" stroke-width="5"/><circle cx="150" cy="690" r="140" fill="#fff4c8" opacity=".12"/>')
+    o.append(hills(900, '#3e5446' if night else '#7d9a6c', '#2e4236' if night else '#62805a'))
+    o.append(f'<rect x="-900" y="930" width="2880" height="200" fill="{"#2a4a6a" if night else "#4f8db0"}" stroke="{INK}" stroke-width="6"/>')
+    for k in range(8):
+        x = 180 + (k % 3) * 40 + osc(t, .4, k * .3) * 14; y = 960 + k * 20
+        o.append(f'<path d="M{f_(x)},{y} l{60 + (k % 2) * 30},0" stroke="#fff4c8" stroke-width="5" opacity=".7"/>')
+    o.append(f'<path d="M-900,1130 Q0,1100 540,1125 T2000,1120 L2000,2400 L-900,2400 Z" fill="{"#3a4a30" if night else "#6a8a4a"}" stroke="{INK}" stroke-width="6"/>')
+    o.append(banana(920, GY - 10, 1.0, t))
+    for k in range(7):
+        x = -60 + k * 55; sw = osc(t, .5, k * .2) * 6
+        o.append(f'<path d="M{x},1150 q{f_(sw)},-60 {f_(sw * 2 + 6)},-110" stroke="#5e7a3a" stroke-width="6" fill="none"/>')
+    if night: o.append('<rect x="-900" y="-500" width="2880" height="2900" fill="#0a1030" opacity=".2"/>')
+    return ''.join(o)
+
 def kiln(x, y, s=1.0):
     o = [f'<path d="M{f_(x - 230 * s)},{f_(y)} L{f_(x - 170 * s)},{f_(y - 330 * s)} Q{f_(x)},{f_(y - 420 * s)} {f_(x + 170 * s)},{f_(y - 330 * s)} L{f_(x + 230 * s)},{f_(y)} Z" fill="#a8563a" stroke="{INK}" stroke-width="{f_(8 * s)}"/>',
          f'<path d="M{f_(x - 80 * s)},{f_(y)} L{f_(x - 80 * s)},{f_(y - 120 * s)} Q{f_(x)},{f_(y - 190 * s)} {f_(x + 80 * s)},{f_(y - 120 * s)} L{f_(x + 80 * s)},{f_(y)} Z" fill="#2a160e" stroke="{INK}" stroke-width="{f_(6 * s)}"/>']
