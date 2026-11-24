@@ -597,7 +597,7 @@ def chunks(txt, maxc=28):
     """chia cau thanh doan vua 2 dong x 28 ky tu, uu tien cat o dau cau/dau phay; khong tach ten rieng, khong de 1 tu le."""
     txt = protect(txt)
     def fits(t): ls = split_lines(t, maxc); return len(ls) <= 2 and max(len(l) for l in ls) <= maxc + 2
-    clauses = [c.strip() for c in re.findall(r'[^.,!?:;]+[.,!?:;]?', txt) if c.strip()]
+    clauses = [c.strip() for c in re.findall(r'(?:[^.,!?:;]|(?<=\d)[.,:](?=\d))+[.,!?:;]?', txt) if c.strip()]   # 25/11: khong cat trong so (2.000, 7,2, 15:30)
     out, cur = [], ''
     for c in clauses:
         t = (cur + ' ' + c).strip()

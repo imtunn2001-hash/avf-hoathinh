@@ -299,6 +299,25 @@ def icon(kind, x, y, s=1.0):
     if k == 'gold':
         return (f'<path d="M{f_(x - 70 * s)},{f_(y + 30 * s)} L{f_(x - 45 * s)},{f_(y - 30 * s)} L{f_(x + 45 * s)},{f_(y - 30 * s)} L{f_(x + 70 * s)},{f_(y + 30 * s)} Z" fill="#e8b830" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
                 f'<path d="M{f_(x - 30 * s)},{f_(y - 14 * s)} l{f_(40 * s)},0" stroke="#fff3b0" stroke-width="{f_(6 * s)}" stroke-linecap="round"/>')
+    if k == 'cap':   # mu luoi trai mau den nhin nghieng
+        return (f'<path d="M{f_(x - 60 * s)},{f_(y + 10 * s)} Q{f_(x - 58 * s)},{f_(y - 62 * s)} {f_(x + 5 * s)},{f_(y - 62 * s)} Q{f_(x + 62 * s)},{f_(y - 58 * s)} {f_(x + 60 * s)},{f_(y + 10 * s)} Z" fill="#232326" stroke="{INK}" stroke-width="{f_(7 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x + 40 * s)},{f_(y + 10 * s)} Q{f_(x + 100 * s)},{f_(y + 4 * s)} {f_(x + 125 * s)},{f_(y + 26 * s)} Q{f_(x + 80 * s)},{f_(y + 34 * s)} {f_(x + 40 * s)},{f_(y + 24 * s)} Z" fill="#1a1a1c" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 60 * s)},{f_(y + 10 * s)} L{f_(x + 60 * s)},{f_(y + 10 * s)}" stroke="#55555c" stroke-width="{f_(6 * s)}"/>'
+                f'<circle cx="{f_(x + 2 * s)}" cy="{f_(y - 62 * s)}" r="{f_(7 * s)}" fill="#55555c" stroke="{INK}" stroke-width="{f_(3 * s)}"/>'
+                f'<path d="M{f_(x - 30 * s)},{f_(y - 40 * s)} Q{f_(x - 20 * s)},{f_(y - 52 * s)} {f_(x)},{f_(y - 54 * s)}" stroke="#4a4a52" stroke-width="{f_(5 * s)}" fill="none" stroke-linecap="round"/>')
+    if k == 'helmet':   # mu bao hiem nua dau
+        return (f'<path d="M{f_(x - 70 * s)},{f_(y + 20 * s)} Q{f_(x - 70 * s)},{f_(y - 70 * s)} {f_(x)},{f_(y - 70 * s)} Q{f_(x + 70 * s)},{f_(y - 70 * s)} {f_(x + 70 * s)},{f_(y + 20 * s)} Z" fill="#2e6ab0" stroke="{INK}" stroke-width="{f_(7 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 74 * s)},{f_(y + 20 * s)} L{f_(x + 74 * s)},{f_(y + 20 * s)}" stroke="{INK}" stroke-width="{f_(12 * s)}" stroke-linecap="round"/>'
+                f'<path d="M{f_(x - 40 * s)},{f_(y - 40 * s)} Q{f_(x - 20 * s)},{f_(y - 58 * s)} {f_(x + 10 * s)},{f_(y - 58 * s)}" stroke="#a8c8f0" stroke-width="{f_(8 * s)}" fill="none" stroke-linecap="round"/>'
+                f'<path d="M{f_(x - 50 * s)},{f_(y + 26 * s)} Q{f_(x)},{f_(y + 70 * s)} {f_(x + 50 * s)},{f_(y + 26 * s)}" stroke="#5a4a3a" stroke-width="{f_(5 * s)}" fill="none"/>')
+    if k == 'mask':   # khau trang
+        return (f'<path d="M{f_(x - 60 * s)},{f_(y - 30 * s)} Q{f_(x)},{f_(y - 46 * s)} {f_(x + 60 * s)},{f_(y - 30 * s)} L{f_(x + 56 * s)},{f_(y + 30 * s)} Q{f_(x)},{f_(y + 56 * s)} {f_(x - 56 * s)},{f_(y + 30 * s)} Z" fill="#5a6a7a" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 60 * s)},{f_(y - 24 * s)} q{f_(-40 * s)},{f_(20 * s)} 0,{f_(44 * s)} M{f_(x + 60 * s)},{f_(y - 24 * s)} q{f_(40 * s)},{f_(20 * s)} 0,{f_(44 * s)}" stroke="#e8e2d2" stroke-width="{f_(5 * s)}" fill="none"/>'
+                + ''.join(f'<path d="M{f_(x - 44 * s)},{f_(y + (j * 16 - 12) * s)} l{f_(88 * s)},0" stroke="#46525e" stroke-width="{f_(3 * s)}"/>' for j in range(3)))
+    if k == 'cards':   # bo bai (co bac)
+        return ''.join(f'<g transform="rotate({r} {f_(x)} {f_(y + 60 * s)})"><rect x="{f_(x - 36 * s)}" y="{f_(y - 52 * s)}" width="{f_(72 * s)}" height="{f_(104 * s)}" rx="{f_(8 * s)}" fill="#fbf6e6" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
+                       f'<text x="{f_(x)}" y="{f_(y + 16 * s)}" font-family="{FONT}" font-weight="900" font-size="{f_(46 * s)}" fill="{c}" text-anchor="middle">{g}</text></g>'
+                       for r, c, g in ((-18, '#111', '♠'), (0, '#c4281f', '♥'), (18, '#111', '♣')))
     if k == 'plate':   # bien so xe
         return (f'<rect x="{f_(x - 70 * s)}" y="{f_(y - 36 * s)}" width="{f_(140 * s)}" height="{f_(72 * s)}" rx="{f_(6 * s)}" fill="#f6f6f0" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
                 f'<text x="{f_(x)}" y="{f_(y + 14 * s)}" font-family="{FONT}" font-weight="900" font-size="{f_(40 * s)}" fill="#111" text-anchor="middle">79-?</text>')
