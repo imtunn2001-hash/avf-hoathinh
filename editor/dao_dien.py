@@ -179,7 +179,12 @@ def items_world(sh, t, d):
     grp = sorted(set(ats))
     shown = [g for g in grp if t >= g]
     o = [B.paper()]
-    if not shown: return ''.join(o)
+    if not shown:   # chua nhac mon nao: bong mo cua ca bo + dau hoi (khong de man giay trong)
+        for k, x in enumerate(it):
+            cx, cy = _items_pos(it)[k]; pul = 1 + .04 * math.sin(t * 3 + k)
+            o.append(f'<g opacity=".16">{B.icon(x.get("icon", "paper"), cx, cy - 10, .9 * pul)}</g>'
+                     f'<text x="{cx}" y="{cy + 85}" font-family="{V.FONT}" font-weight="900" font-size="64" fill="#5a1a14" opacity=".35" text-anchor="middle">?</text>')
+        return ''.join(o)
     last_new = max(grp); tail = se[-1] if se else d
     if len(se) > 1 and tail > last_new + .3 and t >= tail:   # tong ket: ca bang
         q = _ease((t - tail) / .4)
