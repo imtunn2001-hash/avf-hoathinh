@@ -751,6 +751,9 @@ def frame_svg(fi):
     k = max(i for i in range(n) if st[i] <= max(0.0, tv)); sh = sp['shots'][k]; ts = max(0.0, tv - st[k]); dk = ends[k] - st[k]
     CH.TAGS = []
     world, (z, cx, cy), shake, flash = beat(sh, ts, dk)
+    if DD:   # 24/11 dao dien: nhieu khung theo tung cau
+        if sh['type'] == 'items': world = DD.items_world(sh, ts, dk)
+        z, cx, cy = DD.cam(sh, ts, dk, (z, cx, cy))
     tags = CH.TAGS; CH.TAGS = None
     r = random.Random(fi); ox = r.uniform(-shake, shake); oy = r.uniform(-shake, shake)
     Y0 = 600 if FMT == 'square' else 830
@@ -775,10 +778,14 @@ def frame_svg(fi):
         for kk, off in ((a_, dirn * e * W), (b_, dirn * (e - 1) * W)):
             shk = sp['shots'][kk]; dk_ = ends[kk] - st[kk]; tk = max(0.0, min(dk_, tv - st[kk]))
             CH.TAGS = []; wk, (zk, cxk, cyk), _, _ = beat(shk, tk, dk_); CH.TAGS = None
+            if DD:
+                if shk['type'] == 'items': wk = DD.items_world(shk, tk, dk_)
+                zk, cxk, cyk = DD.cam(shk, tk, dk_, (zk, cxk, cyk))
             if FMT == 'square': cyk = GROUND.get(shk['type'], cyk) - 170 / zk
             camk = f'translate(540 {f_(Y0)}) scale({f_(zk)}) translate({f_(-cxk)} {f_(-cyk)})'   # moi canh bi cat dung khung roi moi truot
             o.append(f'<g filter="url(#mb)"><g transform="translate({f_(off)} 0)"><g clip-path="url(#cw)"><g transform="{camk}">{wk}</g></g></g></g>')
         tags = []
+    if DD: o.append(DD.overlay(sh, tt, z, cx, W, H))
     if flash > 0: o.append(f'<rect width="{W}" height="{H}" fill="#fff" opacity="{f_(min(.6, flash))}"/>')   # loe trang DUOI lop chu
     o.append(header_svg(sp))
     hooking = bool(sp.get('hook_text')) and tv < 2.6
@@ -802,9 +809,16 @@ def render_png(fi):
     return subprocess.run(['rsvg-convert', '-f', 'png', '-w', str(W), '-h', str(H)], input=svg.encode(), capture_output=True, check=True).stdout
 
 
+DD = None   # 24/11 dao dien (editor/dao_dien.py) khi spec.dao_dien = true
+
+
 def _init(g):
-    global FMT, W, H
+    global FMT, W, H, DD
     G.update(g); FMT = g.get('fmt', 'vertical'); W, H = (1080, 1080) if FMT == 'square' else (1080, 1920)
+    if g.get('sp', {}).get('dao_dien'):
+        import dao_dien as DD
+        DD.install_bg()
+        if g['sp'].get('shots'): g['sp']['shots'][0]['_first'] = True
     if g.get('sp', {}).get('engine') == 'vh':   # tien trinh con (forkserver/spawn) khong giu ban va tu main -> nap lai
         import vh_svg; vh_svg.install(sys.modules[__name__])
     if g.get('sp', {}).get('chars') == 'roinuoc':

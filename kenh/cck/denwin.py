@@ -33,17 +33,17 @@ P1 = [
       say='Sáng 15/8/1991, đường Phan Chu Trinh, thành phố Nha Trang. Dưới một gốc cây bàng, người dân phát hiện một người đàn ông đã chết. Báo chí gọi anh là anh Hải, tên đã được thay đổi.'),
  dict(type='items', label='NHỮNG THỨ BIẾN MẤT', items=[dict(icon='motorbike', t='XE CUB 79', at=1, x=True), dict(icon='watch', t='ĐỒNG HỒ SENKO 5', at=1, x=True), dict(icon='gold', t='DÂY CHUYỀN VÀNG', at=1, x=True), dict(icon='paper', t='GIẤY GHI NỢ', at=2)],
       say='Anh Hải ba mươi lăm tuổi, bán thịt heo, làm ăn khá giả. Người nhà kể, chiếc xe Cub 79 của anh đã biến mất. Đồng hồ Senko 5 và sợi dây chuyền vàng cũng không còn. Trong túi anh chỉ còn một mẩu giấy ghi nợ gần hai trăm nghìn đồng.'),
- dict(type='stage', label='CHUYÊN ÁN', bg='room', cast=[dict(c='he', x=540, D=175, expr='normal', hands=[(.6, -.3, 'magnifier')])],
+ dict(type='stage', label='CHUYÊN ÁN', bg='room', cast=[dict(c='he', x=540, D=175, expr='normal', hands=[(.6, -.3, 'magnifier')], **{'from': -220})],
       cards=[dict(t='GIẾT NGƯỜI CƯỚP CỦA', x=540, y=640, at=1, col='#c4281f', tc='#fff', fs=40)],
       say='Người dẫn đầu chuyên án là ông Phạm Minh Hễ. Ông từng là trưởng phòng Cảnh sát hình sự. Công an tỉnh Khánh Hoà. Hướng đầu tiên khá rõ: đây là vụ giết người để cướp tài sản.'),
  dict(type='items', label='TÌM TRONG TỈNH', items=[dict(icon='coin', t='TIỆM CẦM ĐỒ', at=0), dict(icon='motorbike', t='CHỖ MUA XE CŨ', at=0), dict(icon='paper', t='KHÔNG KẾT QUẢ', at=2, x=True)],
       say='Trinh sát chia nhau đi khắp các tiệm cầm đồ, các chỗ thu mua xe cũ trong tỉnh. Họ tìm chiếc Cub, tìm chiếc đồng hồ. Nhiều ngày trôi qua, không có kết quả.'),
- dict(type='stage', label='HƠN MỘT THÁNG SAU', bg='village', cast=[dict(c='dan', x=330, D=165, expr='scared', tag=False)], icons=[dict(icon='map', x=790, y=860, s=1.6, at=1)],
+ dict(type='stage', label='HƠN MỘT THÁNG SAU', bg='village', cast=[dict(c='dan', x=330, D=165, expr='scared', tag=False, **{'from': -200})], icons=[dict(icon='map', x=790, y=860, s=1.6, at=1)],
       cards=[dict(t='QUỐC LỘ 1A', x=790, y=1080, at=1)],
       say='Hơn một tháng sau. Xã Cam Thịnh Đông, huyện Cam Ranh. Người dân đi cắt cỏ. Trong bụi cây sát quốc lộ 1A, họ phát hiện thi thể một người đàn ông. Chỗ ấy cách ranh giới tỉnh Ninh Thuận chừng hai trăm mét.'),
  dict(type='items', label='KHÔNG GIẤY TỜ', items=[dict(icon='shirt', t='ÁO THUN TRẮNG', at=0), dict(icon='ring', t='NHẪN ĐÁ XANH', at=0), dict(icon='paper', t='GIẤY TỜ TUỲ THÂN', at=1, x=True)],
       say='Anh khoảng hai lăm đến ba mươi tuổi, mặc quần jean, áo thun trắng, tay đeo nhẫn mặt đá xanh. Trên người không có một giấy tờ tuỳ thân nào.'),
- dict(type='stage', label='NGƯỜI EM TRAI', bg='room', cast=[dict(c='em', x=540, D=175, expr='sad')],
+ dict(type='stage', label='NGƯỜI EM TRAI', bg='room', cast=[dict(c='em', x=540, D=175, expr='sad', **{'from': 1300})],
       say='Người em trai đến nhận dạng. Đó là anh Trần, hai mươi sáu tuổi, chủ một quán cà phê ở Nha Trang. Anh đã mất tích nhiều ngày. Tên anh cũng đã được báo chí thay đổi.'),
  dict(type='items', label='CŨNG BIẾN MẤT', items=[dict(icon='motorbike', t='WIN 100 MÀU ĐỎ', at=0, x=True), dict(icon='watch', t='SENKO 5 MẶT TRẮNG', at=0, x=True), dict(icon='paper', t='VÍ TIỀN', at=1, x=True)],
       say='Anh Trần đi một chiếc xe Win 100 màu đỏ, đeo đồng hồ Senko 5 mặt trắng. Xe, đồng hồ, ví tiền, tất cả đều không còn. Hai vụ cách nhau hơn một tháng, cách nhau vài chục cây số. Liệu có liên quan?'),
@@ -151,7 +151,7 @@ EP = [('p1', P1, 'PHẦN 1/3', 'VẾT RẠN TRÊN ĐÈN XE', 'Phần 2: Cuộc t
 for name, S, badge, hook, nxt in EP:
     for s in S: s['tts'] = tts(s['say'])
     sp = dict(engine='vh', chars='roinuoc', format='vertical', series='VẾT RẠN TRÊN ĐÈN XE WIN', badge=badge, hook_text=hook, next=nxt,
-              cta='THEO DÕI CHUYỆN CHƯA KỂ', tts=True, speed=0.92, tag=f'cck-denwin-{name}', cast=CAST, shots=S)
+              cta='THEO DÕI CHUYỆN CHƯA KỂ', tts=True, dao_dien=True, speed=0.92, tag=f'cck-denwin-{name}', cast=CAST, shots=S)
     json.dump(sp, open(os.path.join(OUT, f'{name}.json'), 'w'), ensure_ascii=False)
     t = json.loads(json.dumps(sp)); t['tts'] = False; durs = []
     for s in t['shots']:

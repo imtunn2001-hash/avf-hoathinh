@@ -6,7 +6,7 @@ on:
       job_id:    { description: "ma video", required: true, type: string }
       spec_json: { description: "kich ban + danh sach canh (JSON)", required: true, type: string }
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: dung-${{ inputs.job_id }}
 jobs:
@@ -36,7 +36,13 @@ jobs:
           echo "thoi luong $D giay"
           FPS=$(python3 -c "print(12/max(float('$D'),1))")
           ffmpeg -v error -y -i out/out.mp4 -vf "fps=$FPS,scale=270:480,tile=4x3:padding=6:color=white" -frames:v 1 -q:v 4 out/qc.jpg || true
+      - name: Ban thu -> GitHub release (khong vao kho, khong dang)
+        if: startsWith(inputs.job_id, 'thu-')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ inputs.job_id }}" out/out.mp4 out/qc.jpg --target "${{ github.sha }}" --title "${{ inputs.job_id }}" --notes "ban thu, khong dang" --prerelease
       - name: Gui video ve kho
+        if: ${{ !startsWith(inputs.job_id, 'thu-') }}
         env:
           AVF_UPLOAD_URL: ${{ secrets.AVF_UPLOAD_URL }}
           AVF_KEY: ${{ secrets.AVF_KEY }}
