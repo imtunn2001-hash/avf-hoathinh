@@ -815,7 +815,7 @@ DD = None   # 24/11 dao dien (editor/dao_dien.py) khi spec.dao_dien = true
 def _init(g):
     global FMT, W, H, DD
     G.update(g); FMT = g.get('fmt', 'vertical'); W, H = (1080, 1080) if FMT == 'square' else (1080, 1920)
-    if g.get('sp', {}).get('dao_dien'):
+    if g.get('sp', {}).get('dao_dien', True):   # 25/11 chu chot: dung kieu moi cho moi kenh hoat hinh (CCK, KSC, LT); spec.dao_dien=false de tat
         import dao_dien as DD
         DD.install_bg()
         if g['sp'].get('shots'): g['sp']['shots'][0]['_first'] = True
