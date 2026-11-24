@@ -23,7 +23,16 @@ jobs:
           mkdir -p ~/.local/share/fonts
           for w in SemiBold Bold ExtraBold; do curl -fsSL --max-time 60 -o ~/.local/share/fonts/BeVietnamPro-$w.ttf https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-$w.ttf || true; done
           fc-cache -f >/dev/null 2>&1 || true
+      - name: Lay ban thu da duyet (up-<tag release>) thay vi dung lai
+        if: startsWith(inputs.job_id, 'up-')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p out; T="${{ inputs.job_id }}"; T="${T#up-}"
+          gh release download "$T" -p out.mp4 -p qc.jpg -D out -R "${{ github.repository }}"
+          ls -la out
       - name: Dung
+        if: ${{ !startsWith(inputs.job_id, 'up-') }}
         env:
           SPEC_JSON: ${{ inputs.spec_json }}
           AVF_TTS_URL: ${{ secrets.AVF_TTS_URL }}
@@ -31,6 +40,7 @@ jobs:
           NPROC: "4"
         run: python3 editor/ksc_svg.py
       - name: Kiem tra
+        if: ${{ !startsWith(inputs.job_id, 'up-') }}
         run: |
           D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 out/out.mp4)
           echo "thoi luong $D giay"
@@ -48,4 +58,5 @@ jobs:
           AVF_KEY: ${{ secrets.AVF_KEY }}
           JOB: ${{ inputs.job_id }}
         run: |
-          curl -fsS --max-time 600 -H "X-AVF-Key: $AVF_KEY" --form-string "job=$JOB" -F "video=@out/out.mp4;type=video/mp4" -F "qc=@out/qc.jpg;type=image/jpeg" "$AVF_UPLOAD_URL" -o /dev/null -w "gui xong %{http_code}\n"
+          curl -fsS --max-time 600 -H "X-AVF-Key: $AVF_KEY" --form-string "job=$JOB" -F "video=@out/out.mp4;type=video/mp4" -F "qc=@out/qc.jpg;type=image/jpeg" "$AVF_UPLOAD_URL" -o out/kho.json -w "gui xong %{http_code}\n"
+          python3 -c "import json;print('KHO_URL_PATH', json.load(open('out/kho.json')).get('url','').split('/avf-media/')[-1])"
