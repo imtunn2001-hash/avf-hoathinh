@@ -845,11 +845,22 @@ SENT = {}   # moc tung cau trong canh: {canh: [(bat_dau, ket_thuc, chu)]}
 W87 = os.environ.get('AVF_TTS_URL', '')   # dia chi that nam trong GitHub Secrets, khong ghi vao code
 
 
+def bo_ky_hieu(s):
+    """bo ky hieu ngat nghi khoi phu de: ' / ', ' // ', ' /// ', [nghỉ x], {chậm: ...} -> chi giu chu."""
+    s = re.sub(r'\[nghỉ\s*[\d.,]+\s*\]', ' ', s)
+    s = re.sub(r'\{(?:chậm|rất chậm|nhấn|hạ|nhanh|cao)\s*:\s*', '', s, flags=re.I).replace('}', '')
+    s = re.sub(r'(^|\s)/{1,3}(?=\s|$)', ' ', s)
+    return re.sub(r'\s+', ' ', s).replace(' ,', ',').replace(' .', '.').strip()
+
+
 def tts_shots(sp):
     import urllib.request
     from multiprocessing.pool import ThreadPool
     def one(i):
-        sh = sp['shots'][i]; body = json.dumps({'text': doc_so.doc_tts(sh.get('tts') or sh['say']), 'speed': sp.get('speed', 1.0), 'tag': f"{sp.get('tag', 'ksc')}-{i}"}).encode()
+        sh = sp['shots'][i]; src = sh.get('tts') or sh['say']
+        # 24/11: ky hieu ngat nghi (skill giong-doc-ngat-nghi) -> W87 v3. Giu nguyen [nghỉ x] khi doi so -> chu.
+        txt = ''.join(x if re.fullmatch(r'\[nghỉ\s*[\d.,]+\s*\]', x) else doc_so.doc_tts(x) for x in re.split(r'(\[nghỉ\s*[\d.,]+\s*\])', src))
+        body = json.dumps({'text': txt, 'speed': sp.get('speed', 1.0), 'tag': f"{sp.get('tag', 'ksc')}-{i}"}).encode()
         for k in range(3):
             try:
                 req = urllib.request.Request(W87, data=body, headers={'Content-Type': 'application/json', 'X-AVF-Key': os.environ.get('AVF_KEY', '')})
@@ -857,7 +868,8 @@ def tts_shots(sp):
                 if j.get('ok'):
                     for u in j['voice_urls']: print('::add-mask::' + u, flush=True)   # che link file giong khoi nhat ky
                     tx = j.get('texts') or [''] * len(j['voice_urls'])
-                    return [[u, p, t_] for u, p, t_ in zip(j['voice_urls'], j['pauses'], tx)]
+                    se_ = j.get('sents') or list(range(len(j['voice_urls'])))   # cau cua tung cum (W87 v3)
+                    return [[u, p, t_, s_] for u, p, t_, s_ in zip(j['voice_urls'], j['pauses'], tx, se_)]
                 print('giong loi canh', i)
             except Exception as ex: print('giong that bai canh', i, k, type(ex).__name__)
         sys.exit(f'khong co giong canh {i}')
@@ -884,7 +896,7 @@ def main():
     for sh_ in sp['shots']:   # 23/11: giong doc dung ban chu (tts), phu de dung ban SO (2026, 59.000, 19:20)
         if sh_.get('say'):
             if not sh_.get('tts'): sh_['tts'] = sh_['say']
-            sh_['say'] = doc_so.chu_so(sh_['say'])
+            sh_['say'] = doc_so.chu_so(bo_ky_hieu(sh_['say']))
     for k_ in ('series', 'badge', 'hook_text', 'next', 'cta'):
         if isinstance(sp.get(k_), str): sp[k_] = doc_so.chuan_dau(sp[k_])
     shots = sp['shots']; n = len(shots); voice = None; srt = []
@@ -899,13 +911,17 @@ def main():
                 # canh nhieu cau (W87): [[url, pause], ...] -> moi cau doc lien, nghi dung pause giua cau (chu chot 21/11)
                 subs_ = []; cur = 0.0; sent = []
                 for k, it in enumerate(u):
-                    uu, pz = it[0], it[1]; tx = it[2] if len(it) > 2 else ''
+                    uu, pz = it[0], it[1]; tx = it[2] if len(it) > 2 else ''; sx = it[3] if len(it) > 3 else k
                     pk = get(uu, os.path.join(OUT, f'vp{i}_{k}.mp3')); wk = os.path.join(OUT, f'vp{i}_{k}.wav')
                     pad = pa if k == len(u) - 1 else max(0.0, float(pz or .45) - 0.1)
                     subprocess.check_call(['ffmpeg', '-y', '-v', 'error', '-i', pk, '-ar', str(SR), '-ac', '2', '-af', TRIM + ',apad=pad_dur=%.2f' % pad, wk]); subs_.append(wk)
                     dk = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', wk]).decode().strip())
-                    sent.append((cur, cur + max(.2, dk - pad), tx)); cur += dk   # moc noi that cua tung cau (khong tinh khoang nghi)
-                SENT[i] = sent
+                    sent.append((cur, cur + max(.2, dk - pad), tx, sx)); cur += dk   # moc noi that cua tung cum (khong tinh khoang nghi)
+                g_ = {}   # gop cac cum cung 1 cau -> 1 moc cau (phu de / dao dien theo cau)
+                for a_, b_, t_, s_ in sent:
+                    if s_ in g_: g_[s_] = (g_[s_][0], b_, g_[s_][2] + ' ' + t_)
+                    else: g_[s_] = (a_, b_, t_)
+                SENT[i] = [g_[k_] for k_ in sorted(g_)]
                 l2 = os.path.join(OUT, f'vl{i}.txt'); open(l2, 'w').write(''.join(f"file '{x}'\n" for x in subs_))
                 subprocess.check_call(['ffmpeg', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', l2, '-c', 'copy', wv])
             else:
