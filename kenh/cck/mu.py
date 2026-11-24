@@ -19,7 +19,7 @@ CAST = {
     'dan': dict(tag='NGƯỜI DÂN', skin='#d9a070', hair='#1a1410', hair_style='nonla', outfit='#6a7a4a', outfit2='#4e5a36', trim='#3a2a1a'),
 }
 P1 = [
- dict(type='stage', label='', bg='village_night', icons=[dict(icon='motorbike', x=430, y=1000, s=2.2, at=0), dict(icon='cap', x=640, y=780, s=1.6, at=1)],
+ dict(type='stage', label='', bg='village_night', icons=[dict(icon='motorbike', x=430, y=1000, s=2.2, at=0), dict(icon='cap', x=640, y=780, s=1.6, at=0)],
       say='Một chiếc mũ lưỡi trai màu đen, móc trên giá một chiếc xe ôm. /// {chậm: Nó không phải của chủ xe.} // Và 9 tháng sau, nó gọi đúng tên hung thủ.'),
  dict(type='ke', label='CHUYỆN CHƯA KỂ', board='VỤ ÁN|ĐẠI TỪ', expr='normal',
       say='Đây là một vụ án có thật ở huyện Đại Từ, tỉnh Thái Nguyên. Tòa đã xét xử. Chuyện dài, mình chia làm ba phần. Anh em để ý kỹ chiếc mũ nhé.'),
