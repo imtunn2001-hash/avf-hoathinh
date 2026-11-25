@@ -769,7 +769,12 @@ def frame_svg(fi):
         elif k > 0 and sp['shots'][k - 1]['type'] != sh['type'] and ts < TB:
             wp = (k - 1, k, (ts + TA) / (TA + TB))
     if wp is None:
-        o.append(f'<g transform="{cam}">{world}</g>')
+        sc_, sat_ = DD.lat_fx(sh, ts) if DD else (1.0, 1.0)
+        if sc_ != 1.0 or sat_ < 1.0:   # 25/11 cu lat: the dap + mat mau roi hoi lai
+            o.append(f'<defs><filter id="mono"><feColorMatrix type="saturate" values="{f_(sat_)}"/></filter></defs>'
+                     f'<g filter="url(#mono)"><g transform="translate(540 960) scale({f_(sc_)}) translate(-540 -960)"><g transform="{cam}">{world}</g></g></g>')
+        else:
+            o.append(f'<g transform="{cam}">{world}</g>')
     else:
         a_, b_, p = wp; p = max(0.0, min(1.0, p)); e = p * p * (3 - 2 * p); bl = 2 + 46 * (1 - abs(2 * p - 1)) ** 1.5
         dirn = -1 if (b_ % 2) else 1
@@ -785,7 +790,7 @@ def frame_svg(fi):
             camk = f'translate(540 {f_(Y0)}) scale({f_(zk)}) translate({f_(-cxk)} {f_(-cyk)})'   # moi canh bi cat dung khung roi moi truot
             o.append(f'<g filter="url(#mb)"><g transform="translate({f_(off)} 0)"><g clip-path="url(#cw)"><g transform="{camk}">{wk}</g></g></g></g>')
         tags = []
-    if DD: o.append(DD.overlay(sh, tt, z, cx, W, H))
+    if DD: o.append(DD.overlay(sh, tt, z, cx, W, H)); o.append(DD.so_svg(sh, ts, W))
     if flash > 0: o.append(f'<rect width="{W}" height="{H}" fill="#fff" opacity="{f_(min(.6, flash))}"/>')   # loe trang DUOI lop chu
     o.append(header_svg(sp))
     hooking = bool(sp.get('hook_text')) and tv < 2.6
@@ -819,6 +824,7 @@ def _init(g):
         import dao_dien as DD
         DD.install_bg()
         if g['sp'].get('shots'): g['sp']['shots'][0]['_first'] = True
+        if g.get('st'): DD.chuan_bi(g['sp']['shots'], g['st'])
     if g.get('sp', {}).get('engine') == 'vh':   # tien trinh con (forkserver/spawn) khong giu ban va tu main -> nap lai
         import vh_svg; vh_svg.install(sys.modules[__name__])
     if g.get('sp', {}).get('chars') == 'roinuoc':

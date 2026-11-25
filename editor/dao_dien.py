@@ -300,3 +300,83 @@ def install_bg():
             B.BG[k] = (lambda b, f: (lambda t: b(t) + f(t)))(base, fn)
     sb = B.sea_beach
     B.sea_beach = lambda t, night=False: sb(t, night) + beach_extra(t)
+
+
+# ---------------- 25/11: nhan so + cu lat (hoc y tuong "punch zoom", "mono flash", chu dap; tu viet lai) ----------------
+import re as _re
+
+_LAT = _re.compile(r'^(Nhưng|Và rồi|Vậy mà|Thế nhưng|Không ai|Đột nhiên|Rồi đột nhiên|Ấy vậy mà)\b')
+_SO = _re.compile(r'(\d[\d.,:/]*\d|\d)(\s?(?:tuổi|năm|đồng|triệu|tỷ|nghìn|ngày|giờ|người|cây số|km|vạn|chỉ vàng|chỉ|lần|phút))?')
+
+
+def _cau(sh):
+    s = sh.get('say', '')
+    return [x.strip() for x in _re.findall(r'.+?(?:[.!?…]+(?=\s|$)|$)', s) if x.strip()]
+
+
+def nhan(sh):
+    """moi cau: (bat_dau, la_cu_lat, so_de_dap). Tinh 1 lan / canh."""
+    if '_dd_nhan' in sh: return sh['_dd_nhan']
+    cs = _cau(sh); se = list(sh.get('_sent') or [])
+    raw = sh.get('tts', '')
+    out = []; last_so = -99; last_lat = -99
+    for j, c in enumerate(cs):
+        t0 = se[j] if j < len(se) else None
+        if t0 is None: break
+        lat = j > 0 and bool(_LAT.match(c))
+        if not lat and j > 0:   # ky hieu /// dung ngay truoc cau nay trong ban danh dau
+            i = raw.find(c[:18]) if len(c) >= 18 else -1
+            lat = i > 0 and raw[max(0, i - 6):i].strip().endswith('///')
+        if lat and t0 + sum(1 for _ in ()) - last_lat < 12: lat = False
+        if lat: last_lat = t0
+        so = None
+        m = _SO.search(c)
+        da_co = ' '.join(str(x.get('t', '')) + ' ' + str(x.get('text', '')) for x in (sh.get('cards', []) + sh.get('items', []) + sh.get('icons', [])) if isinstance(x, dict)) + ' ' + str(sh.get('label', ''))
+        if m and _re.sub(r'\D', '', m.group(1)) and _re.sub(r'\D', '', m.group(1)) in _re.sub(r'\D', '', da_co): m = None   # hinh da co so nay
+        if m and (len(m.group(1)) >= 3 or m.group(2)) and t0 - last_so > 5:
+            so = (m.group(1) + (m.group(2) or '')).strip(); last_so = t0
+        out.append((t0, lat, so))
+    sh['_dd_nhan'] = out
+    return out
+
+
+def lat_fx(sh, t):
+    """(scale, saturate) cho cu lat: 0.35s dau the 'dap' tu 0.86 len 1 co vuot da; mau tu xam ve day du trong 0.7s."""
+    for t0, lat, _ in nhan(sh):
+        if lat and t0 <= t < t0 + .75:
+            q = (t - t0)
+            if q < .35:
+                p = q / .35; c1 = 1.70158 * 1.4; c3 = c1 + 1; b = 1 + c3 * (p - 1) ** 3 + c1 * (p - 1) ** 2
+                sc = .86 + .14 * b
+            else: sc = 1.0
+            return sc, min(1.0, max(0.0, (q - .15) / .55))
+    return 1.0, 1.0
+
+
+def so_svg(sh, t, W=1080):
+    """chu so dap vao man hinh (trong SAFE), giu ~1.4s."""
+    for t0, _, so in nhan(sh):
+        if so and t0 + .12 <= t < t0 + 1.75:
+            q = t - t0 - .12
+            sc = 1.3 - .3 * _ease(q / .18)
+            op = 1.0 if q < 1.4 else max(0.0, 1 - (q - 1.4) / .2)
+            fs = 118 if len(so) <= 8 else (92 if len(so) <= 13 else 70)
+            w = min(780, int(fs * .62 * len(so) + 90)); y = 640
+            return (f'<g opacity="{op:.2f}" transform="translate(540 {y}) scale({sc:.3f}) rotate(-3)">'
+                    f'<rect x="{-w // 2}" y="{-fs * .78:.0f}" width="{w}" height="{fs * 1.32:.0f}" rx="22" fill="#111" opacity=".82"/>'
+                    f'<text x="0" y="{fs * .3:.0f}" font-family="Be Vietnam Pro, Inter, sans-serif" font-weight="900" font-size="{fs}" '
+                    f'fill="#FFD400" stroke="#000" stroke-width="6" paint-order="stroke" text-anchor="middle">{so}</text></g>')
+    return ''
+
+
+def chuan_bi(shots, st, gap_lat=15.0):
+    """loc cu lat tren CA video: cach nhau >= gap_lat giay (it ma dat)."""
+    last = -99.0
+    for k, sh in enumerate(shots):
+        ds = nhan(sh); nw = []
+        for t0, lat, so in ds:
+            g = st[k] + t0
+            if lat and g - last < gap_lat: lat = False
+            if lat: last = g
+            nw.append((t0, lat, so))
+        sh['_dd_nhan'] = nw
