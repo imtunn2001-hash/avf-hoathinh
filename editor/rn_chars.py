@@ -189,6 +189,9 @@ def _face(c, name, hx, hy, rx, ry, D, facing, expr):
         o.append(''.join(f'<path d="M{_f(X - 10 * s)},{_f(hy + 12 * s)} q{_f(10 * s)},{_f(6 * s)} {_f(20 * s)},0" stroke="#8a6a8a" stroke-width="{_f(3 * s)}" fill="none" opacity=".8"/>' for X in xs))
     if mark == 'bangs':     # toc mai bang (be gai)
         o.append(f'<path d="M{_f(hx - rx * .85)},{_f(hy - ry * .45)} Q{_f(hx)},{_f(hy - ry * .2)} {_f(hx + rx * .85)},{_f(hy - ry * .45)} L{_f(hx + rx * .8)},{_f(hy - ry * .6)} Q{_f(hx)},{_f(hy - ry * .75)} {_f(hx - rx * .8)},{_f(hy - ry * .6)} Z" fill="#140f0c"/>')
+    if mark == 'dirt':      # vet bun tren ma (nhan vat BAN - Chien Su Ky)
+        o.append(f'<ellipse cx="{_f(mx + facing * 26 * s)}" cy="{_f(my - 14 * s)}" rx="{_f(13 * s)}" ry="{_f(7 * s)}" fill="#6a4a2a" opacity=".75" transform="rotate({_f(-18 * facing)} {_f(mx + facing * 26 * s)} {_f(my - 14 * s)})"/>'
+                 f'<circle cx="{_f(mx + facing * 40 * s)}" cy="{_f(my - 20 * s)}" r="{_f(4 * s)}" fill="#6a4a2a" opacity=".7"/>')
     if mark == 'mole':
         o.append(f'<circle cx="{_f(mx + facing * 20 * s)}" cy="{_f(my - 10 * s)}" r="{_f(4 * s)}" fill="{INK}"/>')
     if c.get('beard'):

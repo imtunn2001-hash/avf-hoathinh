@@ -374,9 +374,16 @@ def beat(sh, t, d):
         s.append(ch('chipheo', x, GY + 60 - bob, 200, 1, 'angry', [(.7, -.1, 'sword', 20)], lean=osc(t, .5) * 6, t=t))
         s.append('<rect x="-900" y="-500" width="2880" height="2900" fill="#0a1030" opacity=".25"/>')
         cam = (lerp(1.0, 1.12, ease(t / d)), lerp(400, 600, ease(t / d)), 860)
+    elif _KB is not None and ty in _KB_TYPES:   # 26/11 canh tran cua may KSC cu (melee, army_march, victory...) dung chung nhan vat roi nuoc
+        return _KB(sh, t, d)
     else:
         s.append('<rect x="-900" y="-500" width="2880" height="2900" fill="#efe7d2"/>')
     return ''.join(s), cam, shake, flash
+
+
+_KB = None
+_KB_TYPES = ('fleet_arrive', 'bait_row', 'melee', 'crash_stakes', 'victory', 'chase', 'ambush', 'prep_stakes', 'general',
+             'army_march', 'crossbow_volley', 'drill', 'citadel')
 
 
 SFX = {
@@ -404,6 +411,8 @@ SFX = {
 def install(M):
     """thay beat/SFX/GROUND cua module may dung (ksc_svg dang chay)."""
     import cung_svg
+    global _KB
+    if getattr(M, 'beat', None) is not beat and _KB is None: _KB = M.beat   # giu beat goc cua ksc_svg cho canh tran
     M.beat = beat
     import bian_svg
     M.SFX_PLAN.update(SFX); M.SFX_PLAN.update(cung_svg.SFX); M.SFX_PLAN.update(bian_svg.SFX)
