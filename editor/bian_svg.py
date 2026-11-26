@@ -268,6 +268,25 @@ def icon(kind, x, y, s=1.0):
     if k == 'comb':
         return (f'<rect x="{f_(x - 70 * s)}" y="{f_(y - 20 * s)}" width="{f_(140 * s)}" height="{f_(22 * s)}" rx="{f_(6 * s)}" fill="#6a4a2a" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
                 + ''.join(f'<path d="M{f_(x - 62 * s + j * 12 * s)},{f_(y)} l0,{f_(26 * s)}" stroke="#6a4a2a" stroke-width="{f_(5 * s)}"/>' for j in range(11)))
+    if k == 'tuphu':   # tranh treo 'Tu phu': 4 ong quan dung phò 1 vua nho
+        o = [f'<rect x="{f_(x - 95 * s)}" y="{f_(y - 130 * s)}" width="{f_(190 * s)}" height="{f_(16 * s)}" rx="{f_(6 * s)}" fill="#6a4a2a" stroke="{INK}" stroke-width="{f_(5 * s)}"/>',
+             f'<rect x="{f_(x - 80 * s)}" y="{f_(y - 116 * s)}" width="{f_(160 * s)}" height="{f_(220 * s)}" fill="#efe2bc" stroke="{INK}" stroke-width="{f_(6 * s)}"/>',
+             f'<rect x="{f_(x - 95 * s)}" y="{f_(y + 102 * s)}" width="{f_(190 * s)}" height="{f_(16 * s)}" rx="{f_(6 * s)}" fill="#6a4a2a" stroke="{INK}" stroke-width="{f_(5 * s)}"/>',
+             f'<circle cx="{f_(x)}" cy="{f_(y - 70 * s)}" r="{f_(13 * s)}" fill="#f0c49c" stroke="{INK}" stroke-width="{f_(4 * s)}"/>',
+             f'<path d="M{f_(x - 12 * s)},{f_(y - 84 * s)} l{f_(6 * s)},{f_(-12 * s)} l{f_(6 * s)},{f_(8 * s)} l{f_(6 * s)},{f_(-8 * s)} l{f_(6 * s)},{f_(12 * s)} Z" fill="#d8a93a" stroke="{INK}" stroke-width="{f_(3 * s)}"/>',
+             f'<path d="M{f_(x - 16 * s)},{f_(y - 56 * s)} L{f_(x + 16 * s)},{f_(y - 56 * s)} L{f_(x + 20 * s)},{f_(y - 20 * s)} L{f_(x - 20 * s)},{f_(y - 20 * s)} Z" fill="#d9a52a" stroke="{INK}" stroke-width="{f_(4 * s)}"/>']
+        for j, (dx, col) in enumerate(((-54, '#2e4a6a'), (-18, '#7a1f1a'), (18, '#2e5a46'), (54, '#5a2a5a'))):
+            cx, cy = x + dx * s, y + 22 * s
+            o.append(f'<circle cx="{f_(cx)}" cy="{f_(cy)}" r="{f_(12 * s)}" fill="#e2ae80" stroke="{INK}" stroke-width="{f_(4 * s)}"/>'
+                     f'<rect x="{f_(cx - 12 * s)}" y="{f_(cy - 18 * s)}" width="{f_(24 * s)}" height="{f_(8 * s)}" fill="#1a1a1a"/>'
+                     f'<path d="M{f_(cx - 14 * s)},{f_(cy + 13 * s)} L{f_(cx + 14 * s)},{f_(cy + 13 * s)} L{f_(cx + 17 * s)},{f_(cy + 62 * s)} L{f_(cx - 17 * s)},{f_(cy + 62 * s)} Z" fill="{col}" stroke="{INK}" stroke-width="{f_(4 * s)}"/>')
+        return ''.join(o)
+    if k == 'banknote':   # to tien giay 'Thong bao hoi sao' (hinh rong gian luoc)
+        return (f'<rect x="{f_(x - 70 * s)}" y="{f_(y - 85 * s)}" width="{f_(140 * s)}" height="{f_(170 * s)}" fill="#e9dcb4" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<rect x="{f_(x - 56 * s)}" y="{f_(y - 71 * s)}" width="{f_(112 * s)}" height="{f_(142 * s)}" fill="none" stroke="#7a1f1a" stroke-width="{f_(4 * s)}"/>'
+                f'<path d="M{f_(x - 40 * s)},{f_(y + 30 * s)} q{f_(20 * s)},{f_(-40 * s)} {f_(40 * s)},{f_(-10 * s)} t{f_(40 * s)},{f_(-30 * s)}" fill="none" stroke="#2e5a46" stroke-width="{f_(7 * s)}" stroke-linecap="round"/>'
+                f'<circle cx="{f_(x + 40 * s)}" cy="{f_(y - 12 * s)}" r="{f_(8 * s)}" fill="#2e5a46"/>'
+                f'<rect x="{f_(x - 22 * s)}" y="{f_(y - 60 * s)}" width="{f_(44 * s)}" height="{f_(26 * s)}" fill="#c4281f" stroke="{INK}" stroke-width="{f_(3 * s)}"/>')
     if k == 'map':
         return (f'<path d="M{f_(x - 70 * s)},{f_(y - 50 * s)} L{f_(x - 20 * s)},{f_(y - 60 * s)} L{f_(x + 25 * s)},{f_(y - 50 * s)} L{f_(x + 70 * s)},{f_(y - 60 * s)} L{f_(x + 70 * s)},{f_(y + 50 * s)} L{f_(x + 25 * s)},{f_(y + 60 * s)} L{f_(x - 20 * s)},{f_(y + 50 * s)} L{f_(x - 70 * s)},{f_(y + 60 * s)} Z" fill="#e8dcb0" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
                 f'<circle cx="{f_(x + 10 * s)}" cy="{f_(y)}" r="{f_(12 * s)}" fill="#c4281f" stroke="{INK}" stroke-width="{f_(4 * s)}"/>')
