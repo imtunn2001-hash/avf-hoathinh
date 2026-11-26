@@ -318,10 +318,63 @@ def icon(kind, x, y, s=1.0):
         return ''.join(f'<g transform="rotate({r} {f_(x)} {f_(y + 60 * s)})"><rect x="{f_(x - 36 * s)}" y="{f_(y - 52 * s)}" width="{f_(72 * s)}" height="{f_(104 * s)}" rx="{f_(8 * s)}" fill="#fbf6e6" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
                        f'<text x="{f_(x)}" y="{f_(y + 16 * s)}" font-family="{FONT}" font-weight="900" font-size="{f_(46 * s)}" fill="{c}" text-anchor="middle">{g}</text></g>'
                        for r, c, g in ((-18, '#111', '♠'), (0, '#c4281f', '♥'), (18, '#111', '♣')))
+    if k in ('dog', 'dog_sad', 'dog_tied'):   # cau Vang (Lao Hac): cho vang ngoi nhin phai; sad = tai cup, mat nguoc len; tied = nam, day trung chan
+        return dog_svg(x, y, s, k)
+    if k == 'bowl':   # bat com sanh
+        return (f'<path d="M{f_(x - 60 * s)},{f_(y - 20 * s)} Q{f_(x)},{f_(y + 60 * s)} {f_(x + 60 * s)},{f_(y - 20 * s)} Z" fill="#f4f0e6" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 48 * s)},{f_(y - 4 * s)} Q{f_(x)},{f_(y + 22 * s)} {f_(x + 48 * s)},{f_(y - 4 * s)}" stroke="#3a6ab0" stroke-width="{f_(5 * s)}" fill="none"/>'
+                f'<ellipse cx="{f_(x)}" cy="{f_(y - 22 * s)}" rx="{f_(52 * s)}" ry="{f_(14 * s)}" fill="#fbfaf4" stroke="{INK}" stroke-width="{f_(5 * s)}"/>')
     if k == 'plate':   # bien so xe
         return (f'<rect x="{f_(x - 70 * s)}" y="{f_(y - 36 * s)}" width="{f_(140 * s)}" height="{f_(72 * s)}" rx="{f_(6 * s)}" fill="#f6f6f0" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
                 f'<text x="{f_(x)}" y="{f_(y + 14 * s)}" font-family="{FONT}" font-weight="900" font-size="{f_(40 * s)}" fill="#111" text-anchor="middle">79-?</text>')
     return f'<circle cx="{f_(x)}" cy="{f_(y)}" r="{f_(40 * s)}" fill="#ddd" stroke="{INK}" stroke-width="6"/>'
+
+
+def dog_svg(x, y, s=1.0, k='dog'):
+    """Cau Vang: cho vang viền muc dam, vong co do (dau rieng). (x, y) = giua than; chan cham y + 75*s."""
+    P = lambda dx, dy: f'{f_(x + dx * s)},{f_(y + dy * s)}'
+    W = f'stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round" stroke-linecap="round"'
+    FUR, FUR2 = '#d9a441', '#b8822a'
+    o = []
+    if k == 'dog_tied':   # nam nghieng, 4 chan bi trói
+        o.append(f'<path d="M{P(-95, 40)} Q{P(-130, 10)} {P(-150, 30)}" fill="none" {W}/>')
+        o.append(f'<ellipse cx="{f_(x - 10 * s)}" cy="{f_(y + 40 * s)}" rx="{f_(95 * s)}" ry="{f_(38 * s)}" fill="{FUR}" {W}/>')
+        for dx in (-50, -25, 35, 60):
+            o.append(f'<path d="M{P(dx, 65)} L{P(dx + 18, 92)}" {W} fill="none"/>')
+        o.append(f'<path d="M{P(-60, 88)} Q{P(0, 104)} {P(85, 88)}" stroke="#8a6a3a" stroke-width="{f_(9 * s)}" fill="none"/>')
+        hx, hy = 95, 20
+        o.append(f'<circle cx="{f_(x + hx * s)}" cy="{f_(y + hy * s)}" r="{f_(40 * s)}" fill="{FUR}" {W}/>')
+        o.append(f'<ellipse cx="{f_(x + (hx + 38) * s)}" cy="{f_(y + (hy + 14) * s)}" rx="{f_(26 * s)}" ry="{f_(17 * s)}" fill="#e8bd66" {W}/>')
+        o.append(f'<circle cx="{f_(x + (hx + 60) * s)}" cy="{f_(y + (hy + 8) * s)}" r="{f_(8 * s)}" fill="{INK}"/>')
+        o.append(f'<path d="M{P(hx - 25, hy - 30)} Q{P(hx - 50, hy - 5)} {P(hx - 35, hy + 25)}" fill="{FUR2}" {W}/>')
+        o.append(f'<circle cx="{f_(x + (hx + 12) * s)}" cy="{f_(y + (hy - 10) * s)}" r="{f_(7 * s)}" fill="{INK}"/><circle cx="{f_(x + (hx + 14) * s)}" cy="{f_(y + (hy - 13) * s)}" r="{f_(2.5 * s)}" fill="#fff"/>')
+        o.append(f'<path d="M{P(hx + 2, hy - 24)} L{P(hx + 22, hy - 18)}" {W} fill="none"/>')
+        o.append(f'<path d="M{P(hx - 30, hy + 10)} Q{P(hx - 20, hy + 30)} {P(hx - 5, hy + 38)}" stroke="#c4281f" stroke-width="{f_(9 * s)}" fill="none"/>')
+        return ''.join(o)
+    sad = k == 'dog_sad'
+    tail = f'M{P(-70, 30)} Q{P(-120, 40)} {P(-125, 70)}' if sad else f'M{P(-70, 10)} Q{P(-120, -10)} {P(-110, -60)}'
+    o.append(f'<path d="{tail}" fill="none" stroke="{INK}" stroke-width="{f_(16 * s)}" stroke-linecap="round"/><path d="{tail}" fill="none" stroke="{FUR}" stroke-width="{f_(8 * s)}" stroke-linecap="round"/>')
+    o.append(f'<path d="M{P(-75, 70)} Q{P(-90, -10)} {P(-10, -45)} Q{P(50, -55)} {P(55, 10)} L{P(50, 75)} Z" fill="{FUR}" {W}/>')
+    o.append(f'<ellipse cx="{f_(x - 40 * s)}" cy="{f_(y + 40 * s)}" rx="{f_(42 * s)}" ry="{f_(36 * s)}" fill="{FUR}" {W}/>')
+    o.append(f'<path d="M{P(-70, 75)} L{P(-25, 75)}" {W} fill="none"/>')
+    for dx in (18, 42):
+        o.append(f'<path d="M{P(dx, 0)} L{P(dx, 75)}" stroke="{INK}" stroke-width="{f_(22 * s)}" stroke-linecap="round"/><path d="M{P(dx, 0)} L{P(dx, 75)}" stroke="{FUR}" stroke-width="{f_(11 * s)}" stroke-linecap="round"/>')
+    hx, hy = (45, -60) if sad else (45, -85)
+    o.append(f'<circle cx="{f_(x + hx * s)}" cy="{f_(y + hy * s)}" r="{f_(44 * s)}" fill="{FUR}" {W}/>')
+    o.append(f'<ellipse cx="{f_(x + (hx + 42) * s)}" cy="{f_(y + (hy + 16) * s)}" rx="{f_(28 * s)}" ry="{f_(19 * s)}" fill="#e8bd66" {W}/>')
+    o.append(f'<circle cx="{f_(x + (hx + 66) * s)}" cy="{f_(y + (hy + 9) * s)}" r="{f_(9 * s)}" fill="{INK}"/>')
+    o.append(f'<path d="M{P(hx + 42, hy + 30)} Q{P(hx + 52, hy + 36)} {P(hx + 60, hy + 30)}" {W} fill="none"/>' if not sad else
+             f'<path d="M{P(hx + 40, hy + 36)} Q{P(hx + 50, hy + 28)} {P(hx + 60, hy + 34)}" {W} fill="none"/>')
+    if sad:   # tai cup sat dau, mat nguoc len, may chau
+        o.append(f'<path d="M{P(hx - 30, hy - 25)} Q{P(hx - 55, hy + 5)} {P(hx - 38, hy + 40)} Q{P(hx - 20, hy + 10)} {P(hx - 12, hy - 30)} Z" fill="{FUR2}" {W}/>')
+        o.append(f'<circle cx="{f_(x + (hx + 14) * s)}" cy="{f_(y + (hy - 8) * s)}" r="{f_(8 * s)}" fill="{INK}"/><circle cx="{f_(x + (hx + 16) * s)}" cy="{f_(y + (hy - 12) * s)}" r="{f_(3 * s)}" fill="#fff"/>')
+        o.append(f'<path d="M{P(hx + 2, hy - 20)} L{P(hx + 24, hy - 28)}" {W} fill="none"/>')
+        o.append(f'<path d="M{P(hx + 20, hy + 2)} q{f_(-3 * s)},{f_(12 * s)} 0,{f_(16 * s)} q{f_(3 * s)},{f_(-4 * s)} 0,{f_(-16 * s)}" fill="#7fc3f0" stroke="{INK}" stroke-width="{f_(2.5 * s)}"/>')
+    else:     # tai vềnh, mat tron vui
+        o.append(f'<path d="M{P(hx - 32, hy - 20)} L{P(hx - 30, hy - 72)} L{P(hx - 2, hy - 38)} Z" fill="{FUR2}" {W}/>')
+        o.append(f'<circle cx="{f_(x + (hx + 16) * s)}" cy="{f_(y + (hy - 10) * s)}" r="{f_(8 * s)}" fill="{INK}"/><circle cx="{f_(x + (hx + 18) * s)}" cy="{f_(y + (hy - 13) * s)}" r="{f_(3 * s)}" fill="#fff"/>')
+    o.append(f'<path d="M{P(hx - 34, hy + 22)} Q{P(hx - 10, hy + 46)} {P(hx + 22, hy + 38)}" stroke="#c4281f" stroke-width="{f_(10 * s)}" fill="none" stroke-linecap="round"/>')
+    return ''.join(o)
 
 
 def suitcase_open(x, y, q):
