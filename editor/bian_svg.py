@@ -197,6 +197,34 @@ BG = {'shop': lambda t: shop_bg(t), 'shop_day': lambda t: shop_bg(t, False), 'pr
 # ---------------- icon vat chung ----------------
 def icon(kind, x, y, s=1.0):
     k = kind
+    if k == 'safe':   # ket sat
+        return (f'<rect x="{f_(x - 75 * s)}" y="{f_(y - 85 * s)}" width="{f_(150 * s)}" height="{f_(170 * s)}" rx="{f_(10 * s)}" fill="#4a5a64" stroke="{INK}" stroke-width="{f_(7 * s)}"/>'
+                f'<rect x="{f_(x - 58 * s)}" y="{f_(y - 68 * s)}" width="{f_(116 * s)}" height="{f_(136 * s)}" rx="{f_(6 * s)}" fill="#5e707a" stroke="{INK}" stroke-width="{f_(4 * s)}"/>'
+                f'<circle cx="{f_(x)}" cy="{f_(y - 5 * s)}" r="{f_(26 * s)}" fill="#c9c2b0" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
+                f'<path d="M{f_(x)},{f_(y - 5 * s)} l{f_(16 * s)},{f_(-10 * s)}" stroke="{INK}" stroke-width="{f_(5 * s)}" stroke-linecap="round"/>'
+                f'<rect x="{f_(x + 34 * s)}" y="{f_(y - 20 * s)}" width="{f_(12 * s)}" height="{f_(40 * s)}" rx="{f_(4 * s)}" fill="#d8a93a" stroke="{INK}" stroke-width="{f_(3 * s)}"/>')
+    if k == 'envelope':   # phong bi
+        return (f'<rect x="{f_(x - 75 * s)}" y="{f_(y - 48 * s)}" width="{f_(150 * s)}" height="{f_(96 * s)}" rx="{f_(4 * s)}" fill="#f6f0dc" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<path d="M{f_(x - 75 * s)},{f_(y - 48 * s)} L{f_(x)},{f_(y + 8 * s)} L{f_(x + 75 * s)},{f_(y - 48 * s)}" fill="none" stroke="{INK}" stroke-width="{f_(5 * s)}" stroke-linejoin="round"/>')
+    if k == 'giftbag':   # tui qua
+        return (f'<path d="M{f_(x - 60 * s)},{f_(y - 40 * s)} L{f_(x + 60 * s)},{f_(y - 40 * s)} L{f_(x + 70 * s)},{f_(y + 70 * s)} L{f_(x - 70 * s)},{f_(y + 70 * s)} Z" fill="#c4281f" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 30 * s)},{f_(y - 40 * s)} q{f_(30 * s)},{f_(-60 * s)} {f_(60 * s)},0" fill="none" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<rect x="{f_(x - 40 * s)}" y="{f_(y)}" width="{f_(80 * s)}" height="{f_(36 * s)}" rx="{f_(4 * s)}" fill="#d8a93a" stroke="{INK}" stroke-width="{f_(4 * s)}"/>')
+    if k == 'drop':   # giot mau nho (vat chung, khong mau me)
+        return (f'<path d="M{f_(x)},{f_(y - 55 * s)} Q{f_(x + 42 * s)},{f_(y)} {f_(x + 30 * s)},{f_(y + 25 * s)} A{f_(34 * s)},{f_(34 * s)} 0 0 1 {f_(x - 30 * s)},{f_(y + 25 * s)} Q{f_(x - 42 * s)},{f_(y)} {f_(x)},{f_(y - 55 * s)} Z" fill="#8a1e18" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
+                f'<ellipse cx="{f_(x - 10 * s)}" cy="{f_(y + 10 * s)}" rx="{f_(7 * s)}" ry="{f_(12 * s)}" fill="#fff" opacity=".45"/>')
+    if k == 'bus':
+        return (f'<rect x="{f_(x - 110 * s)}" y="{f_(y - 60 * s)}" width="{f_(220 * s)}" height="{f_(100 * s)}" rx="{f_(16 * s)}" fill="#2e6ab0" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                + ''.join(f'<rect x="{f_(x + (-95 + j * 48) * s)}" y="{f_(y - 46 * s)}" width="{f_(38 * s)}" height="{f_(34 * s)}" rx="{f_(4 * s)}" fill="#cfe6f5" stroke="{INK}" stroke-width="{f_(4 * s)}"/>' for j in range(4))
+                + f'<circle cx="{f_(x - 60 * s)}" cy="{f_(y + 42 * s)}" r="{f_(20 * s)}" fill="#222" stroke="{INK}" stroke-width="{f_(4 * s)}"/><circle cx="{f_(x + 60 * s)}" cy="{f_(y + 42 * s)}" r="{f_(20 * s)}" fill="#222" stroke="{INK}" stroke-width="{f_(4 * s)}"/>')
+    if k == 'corkscrew':   # cai mo ruou
+        return (f'<rect x="{f_(x - 55 * s)}" y="{f_(y - 50 * s)}" width="{f_(110 * s)}" height="{f_(22 * s)}" rx="{f_(10 * s)}" fill="#8a5a2a" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
+                f'<path d="M{f_(x)},{f_(y - 28 * s)} l0,{f_(14 * s)}' + ''.join(f' q{f_(18 * s)},{f_(7 * s)} 0,{f_(14 * s)} q{f_(-18 * s)},{f_(7 * s)} 0,{f_(14 * s)}' for _ in range(3)) + f'" fill="none" stroke="#9aa0a6" stroke-width="{f_(6 * s)}" stroke-linecap="round"/>')
+    if k == 'hut':   # lan canh rung cao su
+        return (''.join(f'<path d="M{f_(x + dx * s)},{f_(y + 60 * s)} l0,{f_(-170 * s)}" stroke="#6a4a2a" stroke-width="{f_(16 * s)}"/><circle cx="{f_(x + dx * s)}" cy="{f_(y - 130 * s)}" r="{f_(46 * s)}" fill="#3a6a3a" stroke="{INK}" stroke-width="{f_(5 * s)}"/>' for dx in (-130, 130))
+                + f'<path d="M{f_(x - 80 * s)},{f_(y - 10 * s)} L{f_(x)},{f_(y - 70 * s)} L{f_(x + 80 * s)},{f_(y - 10 * s)} Z" fill="#b8925a" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<rect x="{f_(x - 60 * s)}" y="{f_(y - 10 * s)}" width="{f_(120 * s)}" height="{f_(70 * s)}" fill="#8a6a42" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<rect x="{f_(x - 18 * s)}" y="{f_(y + 15 * s)}" width="{f_(36 * s)}" height="{f_(45 * s)}" fill="#2a1e14"/>')
     if k == 'suitcase':
         return (f'<rect x="{f_(x - 70 * s)}" y="{f_(y - 40 * s)}" width="{f_(140 * s)}" height="{f_(90 * s)}" rx="{f_(10 * s)}" fill="#8a5a2a" stroke="{INK}" stroke-width="{f_(7 * s)}"/>'
                 f'<path d="M{f_(x - 25 * s)},{f_(y - 40 * s)} l0,{f_(-20 * s)} l{f_(50 * s)},0 l0,{f_(20 * s)}" stroke="{INK}" stroke-width="{f_(7 * s)}" fill="none"/>'
