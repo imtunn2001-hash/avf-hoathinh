@@ -186,9 +186,26 @@ def alley_bg(t):
     return ''.join(o)
 
 
+def hospital_bg(t, dentist=False):
+    """Hanh lang benh vien / phong nha khoa (CCK xyanua 28/11): tuong xanh nhat, bien chu thap do hoac bien rang."""
+    o = [f'<rect x="-900" y="-500" width="2880" height="2900" fill="#d6e8de"/>']
+    o.append(f'<rect x="-900" y="{GY - 260}" width="2880" height="220" fill="#b8d4c4"/>')
+    o.append(f'<path d="M-900,{GY - 260} L1980,{GY - 260}" stroke="#8ab09a" stroke-width="8"/>')
+    for x in (-160, 1060):
+        o.append(f'<rect x="{x}" y="420" width="180" height="240" rx="8" fill="#eaf4f8" stroke="{INK}" stroke-width="6"/><path d="M{x + 90},420 l0,240 M{x},540 l180,0" stroke="{INK}" stroke-width="4"/>')
+    o.append(f'<rect x="380" y="330" width="320" height="110" rx="12" fill="#fff" stroke="{INK}" stroke-width="6"/>')
+    if dentist:
+        o.append(f'<text x="540" y="405" font-family="{FONT}" font-weight="900" font-size="48" fill="#2e6ab0" text-anchor="middle">NHA KHOA</text>')
+    else:
+        o.append(f'<path d="M510,348 h60 v28 h28 v38 h-28 v28 h-60 v-28 h-28 v-38 h28 Z" fill="#c4281f"/>')
+    o.append(f'<rect x="-900" y="{GY - 40}" width="2880" height="1000" fill="#c8ccc4" stroke="{INK}" stroke-width="6"/>')
+    for k in range(-10, 24): o.append(f'<path d="M{k * 120},{GY - 40} l-60,1000" stroke="#b0b4aa" stroke-width="4"/>')
+    return ''.join(o)
+
+
 BG = {'shop': lambda t: shop_bg(t), 'shop_day': lambda t: shop_bg(t, False), 'prison': prison_bg, 'court': court_bg,
       'beach': lambda t: sea_beach(t), 'beach_night': lambda t: sea_beach(t, True), 'station': station_bg, 'street': street_night,
-      'room': room_bg, 'lab': lab_bg, 'paper': lambda t: paper(), 'night': lambda t: night_sky() + f'<rect x="-900" y="{GY - 40}" width="2880" height="1000" fill="#2a3428" stroke="{INK}" stroke-width="6"/>',
+      'room': room_bg, 'hospital': hospital_bg, 'dentist': lambda t: hospital_bg(t, True), 'lab': lab_bg, 'paper': lambda t: paper(), 'night': lambda t: night_sky() + f'<rect x="-900" y="{GY - 40}" width="2880" height="1000" fill="#2a3428" stroke="{INK}" stroke-width="6"/>',
       'market': market_bg, 'alley': alley_bg,
       'hall': lambda t: __import__('cung_svg').hall(t), 'hall_empty': lambda t: __import__('cung_svg').hall(t, throne=False), 'hall_dim': lambda t: __import__('cung_svg').hall(t, .45, throne=False),
       'pagoda': lambda t: __import__('cung_svg').garden(t), 'lychee': lambda t: __import__('cung_svg').lychee(t), 'lychee_dawn': lambda t: __import__('cung_svg').lychee(t, 1.0), 'lake': lambda t: __import__('cung_svg').lake(t), 'village': lambda t: V.village(t), 'village_night': lambda t: V.village(t, night=True), 'riverbank': lambda t: V.riverbank(t), 'riverbank_dawn': lambda t: V.riverbank(t, False)}
@@ -206,6 +223,28 @@ def icon(kind, x, y, s=1.0):
     if k == 'envelope':   # phong bi
         return (f'<rect x="{f_(x - 75 * s)}" y="{f_(y - 48 * s)}" width="{f_(150 * s)}" height="{f_(96 * s)}" rx="{f_(4 * s)}" fill="#f6f0dc" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
                 f'<path d="M{f_(x - 75 * s)},{f_(y - 48 * s)} L{f_(x)},{f_(y + 8 * s)} L{f_(x + 75 * s)},{f_(y - 48 * s)}" fill="none" stroke="{INK}" stroke-width="{f_(5 * s)}" stroke-linejoin="round"/>')
+    if k == 'handbag':   # gio xach (CCK xyanua 28/11)
+        return (f'<path d="M{f_(x - 40 * s)},{f_(y - 30 * s)} q{f_(40 * s)},{f_(-80 * s)} {f_(80 * s)},0" fill="none" stroke="{INK}" stroke-width="{f_(8 * s)}"/>'
+                f'<path d="M{f_(x - 80 * s)},{f_(y - 30 * s)} L{f_(x + 80 * s)},{f_(y - 30 * s)} L{f_(x + 66 * s)},{f_(y + 60 * s)} L{f_(x - 66 * s)},{f_(y + 60 * s)} Z" fill="#6a3a5a" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 78 * s)},{f_(y - 6 * s)} L{f_(x + 78 * s)},{f_(y - 6 * s)}" stroke="#4e2a42" stroke-width="{f_(5 * s)}"/>'
+                f'<rect x="{f_(x - 12 * s)}" y="{f_(y - 14 * s)}" width="{f_(24 * s)}" height="{f_(16 * s)}" rx="{f_(3 * s)}" fill="#d8a93a" stroke="{INK}" stroke-width="{f_(3 * s)}"/>')
+    if k == 'packet_y':   # goi hoa chat mau vang (khong ve chat ben trong)
+        return (f'<path d="M{f_(x - 58 * s)},{f_(y - 40 * s)} L{f_(x + 58 * s)},{f_(y - 40 * s)} L{f_(x + 58 * s)},{f_(y + 50 * s)} L{f_(x - 58 * s)},{f_(y + 50 * s)} Z" fill="#e8c83a" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 58 * s)},{f_(y - 26 * s)} L{f_(x + 58 * s)},{f_(y - 26 * s)}" stroke="{INK}" stroke-width="{f_(4 * s)}"/>'
+                f'<path d="M{f_(x)},{f_(y - 4 * s)} l{f_(22 * s)},{f_(40 * s)} l{f_(-44 * s)},0 Z" fill="#c4281f" stroke="{INK}" stroke-width="{f_(3 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x)},{f_(y + 8 * s)} l0,{f_(14 * s)}" stroke="#fff" stroke-width="{f_(4 * s)}" stroke-linecap="round"/><circle cx="{f_(x)}" cy="{f_(y + 29 * s)}" r="{f_(2.6 * s)}" fill="#fff"/>')
+    if k == 'tooth':   # rang (gia lam nha si)
+        return (f'<path d="M{f_(x - 50 * s)},{f_(y - 40 * s)} q{f_(25 * s)},{f_(-30 * s)} {f_(50 * s)},{f_(-8 * s)} q{f_(25 * s)},{f_(-22 * s)} {f_(50 * s)},{f_(8 * s)} q{f_(8 * s)},{f_(40 * s)} {f_(-14 * s)},{f_(70 * s)} l{f_(-10 * s)},{f_(40 * s)} q{f_(-8 * s)},{f_(10 * s)} {f_(-14 * s)},0 l{f_(-12 * s)},{f_(-40 * s)} l{f_(-12 * s)},{f_(40 * s)} q{f_(-6 * s)},{f_(10 * s)} {f_(-14 * s)},0 l{f_(-10 * s)},{f_(-40 * s)} q{f_(-22 * s)},{f_(-30 * s)} {f_(-14 * s)},{f_(-70 * s)} Z" fill="#f6f2e6" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>')
+    if k == 'cup':   # ly nuoc
+        return (f'<path d="M{f_(x - 45 * s)},{f_(y - 60 * s)} L{f_(x + 45 * s)},{f_(y - 60 * s)} L{f_(x + 34 * s)},{f_(y + 60 * s)} L{f_(x - 34 * s)},{f_(y + 60 * s)} Z" fill="#e6f2f6" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 40 * s)},{f_(y - 20 * s)} L{f_(x + 40 * s)},{f_(y - 20 * s)} L{f_(x + 34 * s)},{f_(y + 56 * s)} L{f_(x - 34 * s)},{f_(y + 56 * s)} Z" fill="#f2dc8a" opacity=".8"/>')
+    if k == 'cross':   # chu thap do (benh vien, cap cuu)
+        return (f'<rect x="{f_(x - 70 * s)}" y="{f_(y - 70 * s)}" width="{f_(140 * s)}" height="{f_(140 * s)}" rx="{f_(16 * s)}" fill="#fff" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<path d="M{f_(x - 18 * s)},{f_(y - 50 * s)} h{f_(36 * s)} v{f_(32 * s)} h{f_(32 * s)} v{f_(36 * s)} h{f_(-32 * s)} v{f_(32 * s)} h{f_(-36 * s)} v{f_(-32 * s)} h{f_(-32 * s)} v{f_(-36 * s)} h{f_(32 * s)} Z" fill="#c4281f" stroke="{INK}" stroke-width="{f_(4 * s)}" stroke-linejoin="round"/>')
+    if k == 'testtube':   # ong nghiem giam dinh
+        return (f'<path d="M{f_(x - 22 * s)},{f_(y - 80 * s)} l0,{f_(130 * s)} a{f_(22 * s)},{f_(22 * s)} 0 0 0 {f_(44 * s)},0 l0,{f_(-130 * s)}" fill="#e6f2f6" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<path d="M{f_(x - 19 * s)},{f_(y + 5 * s)} l0,{f_(45 * s)} a{f_(19 * s)},{f_(19 * s)} 0 0 0 {f_(38 * s)},0 l0,{f_(-45 * s)} Z" fill="#7ac4f0"/>'
+                f'<path d="M{f_(x - 32 * s)},{f_(y - 80 * s)} l{f_(64 * s)},0" stroke="{INK}" stroke-width="{f_(7 * s)}" stroke-linecap="round"/>')
     if k == 'packet':   # goi giay nho buoc lat (goi ba cho - Lao Hac P2), khong ve chat ben trong
         return (f'<path d="M{f_(x - 62 * s)},{f_(y - 30 * s)} Q{f_(x)},{f_(y - 52 * s)} {f_(x + 62 * s)},{f_(y - 30 * s)} L{f_(x + 52 * s)},{f_(y + 40 * s)} Q{f_(x)},{f_(y + 54 * s)} {f_(x - 52 * s)},{f_(y + 40 * s)} Z" fill="#d9c9a0" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
                 f'<path d="M{f_(x - 58 * s)},{f_(y + 2 * s)} Q{f_(x)},{f_(y - 12 * s)} {f_(x + 58 * s)},{f_(y + 2 * s)}" stroke="#7a5a2a" stroke-width="{f_(7 * s)}" fill="none"/>'
