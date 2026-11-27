@@ -3,7 +3,8 @@ SPEC_JSON: {"channel","video_url","text"?,"hl"?,"badge"?,"sub"?,"cap"?,"band"?:[
 - Lay cac khung ngay SAU moi lan chuyen canh (luc chu/phu de chua kip hien), chi giu dai giua (band) - bo chu khoa o tren va phu de o duoi.
 - Cham diem do net + mau + do sang, chon khung tot nhat trong 10%-85% thoi luong.
 - Thieu chu bia thi tu rut tu caption (dong 1, cat theo dau – : , .), badge tu "Phần n/m".
-Ra out/thumb.jpg (< 2 MB, 1080x1920) + out/thumb.json (khung da chon)."""
+Ra out/thumb.jpg (< 2 MB, 1080x1920) + out/thumb.json (khung da chon)
++ out/out.mp4 = video goc co ANH BIA o khung dau tien (1 khung) de TikTok/Facebook tu lay lam bia (chu chot 27/11)."""
 import json
 import os
 import re
@@ -102,6 +103,30 @@ def main():
     json.dump({'t': round(best[1], 2), 'score': round(float(best[0]), 1), 'text': text, 'badge': badge, 'n': len(ts)},
               open(os.path.join(OUT, 'thumb.json'), 'w'), ensure_ascii=False)
     print('anh bia: khung', round(best[1], 2), 's /', len(ts), 'khung thu -', text)
+    try:
+        ghep_bia(vp, os.path.join(OUT, 'thumb.jpg'), os.path.join(OUT, 'out.mp4'))
+    except Exception as e:
+        print('khong ghep duoc bia vao video:', str(e)[:200])
+
+
+def ghep_bia(vp, img, out):
+    """Chen anh bia lam KHUNG DAU (1 khung) roi noi video goc; tieng day lui dung 1 khung."""
+    r = subprocess.check_output(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=r_frame_rate,width,height',
+                                 '-of', 'csv=p=0', vp]).decode().strip().split(',')
+    w, h = int(r[0]), int(r[1]); a, b = r[2].split('/'); fps = float(a) / float(b or 1)
+    one = 1.0 / fps
+    has_a = bool(subprocess.check_output(['ffprobe', '-v', 'error', '-select_streams', 'a', '-show_entries', 'stream=index', '-of', 'csv=p=0', vp]).strip())
+    fc = ('[1:v]scale=%d:%d:force_original_aspect_ratio=increase,crop=%d:%d,setsar=1,fps=%s,format=yuv420p,trim=end_frame=1[c];'
+          '[0:v]setsar=1,format=yuv420p[v];[c][v]concat=n=2:v=1:a=0[vo]') % (w, h, w, h, r[2])
+    cmd = ['ffmpeg', '-v', 'error', '-y', '-i', vp, '-loop', '1', '-t', '%.4f' % (one * 2), '-i', img, '-filter_complex']
+    if has_a:
+        fc += ';[0:a]adelay=%d:all=1[ao]' % round(one * 1000)
+        cmd += [fc, '-map', '[vo]', '-map', '[ao]', '-c:a', 'aac', '-b:a', '192k']
+    else:
+        cmd += [fc, '-map', '[vo]']
+    cmd += ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-movflags', '+faststart', out]
+    subprocess.run(cmd, check=True)
+    print('video co bia khung dau:', out, round(one, 3), 's')
 
 
 if __name__ == '__main__':

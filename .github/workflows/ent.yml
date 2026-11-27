@@ -104,5 +104,5 @@ jobs:
         env: { GH_TOKEN: "${{ github.token }}" }
         run: |
           gh release delete "ent-${{ inputs.job_id }}" -y --cleanup-tag 2>/dev/null || true
-          if [ "${{ inputs.kind }}" = "card" ]; then F="out/*.jpg"; elif [ "${{ inputs.kind }}" = "clip" ]; then F="out/clip*.mp4 out/clips.json"; elif [ "${{ inputs.kind }}" = "thumb" ]; then F="out/thumb.jpg out/thumb.json"; elif [ "${{ inputs.kind }}" = "meo" ]; then F="out/m*.jpg"; else F="out/out.mp4"; [ -f out/qc.jpg ] && F="$F out/qc.jpg"; [ -f out/qc.json ] && F="$F out/qc.json"; [ -f out/cover.png ] && F="$F out/cover.png"; fi
+          if [ "${{ inputs.kind }}" = "card" ]; then F="out/*.jpg"; elif [ "${{ inputs.kind }}" = "clip" ]; then F="out/clip*.mp4 out/clips.json"; elif [ "${{ inputs.kind }}" = "thumb" ]; then F="out/thumb.jpg out/thumb.json"; [ -f out/out.mp4 ] && F="$F out/out.mp4"; elif [ "${{ inputs.kind }}" = "meo" ]; then F="out/m*.jpg"; else F="out/out.mp4"; [ -f out/qc.jpg ] && F="$F out/qc.jpg"; [ -f out/qc.json ] && F="$F out/qc.json"; [ -f out/cover.png ] && F="$F out/cover.png"; fi
           gh release create "ent-${{ inputs.job_id }}" $F --title "ent ${{ inputs.job_id }}" --notes "auto"
