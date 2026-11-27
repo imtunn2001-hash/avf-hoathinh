@@ -607,7 +607,7 @@ def main():
     else:
         durs = sp.get('durs') or [5.0] * n; st = [sum(durs[:k]) for k in range(n)]; dur = sum(durs)
         srt = [(st[k], st[k] + durs[k] - .2, shots[k].get('say', '')) for k in range(n) if shots[k].get('say')]
-    LEAD, TAIL = .2, 2.6; D = dur + LEAD + TAIL
+    LEAD, TAIL = .1, 2.6; D = dur + LEAD + TAIL
     ends = st[1:] + [dur + TAIL]
     wts = word_times(srt)
     base = Image.new('RGB', (W, H), (14, 10, 10)); header(base, sp)

@@ -129,7 +129,7 @@ def main():
     if _ct: print('CANH BAO CHINH TA:', ', '.join(_ct))
     git_imgs(sp.get('git_branch'), [s['img'] for s in sc])
     gaps = [s.get('gap', 0.75) for s in sc]
-    voice, spans = voices([list(zip(s['voice_urls'], s.get('pauses') or [0.45] * len(s['voice_urls']))) if s.get('voice_urls') else s['voice_url'] for s in sc], gaps, lead=0.5)
+    voice, spans = voices([list(zip(s['voice_urls'], s.get('pauses') or [0.45] * len(s['voice_urls']))) if s.get('voice_urls') else s['voice_url'] for s in sc], gaps, lead=0.12)  # 28/11 hook 2 giay
     end_d = 3.2; dur = len(voice) / SR + end_d
     os.environ.setdefault('VID_VF', fx.grade_vf(sp.get('grade', 'mnmb')))
     # moc tung cau trong canh (tu file giong da tai) -> moc tung tu cho phu de nhay theo tu

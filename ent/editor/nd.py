@@ -95,7 +95,7 @@ def main():
         except Exception as e:
             print('srt loi', e)
     dur = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', voice]).decode().strip())
-    LEAD, TAIL = 0.4, 2.2
+    LEAD, TAIL = 0.15, 2.2
     D = dur + LEAD + TAIL
     title = spec.get('title', 'NHẬN ĐỊNH VÀNG'); sub = spec.get('sub', ''); cta = spec.get('cta', 'Theo dõi page để nhận kèo mỗi sáng')
     # chart: vung hien thi 1080 x CH o giua

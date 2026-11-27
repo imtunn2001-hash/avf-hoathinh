@@ -235,7 +235,7 @@ def main():
         try: srt = parse_srt(open(get(sp['srt_url'], os.path.join(OUT, 'v.srt')), encoding='utf-8').read())
         except Exception as e: print('srt', e)
     dur = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', voice]).decode().strip())
-    LEAD, TAIL = 0.3, 3.0
+    LEAD, TAIL = 0.1, 3.0
     D = dur + LEAD + TAIL
     imgs = [Image.open(os.path.join(D_, s)).convert('RGB') for s in sp['scenes'] if os.path.exists(os.path.join(D_, s))]
     if not imgs: sys.exit('khong co anh canh')

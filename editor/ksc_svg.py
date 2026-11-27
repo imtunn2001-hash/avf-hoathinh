@@ -967,7 +967,7 @@ def main():
     else:
         durs = sp.get('durs') or [5.0] * n; st = [sum(durs[:k]) for k in range(n)]; dur = sum(durs)
         subs = [c for k in range(n) for c in timed_chunks(st[k], st[k] + durs[k] - .15, shots[k].get('say', ''))]
-    LEAD, TAIL = .2, 2.6; D = dur + LEAD + TAIL; ends = st[1:] + [dur + TAIL]
+    LEAD, TAIL = .1, 2.6; D = dur + LEAD + TAIL; ends = st[1:] + [dur + TAIL]
     g = dict(sp=sp, st=st, ends=ends, D=D, LEAD=LEAD, TAIL=TAIL, subs=subs, fmt=sp.get('format', 'square'))
     _init(g)
     nfr = int(D * FPS)

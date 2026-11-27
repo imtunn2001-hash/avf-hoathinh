@@ -23,7 +23,7 @@ ROOT = os.getcwd()
 OUT = os.path.join(ROOT, 'out')
 COLORS = {'orange': ORANGE, 'yellow': YEL, 'green': '#2f9e44', 'red': RED, 'white': '#ffffff', 'blue': '#3f7fd0'}
 DISP = "'Anton', 'Be Vietnam Pro', Montserrat"
-LEAD, TAIL = 0.3, 1.4
+LEAD, TAIL = 0.1, 1.4
 G = {}  # du lieu dung chung cho tien trinh con
 
 

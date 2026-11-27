@@ -91,7 +91,7 @@ def main():
     _ct = chinh_ta.soat(' '.join([x.get('text', '') + ' ' + x.get('tag', '') for x in sc] + [sp.get(k, '') for k in ('rule_top', 'rule_bot', 'end_top', 'end_bot')]))
     if _ct: print('CANH BAO CHINH TA:', ', '.join(_ct))
     git_imgs(sp.get('git_branch'), [s['img'] for s in sc])
-    intro = 4.6
+    intro = 0.12   # 28/11 chu chot hook 2 giay: giong vao ngay, bang luat chuyen xuong canh 2
     gaps = [s.get('gap', 0.8) for s in sc]
     voice, spans = voices([list(zip(s['voice_urls'], s.get('pauses') or [0.45] * len(s['voice_urls']))) if s.get('voice_urls') else s['voice_url'] for s in sc], gaps, lead=intro)
     end_d = 3.0; vend = len(voice) / SR; dur = vend + end_d
@@ -110,7 +110,7 @@ def main():
     apath = os.path.join(TMP, 'a.wav'); write_audio(a, apath)
     # hinh
     imgs = [Image.open(s['img']).convert('RGB') for s in sc]
-    starts = [spans[0][0] - 0.3] + [spans[k][0] - 0.15 for k in range(1, len(sc))]
+    starts = [0.0] + [spans[k][0] - 0.15 for k in range(1, len(sc))]
     ends = starts[1:] + [vend]
     black = Image.new('RGB', (W, H), (4, 6, 5))
     fsub = mono(48); ftag = tagf(150); frule = mono(64); frule2 = tagf(120)
@@ -147,6 +147,18 @@ def main():
         while nl * int(fs_.size * 1.38) > 1440 - 900 and fs_.size > 40: fs_ = mono(fs_.size - 2); nl = len(ngat.wrap_cum(d, s['text'], fs_, safezone.MAXW_C540))  # 22/11: phu de >= 40px
         lh_ = int(fs_.size * 1.38)
         type_text(d, s['text'], fs_, min(1250, 1438 - nl * lh_), frac, WHITE, lh=lh_)
+        if k == (1 if len(sc) > 1 else 0) and tin < 3.6 and (sp.get('rule_top') or sp.get('rule_bot')):   # 28/11 bang luat chong len canh 2
+            al = ease(tin / 0.3) * (1 - ease((tin - 3.2) / 0.4))
+            if al > 0.01:
+                ov = Image.new('RGBA', (W, H), (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
+                fr1 = mono(52); fr2 = tagf(96)
+                t1 = ngat.nfc(sp.get('rule_top', '')); t2 = ngat.nfc(sp.get('rule_bot', ''))
+                while t1 and od.textlength(t1, font=fr1) > safezone.MAXW_C540 and fr1.size > 36: fr1 = mono(fr1.size - 2)
+                while t2 and od.textlength(t2, font=fr2) > safezone.MAXW_C540 and fr2.size > 52: fr2 = tagf(fr2.size - 4)
+                od.rectangle((80, 520, 1000 - 60, 520 + 230), fill=(0, 0, 0, int(190 * al)))
+                if t1: od.text(((W - od.textlength(t1, font=fr1)) / 2, 545), t1, font=fr1, fill=(235, 235, 235, int(255 * al)))
+                if t2: od.text(((W - od.textlength(t2, font=fr2)) / 2, 620), t2, font=fr2, fill=RED + (int(255 * al),), stroke_width=4, stroke_fill=(0, 0, 0, int(255 * al)))
+                fr = Image.alpha_composite(fr.convert('RGBA'), ov).convert('RGB'); d = ImageDraw.Draw(fr)
         hud(fr, fi, t, sp)
         gl = 0.0
         if tin < 0.18 and k > 0: gl = 0.7

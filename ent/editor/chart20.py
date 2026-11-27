@@ -170,7 +170,7 @@ def main():
     C = sp['candles']; N = len(C)
     voice, srt, dur = build_voice(sp)
     if sp.get('sub_texts') and len(sp['sub_texts']) == len(G_SPANS): srt = own_srt(sp['sub_texts'], G_SPANS)
-    LEAD, TAIL = 0.3, 2.8
+    LEAD, TAIL = 0.1, 2.8
     D = dur + LEAD + TAIL
     evs = sp.get('events') or []
     et = cue_times(evs, srt, dur)
