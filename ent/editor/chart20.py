@@ -195,6 +195,8 @@ def main():
         return keys[-1][1]
 
     WIN = int(sp.get('window', 46))
+    # 28/11 (mau Hash Forex): chua o trong ben phai cho duong du bao 'path'
+    FUT = int(sp.get('future', 8 if any(e['type'] == 'path' for e in evs) else 0))
     # cai tien 22/11 (QC: 'khung cuoi chart dung yen'): het nen moi thi zoom cham vao cac nen gan nhat
     ZS = keys[-1][0] + 1.0
     ZD = dur + 1.0 - ZS   # zoom deu toi het loi doc, khong dung lai giua chung
@@ -242,10 +244,14 @@ def main():
         vis = vis or [dict(C[0])]
         wf = winf(tv); i0f = max(0.0, len(vis) - wf)
         i0 = int(math.ceil(i0f - 1e-6)); win = vis[i0:]
-        active = [e for e in evs if e['t'] <= tv]
+        active = [e for e in evs if e['t'] <= tv]; placed0 = []
         lv = [e for e in active if e['type'] == 'level']
-        lo = min([c['l'] for c in win] + [e['price'] for e in lv])
-        hi = max([c['h'] for c in win] + [e['price'] for e in lv])
+        xp = [e['price'] for e in lv]   # 28/11: khung gia chua du vung to / mui ten / duong du bao
+        for e in active:
+            if e['type'] in ('zone', 'arrow'): xp += [e['p0'], e['p1']]
+            elif e['type'] == 'path': xp += [p_['price'] for p_ in e['pts']]
+        lo = min([c['l'] for c in win] + xp)
+        hi = max([c['h'] for c in win] + xp)
         pad = (hi - lo) * 0.12 + 0.5; lo -= pad; hi += pad
         lo_s = lo if lo_s is None else lo_s + (lo - lo_s) * 0.12
         hi_s = hi if hi_s is None else hi_s + (hi - hi_s) * 0.12
@@ -261,8 +267,29 @@ def main():
                 d.line([(CX0, y), (CX1 + 10, y)], fill=GRID, width=1)
                 d.text((CX1 + 20, y - 15), vn(g, 0 if step >= 1 else 1), font=F(False, 26), fill=MUTED)
             g += step
-        slot = (CX1 - CX0) / wf; bw = max(4, min(slot * 0.62, 40))
+        slot = (CX1 - CX0) / (wf + FUT); bw = max(4, min(slot * 0.62, 40))
         X = lambda j: CX0 + (j - i0f + 0.5) * slot
+        # 28/11: vung gia to mau (OB / FVG / vung gia tri) ve TRUOC nen
+        zs = [e for e in active if e['type'] == 'zone']
+        if zs:
+            ov = Image.new('RGBA', (W, H), (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
+            for e in zs:
+                q = ease((tv - e['t']) / 0.5); col = tuple(e.get('color') or GOLD)
+                ya, yb = sorted([Y(e['p0']), Y(e['p1'])]); ya = max(CY0, ya); yb = min(CY1, yb)
+                if yb - ya < 2: yb = ya + 2
+                xa = max(CX0, X(int(e['i0'])) - slot / 2) if 'i0' in e else CX0
+                xb = xa + (CX1 - xa) * q
+                od.rectangle([xa, ya, xb, yb], fill=col + (70,), outline=col + (200,), width=2)
+            im.paste(Image.alpha_composite(im.convert('RGBA'), ov).convert('RGB')); d = ImageDraw.Draw(im)
+            for e in zs:
+                if tv - e['t'] < 0.3 or not e.get('label'): continue
+                col = tuple(e.get('color') or GOLD); ya = max(CY0, min(Y(e['p0']), Y(e['p1'])))
+                xa = max(CX0, X(int(e['i0'])) - slot / 2) if 'i0' in e else CX0
+                f_ = F(True, 30); lab = e['label']; lw = d.textlength(lab, font=f_)
+                ly = free_y(placed0, xa + 6, xa + lw + 30, 40, [ya + 6, ya - 46, ya + 52])
+                placed0.append((xa + 6, ly, xa + lw + 30, ly + 40))
+                d.rounded_rectangle([xa + 6, ly, xa + lw + 30, ly + 40], 10, fill=(0, 0, 0), outline=col, width=2)
+                d.text((xa + 18, ly + 3), lab, font=f_, fill=col)
         for k, c in enumerate(win):
             j = i0 + k; x = X(j)
             if x - bw / 2 < CX0 - 1: continue
@@ -272,7 +299,7 @@ def main():
             d.rectangle([x - bw / 2, y0, x + bw / 2, max(y1, y0 + 2)], fill=col)
         last = vis[-1]
         # vung gia
-        placed = []   # hop nhan da ve trong khung nay (level truoc, mark sau) de khong de nhau
+        placed = placed0   # hop nhan da ve trong khung nay (zone, level, mark) de khong de nhau
         for e in lv:
             q = ease((tv - e['t']) / 0.5); y = Y(e['price'])
             col = tuple(e.get('color') or (UP if 'HỖ TRỢ' in e.get('label', '').upper() else (DN if 'KHÁNG' in e.get('label', '').upper() else GOLD)))
@@ -306,6 +333,49 @@ def main():
             placed.append((tx - 14, ty - 4, tx + tw + 14, ty + 46))
             d.rounded_rectangle([tx - 14, ty - 4, tx + tw + 14, ty + 46], 12, fill=(0, 0, 0), outline=GOLD, width=2)
             d.text((tx, ty), e['text'], font=f_, fill=GOLD2)
+        # 28/11: mui ten doc ve dan + nhan xoay (RETEST, SUPPORT...) kieu mau Hash Forex
+        for e in active:
+            if e['type'] != 'arrow': continue
+            j = int(e['i'])
+            if j < i0 or j >= len(vis) + FUT: continue
+            x = X(j); q = ease((tv - e['t']) / 0.6); col = tuple(e.get('color') or GOLD)
+            ya, yb = Y(e['p0']), Y(e['p0'] + (e['p1'] - e['p0']) * q)
+            d.line([(x, ya), (x, yb)], fill=col, width=4)
+            up = e['p1'] > e['p0']
+            d.polygon([(x, yb), (x - 11, yb + (18 if up else -18)), (x + 11, yb + (18 if up else -18))], fill=col)
+            if q > 0.5 and e.get('label'):
+                f_ = F(True, 28); lab = e['label']; tw = int(d.textlength(lab, font=f_)) + 8
+                lay = Image.new('RGBA', (tw, 36), (0, 0, 0, 0)); ImageDraw.Draw(lay).text((4, 1), lab, font=f_, fill=WHITE + (255,), stroke_width=2, stroke_fill=(0, 0, 0, 255))
+                lay = lay.rotate(90 if up else -90, expand=True)
+                ym = (Y(e['p0']) + Y(e['p1'])) / 2 - lay.size[1] / 2
+                xm = int(min(x + 10, CX1 - lay.size[0])); ym = int(min(max(ym, CY0), CY1 - lay.size[1]))
+                lw_, lh_ = lay.size
+                ym = int(free_y(placed, xm, xm + lw_, lh_, [ym] + [ym + sg_ * k_ * 30 for k_ in range(1, 8) for sg_ in (-1, 1)]))
+                ym = int(min(max(ym, CY0), CY1 - lh_)); placed.append((xm, ym, xm + lw_, ym + lh_))
+                im.paste(lay, (xm, ym), lay); d = ImageDraw.Draw(im)
+        # 28/11: duong du bao net dut tu nen cuoi sang vung trong ben phai (kich ban co dieu kien)
+        for e in active:
+            if e['type'] != 'path': continue
+            q = ease((tv - e['t']) / 1.0); col = tuple(e.get('color') or WHITE)
+            pts = [(X(len(vis) - 1), Y(last['c']))] + [(X(len(vis) - 1 + float(p_['di'])), Y(p_['price'])) for p_ in e['pts']]
+            segs = list(zip(pts, pts[1:])); tot = sum(math.dist(a_, b_) for a_, b_ in segs) or 1; lim = tot * q; acc = 0
+            for a_, b_ in segs:
+                L = math.dist(a_, b_)
+                if acc >= lim: break
+                k_ = min(1.0, (lim - acc) / max(L, 1e-6)); bx_ = (a_[0] + (b_[0] - a_[0]) * k_, a_[1] + (b_[1] - a_[1]) * k_)
+                n_ = max(1, int(math.dist(a_, bx_) // 14))
+                for m_ in range(n_):
+                    if m_ % 2: continue
+                    p1_ = (a_[0] + (bx_[0] - a_[0]) * m_ / n_, a_[1] + (bx_[1] - a_[1]) * m_ / n_)
+                    p2_ = (a_[0] + (bx_[0] - a_[0]) * (m_ + 1) / n_, a_[1] + (bx_[1] - a_[1]) * (m_ + 1) / n_)
+                    d.line([p1_, p2_], fill=col, width=4)
+                acc += L
+            if q >= 0.99:
+                (ax_, ay_), (bx2, by2) = pts[-2], pts[-1]; ang = math.atan2(by2 - ay_, bx2 - ax_)
+                d.polygon([(bx2, by2), (bx2 - 22 * math.cos(ang - 0.45), by2 - 22 * math.sin(ang - 0.45)), (bx2 - 22 * math.cos(ang + 0.45), by2 - 22 * math.sin(ang + 0.45))], fill=col)
+                if e.get('label'):
+                    f_ = F(True, 30); lw = d.textlength(e['label'], font=f_); lx = min(bx2 - lw / 2, CX1 - lw); ly = by2 + (-50 if by2 > ay_ else 14)
+                    d.text((lx, ly), e['label'], font=f_, fill=col, stroke_width=3, stroke_fill=(0, 0, 0))
         # the gia hien tai ben phai
         yl = Y(last['c']); colL = UP if last['c'] >= last['o'] else DN
         dashed(d, X(len(vis) - 1) + bw, CX1 + 10, yl, colL, 2, 8, 8)
@@ -431,7 +501,8 @@ def main():
     for e in evs:
         if e['type'] == 'goto': ev.append((e['t'] + LEAD - 0.1, wh, 0.3))
         elif e['type'] == 'pop': ev.append((e['t'] + LEAD, st if e.get('fx') in ('shake', 'flash') else pp, 0.55))
-        elif e['type'] in ('level', 'mark'): ev.append((e['t'] + LEAD, pp, 0.35))
+        elif e['type'] in ('level', 'mark', 'zone', 'arrow'): ev.append((e['t'] + LEAD, pp, 0.35))
+        elif e['type'] == 'path': ev.append((e['t'] + LEAD - 0.1, wh, 0.3))
     if hook: ev.append((LEAD, st, 0.5))
     ins, fl = [], []
     for j, (tt, f_, vol) in enumerate(ev):
