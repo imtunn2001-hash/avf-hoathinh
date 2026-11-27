@@ -23,7 +23,7 @@ def git_imgs(branch, paths):
     if not branch: return
     subprocess.run(['git', 'fetch', '-q', '--depth', '1', 'origin', branch], check=True)
     for p in paths:
-        subprocess.run(['git', 'checkout', 'FETCH_HEAD', '--', p], check=True)
+        __import__('gitlay').lay(p)
 
 
 def decode(path):

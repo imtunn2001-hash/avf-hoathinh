@@ -42,7 +42,7 @@ def load_photo():
     if spec.get('photo_git'):
         g = spec['photo_git']
         subprocess.run(['git', 'fetch', '-q', '--depth', '1', 'origin', g['branch']], check=True)
-        subprocess.run(['git', 'checkout', 'FETCH_HEAD', '--', g['path']], check=True)
+        __import__('gitlay').lay(g['path'])
         p = os.path.join(ROOT, g['path'])
     else:
         p = spec['photo']

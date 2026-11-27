@@ -793,7 +793,7 @@ def main():
     else:
         br, dd = inp['branch'], inp['dir'].strip('/')
         subprocess.run(['git', 'fetch', '-q', '--depth', '1', 'origin', br], check=True)
-        subprocess.run(['git', 'checkout', 'FETCH_HEAD', '--', dd], check=True)
+        __import__('gitlay').lay(dd)
         sp = json.load(open(os.path.join(ROOT, dd, 'spec.json'), encoding='utf-8'))
     shots = sp['shots']; n = len(shots); voice = None; srt = []
     urls = sp.get('voice_urls') or []

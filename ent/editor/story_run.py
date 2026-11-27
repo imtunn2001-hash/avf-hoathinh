@@ -5,7 +5,7 @@ import json, os, subprocess, sys
 inp = json.loads(os.environ['SPEC_JSON'])
 br, d = inp['branch'], inp['dir'].strip('/')
 subprocess.run(['git', 'fetch', '-q', '--depth', '1', 'origin', br], check=True)
-subprocess.run(['git', 'checkout', 'FETCH_HEAD', '--', d], check=True)
+__import__('gitlay').lay(d)
 root = os.getcwd(); D = os.path.join(root, d)
 spec = json.load(open(os.path.join(D, 'spec.json'), encoding='utf-8'))
 spec['dir'] = D; spec['out'] = os.path.join(root, 'out', 'out.mp4'); spec['tmp'] = '/tmp/story'

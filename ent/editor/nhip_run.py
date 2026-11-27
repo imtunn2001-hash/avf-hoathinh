@@ -6,7 +6,7 @@ import json, os, subprocess, sys, shutil
 inp = json.loads(os.environ['SPEC_JSON'])
 br, d, job = inp['branch'], inp['dir'].strip('/'), inp['job']
 subprocess.run(['git', 'fetch', '-q', '--depth', '1', 'origin', br], check=True)
-subprocess.run(['git', 'checkout', 'FETCH_HEAD', '--', d], check=True)
+__import__('gitlay').lay(d)
 root = os.getcwd(); D = os.path.join(root, d)
 os.makedirs(os.path.join(root, 'out'), exist_ok=True)
 env = dict(os.environ, FONT_DIR=os.path.join(root, 'fonts'))

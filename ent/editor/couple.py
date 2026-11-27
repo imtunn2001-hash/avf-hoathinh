@@ -283,5 +283,5 @@ if __name__ == '__main__':
     if spec.get('git_branch'):  # anh nam tren nhanh cp-assets
         subprocess.run(['git', 'fetch', '-q', '--depth', '1', 'origin', spec['git_branch']], check=True)
         for p in spec['panels']:
-            subprocess.run(['git', 'checkout', 'FETCH_HEAD', '--', p['img']], check=True)
+            __import__('gitlay').lay(p['img'])
     render(spec, out)

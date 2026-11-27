@@ -706,7 +706,7 @@ def main():
         inp = json.loads(os.environ['SPEC_JSON'])
         br, dd = inp['branch'], inp['dir'].strip('/')
         subprocess.run(['git', 'fetch', '-q', '--depth', '1', 'origin', br], check=True)
-        subprocess.run(['git', 'checkout', 'FETCH_HEAD', '--', dd], check=True)
+        __import__('gitlay').lay(dd)
         D_ = os.path.join(ROOT, dd)
     sp = json.load(open(os.path.join(D_, 'spec.json'), encoding='utf-8'))
     wd = os.path.join(OUT, 'svg')
