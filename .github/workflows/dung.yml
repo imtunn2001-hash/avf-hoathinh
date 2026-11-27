@@ -51,6 +51,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "${{ inputs.job_id }}" out/out.mp4 out/qc.jpg --target "${{ github.sha }}" --title "${{ inputs.job_id }}" --notes "ban thu, khong dang" --prerelease
+      - name: Anh bia khung dau (Ky Su Chien)
+        if: ${{ startsWith(inputs.job_id, 'ksc-') }}
+        continue-on-error: true
+        env:
+          SPEC_JSON: ${{ inputs.spec_json }}
+        run: python3 ent/editor/bia_dau.py ksc out/out.mp4
       - name: Gui video ve kho
         if: ${{ !startsWith(inputs.job_id, 'thu-') }}
         env:
