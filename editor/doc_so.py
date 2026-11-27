@@ -197,10 +197,19 @@ def _parse(toks):
     return val, used
 
 
-def chu_so(text):
+def _gon(v):
+    """26/11: so tien lon gon kieu bao: 129100000 -> '129,1 triệu', 7200000000 -> '7,2 tỷ'; le qua 2 so thap phan -> 129.150.500."""
+    for mul, ten in ((10 ** 9, 'tỷ'), (10 ** 6, 'triệu')):
+        if v >= mul and v % (mul // 100) == 0:
+            a = f'{v / mul:.2f}'.rstrip('0').rstrip('.')
+            return a.replace('.', ',') + ' ' + ten
+    return f'{v:,}'.replace(',', '.')
+
+
+def chu_so(text, dau_cau=True):
     """'năm một nghìn chín trăm bốn mươi mốt' -> 'năm 1941'; 'ba trăm năm mươi nghìn' -> '350.000'; giu chu o dau cau va ten rieng."""
     toks = re.split(r'(\s+)', text)
-    out = []; i = 0; start = True
+    out = []; i = 0; start = dau_cau
     words = [(j, t) for j, t in enumerate(toks)]
     res = list(toks)
     j = 0; n = len(toks)
@@ -230,8 +239,23 @@ def chu_so(text):
                 prevw = ''
                 for q in range(j - 1, -1, -1):
                     if toks[q].strip(): prevw = toks[q].strip('.,!?…:;"“”()').lower(); break
-                s_ = str(val) if (prevw == 'năm' and 1000 <= val <= 2199) or val < 1000 else f'{val:,}'.replace(',', '.')
                 last = idx[used - 1]
+                # 26/11 (QC v20: '6.000.000 rưỡi', '129.000.000 một'): duoi 'rưỡi' / so le sau triệu-tỷ / 'phẩy'
+                if used >= 2 and seq[used - 1] in _DG and seq[used - 2] in ('triệu', 'tỷ', 'tỉ'):   # 'năm triệu hai' = 5,2 triệu, khong phai 5.000.002
+                    b_ = 10 ** 6 if seq[used - 2] == 'triệu' else 10 ** 9
+                    val += _DG[seq[used - 1]] * (b_ // 10 - 1)
+                unit = seq[used - 1]; base = {'triệu': 10 ** 6, 'tỷ': 10 ** 9, 'tỉ': 10 ** 9, 'nghìn': 1000, 'ngàn': 1000}.get(unit)
+                if base and toks[last].rstrip('.,!?…:;"“”()') == toks[last]:
+                    nx = [q for q in range(last + 1, n) if toks[q].strip()][:2]
+                    w1 = toks[nx[0]].strip('.,!?…:;"“”()').lower() if nx else ''
+                    w2 = toks[nx[1]].strip('.,!?…:;"“”()').lower() if len(nx) > 1 else ''
+                    end1 = nx and toks[nx[0]].rstrip('.,!?…:;"“”()') != toks[nx[0]]
+                    if w1 == 'rưỡi':
+                        k_ = val // base
+                        val += base // 2 if k_ < 100 else (base * 50 if k_ % 100 == 0 else 0); last = nx[0]
+                    elif base >= 10 ** 6 and w1 in _DG and w1 != 'không' and (end1 or w2 not in _MUL | {'mươi', 'mười', 'linh', 'lẻ'}):
+                        val += _DG[w1] * base // 10; last = nx[0]
+                s_ = str(val) if (prevw == 'năm' and 1000 <= val <= 2199) or val < 1000 else _gon(val)
                 tail = toks[last][len(toks[last].rstrip('.,!?…:;"“”()')):]
                 head = toks[j][:len(toks[j]) - len(toks[j].lstrip('"“('))]
                 res[j] = head + s_ + (tail if last == j else '')
