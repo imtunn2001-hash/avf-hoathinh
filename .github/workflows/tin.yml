@@ -27,12 +27,13 @@ jobs:
           fc-cache -f >/dev/null 2>&1 || true
       - name: Dung
         env:
-          SPEC_JSON: ${{ inputs.spec_json }}
           AVF_TTS_URL: ${{ secrets.AVF_TTS_URL }}
           AVF_KEY: ${{ secrets.AVF_KEY }}
           TIN_CLIP_KEY: ${{ secrets.TIN_CLIP_KEY }}
           AVF_MEDIA_BASE: ${{ secrets.AVF_MEDIA_BASE }}
-        run: python3 editor/tin.py
+        run: |
+          export SPEC_JSON="$(jq -r '.inputs.spec_json' "$GITHUB_EVENT_PATH")"
+          python3 editor/tin.py
       - name: Anh kiem tra (QC)
         continue-on-error: true
         run: |

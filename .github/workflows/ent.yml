@@ -49,10 +49,10 @@ jobs:
           if [ "${{ inputs.kind }}" = "nhip" ]; then for w in Black Bold SemiBold Regular; do curl -fsSL --max-time 60 -o fonts/BeVietnamPro-$w.ttf https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-$w.ttf || true; done; fi
       - name: Dung
         env:
-          SPEC_JSON: ${{ inputs.spec_json }}
           AVF_TTS_URL: ${{ secrets.AVF_TTS_URL }}
           AVF_KEY: ${{ secrets.AVF_KEY }}
         run: |
+          export SPEC_JSON="$(jq -r '.inputs.spec_json' "$GITHUB_EVENT_PATH")"   # khong in spec ra log cong khai
           case "${{ inputs.kind }}" in
             reel) python3 editor/ent_reel.py ;;
             mc)   python3 editor/mc_concat.py ;;
