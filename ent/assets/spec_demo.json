@@ -1,0 +1,57 @@
+{
+ "mc_image": "assets/white_demo.png",
+ "voice": "assets/kore_goc_da_cat.mp3",
+ "sentences": [
+  "Vàng hôm nay có gì mới?",
+  "Nghe nhanh nhé!",
+  "Đồng đô la mạnh lên, vàng bị chốt lời.",
+  "Nhưng lãi suất còn cao, dòng tiền trú ẩn lại đổ vào.",
+  "Hai lực kéo ngược chiều, thị trường cực kỳ nhạy cảm!",
+  "Nhà đầu tư nhớ thận trọng, đây không phải lời khuyên đầu tư.",
+  "Theo dõi kênh để cập nhật mỗi ngày nhé!"
+ ],
+ "keywords": [
+  "vàng",
+  "đô la",
+  "lãi suất",
+  "chốt lời",
+  "thận trọng",
+  "nhạy cảm",
+  "cực kỳ"
+ ],
+ "cards": [
+  {
+   "sentence": 2,
+   "kind": "text",
+   "title": "ĐÔ LA MỸ",
+   "sub": "MẠNH LÊN",
+   "label": "Minh họa"
+  },
+  {
+   "sentence": 3,
+   "kind": "chart",
+   "title": "GIÁ VÀNG — MINH HỌA",
+   "label": "Biểu đồ minh họa, không phải số liệu thực"
+  },
+  {
+   "sentence": 4,
+   "kind": "arrows",
+   "title": "2 LỰC KÉO NGƯỢC CHIỀU",
+   "left": "Lãi suất cao",
+   "right": "Tiền trú ẩn"
+  },
+  {
+   "sentence": 5,
+   "kind": "text",
+   "title": "THẬN TRỌNG",
+   "sub": "Không phải lời khuyên đầu tư"
+  },
+  {
+   "sentence": 6,
+   "kind": "text",
+   "title": "THEO DÕI KÊNH",
+   "sub": "Cập nhật giá vàng mỗi ngày"
+  }
+ ],
+ "channel_tag": "GOLD AI NEWS  •  BẢN TIN VÀNG"
+}

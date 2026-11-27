@@ -1,0 +1,108 @@
+name: AVF Ent Render
+run-name: "ent ${{ inputs.job_id }}"
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:    { description: "ma job duy nhat", required: true, type: string }
+      kind:      { description: "card | reel | mc | mcpro | mcv2 (MC 1 giong TTS) | wb (ve tay) | street (anh pho + caption) | story (ke chuyen khung vuong) | clip (cat video dai thanh Reels 9:16) | nhip (Reels quang cao page Nhip) | nd (video nhan dinh vang W55)", required: false, type: string, default: "card" }
+      spec_json: { description: "JSON dau vao", required: true, type: string }
+permissions:
+  contents: write
+defaults:
+  run:
+    working-directory: ent
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cai dat
+        timeout-minutes: 8
+        run: |
+          pip install -q pillow
+          if [ "${{ inputs.kind }}" = "wb" ] || [ "${{ inputs.kind }}" = "story" ] || [ "${{ inputs.kind }}" = "nhip" ] || [ "${{ inputs.kind }}" = "nd" ] || [ "${{ inputs.kind }}" = "series" ] || [ "${{ inputs.kind }}" = "chart20" ] || [ "${{ inputs.kind }}" = "bantin" ] || [ "${{ inputs.kind }}" = "sad" ] || [ "${{ inputs.kind }}" = "couple" ] || [ "${{ inputs.kind }}" = "motiv" ] || [ "${{ inputs.kind }}" = "horror" ] || [ "${{ inputs.kind }}" = "warmap" ] || [ "${{ inputs.kind }}" = "ksc_svg" ] || [ "${{ inputs.kind }}" = "aff_sketch" ] || [ "${{ inputs.kind }}" = "vtd" ] || [ "${{ inputs.kind }}" = "meo" ] || [ "${{ inputs.kind }}" = "thumb" ]; then pip install -q numpy pyyaml; fi
+          if { [ "${{ inputs.kind }}" = "ksc_svg" ] || [ "${{ inputs.kind }}" = "aff_sketch" ] || [ "${{ inputs.kind }}" = "vtd" ] || [ "${{ inputs.kind }}" = "meo" ]; } && ! command -v rsvg-convert >/dev/null 2>&1; then timeout 240 bash -c 'sudo apt-get -o Acquire::Retries=2 update -y && sudo apt-get install -y --no-install-recommends librsvg2-bin' || true; fi
+          if [ "${{ inputs.kind }}" != "card" ] && ! command -v ffmpeg >/dev/null 2>&1; then
+            if ! timeout 150 bash -c 'sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 update -y && sudo apt-get -o Acquire::http::Timeout=20 install -y --no-install-recommends ffmpeg'; then
+              echo "apt cham/loi -> tai ffmpeg dung san"
+              curl -fsSL --retry 3 --max-time 180 -o /tmp/ff.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
+              mkdir -p /tmp/ff && tar -xJf /tmp/ff.tar.xz -C /tmp/ff --strip-components=1
+              sudo cp /tmp/ff/bin/ffmpeg /tmp/ff/bin/ffprobe /usr/local/bin/
+            fi
+          fi
+          ffmpeg -version | head -1 || true
+          if [ "${{ inputs.kind }}" = "mcpro" ]; then
+            pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu || true
+            pip install -q librosa soundfile unidecode eng_to_ipa inflect pypinyin jieba cn2an || true
+            git clone -q --depth 1 https://github.com/myshell-ai/OpenVoice || true
+            mkdir -p ov2/converter
+            curl -fsSL --max-time 120 -o ov2/converter/config.json https://huggingface.co/myshell-ai/OpenVoiceV2/resolve/main/converter/config.json || true
+            curl -fsSL --max-time 300 -o ov2/converter/checkpoint.pth https://huggingface.co/myshell-ai/OpenVoiceV2/resolve/main/converter/checkpoint.pth || true
+          fi
+          mkdir -p fonts
+          curl -fsSL --max-time 60 -o fonts/BeVietnamPro-ExtraBold.ttf https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-ExtraBold.ttf || true
+          curl -fsSL --max-time 60 -o fonts/BeVietnamPro-Medium.ttf https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-Medium.ttf || true
+          if [ "${{ inputs.kind }}" = "ksc_svg" ] || [ "${{ inputs.kind }}" = "vtd" ]; then for w in SemiBold; do curl -fsSL --max-time 60 -o fonts/BeVietnamPro-$w.ttf https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-$w.ttf || true; done; mkdir -p ~/.local/share/fonts && cp fonts/*.ttf ~/.local/share/fonts/ && fc-cache -f >/dev/null 2>&1 || true; fi
+          if [ "${{ inputs.kind }}" = "aff_sketch" ]; then curl -fsSL --max-time 60 -o fonts/Anton-Regular.ttf https://github.com/google/fonts/raw/main/ofl/anton/Anton-Regular.ttf || true; mkdir -p ~/.local/share/fonts && cp fonts/*.ttf ~/.local/share/fonts/ && fc-cache -f >/dev/null 2>&1 || true; fi
+          if [ "${{ inputs.kind }}" = "meo" ]; then curl -fsSL --max-time 60 -o "fonts/Montserrat.ttf" "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf" || true; mkdir -p ~/.local/share/fonts && cp fonts/*.ttf ~/.local/share/fonts/ && fc-cache -f >/dev/null 2>&1 || true; fi
+          if [ "${{ inputs.kind }}" = "nhip" ]; then for w in Black Bold SemiBold Regular; do curl -fsSL --max-time 60 -o fonts/BeVietnamPro-$w.ttf https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-$w.ttf || true; done; fi
+      - name: Dung
+        env:
+          SPEC_JSON: ${{ inputs.spec_json }}
+          AVF_TTS_URL: ${{ secrets.AVF_TTS_URL }}
+          AVF_KEY: ${{ secrets.AVF_KEY }}
+        run: |
+          case "${{ inputs.kind }}" in
+            reel) python3 editor/ent_reel.py ;;
+            mc)   python3 editor/mc_concat.py ;;
+            mcpro) python3 editor/mc_pro.py ;;
+            mcv2) python3 editor/mc_v2.py ;;
+            wb)   python3 editor/wb_run.py ;;
+            street) python3 editor/street.py ;;
+            story) python3 editor/story_run.py ;;
+            clip) python3 editor/clip.py ;;
+            nhip) python3 editor/nhip_run.py ;;
+            nd)   python3 editor/nd.py ;;
+            series) python3 editor/series.py ;;
+            chart20) python3 editor/chart20.py ;;
+            bantin) python3 editor/bantin.py ;;
+            sad) python3 editor/sad.py ;;
+            couple) python3 editor/couple.py ;;
+            motiv) python3 editor/motiv.py ;;
+            horror) python3 editor/horror.py ;;
+            warmap) python3 editor/warmap.py ;;
+            ksc_svg) NPROC=4 python3 editor/ksc_svg.py ;;
+            aff_sketch) NPROC=4 python3 editor/aff_sketch.py ;;
+            vtd) NPROC=4 python3 editor/vtd.py ;;
+            meo) python3 editor/meo.py ;;
+            prosody) python3 editor/prosody.py ;;
+            thumb) python3 editor/thumb_job.py ;;
+            *)    python3 editor/ent_card.py ;;
+          esac
+      - name: Anh kiem tra (QC)
+        if: ${{ inputs.kind != 'card' && inputs.kind != 'clip' && inputs.kind != 'meo' && inputs.kind != 'thumb' }}
+        continue-on-error: true
+        run: |
+          if [ -f out/out.mp4 ]; then
+            D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 out/out.mp4)
+            W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 out/out.mp4)
+            H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 out/out.mp4)
+            # 12 khung hinh rai deu -> 1 anh luoi 4x3 cho Claude xem
+            FPS=$(python3 -c "print(12/max(float('$D'),1))")
+            if [ "$H" -gt "$W" ]; then SC="270:480"; else SC="400:-2"; fi
+            ffmpeg -v error -y -i out/out.mp4 -vf "fps=$FPS,scale=$SC,tile=4x3:padding=6:color=white" -frames:v 1 -q:v 4 out/qc.jpg || true
+            LU=$(ffmpeg -nostats -i out/out.mp4 -af ebur128 -f null - 2>&1 | grep -E '^\s+I:' | tail -1 | awk '{print $2}')
+            SIL=$(ffmpeg -nostats -i out/out.mp4 -af silencedetect=n=-45dB:d=2 -f null - 2>&1 | grep -c silence_end || true)
+            BLK=$(ffmpeg -nostats -i out/out.mp4 -vf blackdetect=d=0.8:pix_th=0.08 -an -f null - 2>&1 | grep -c black_start || true)
+            AUD=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 out/out.mp4 | wc -l)
+            SZ=$(stat -c %s out/out.mp4)
+            echo "{\"duration\":$D,\"width\":$W,\"height\":$H,\"lufs\":\"$LU\",\"silences_2s\":$SIL,\"black_segments\":$BLK,\"audio_streams\":$AUD,\"bytes\":$SZ}" > out/qc.json
+            cat out/qc.json
+          fi
+      - name: Dua len Release
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          gh release delete "ent-${{ inputs.job_id }}" -y --cleanup-tag 2>/dev/null || true
+          if [ "${{ inputs.kind }}" = "card" ]; then F="out/*.jpg"; elif [ "${{ inputs.kind }}" = "clip" ]; then F="out/clip*.mp4 out/clips.json"; elif [ "${{ inputs.kind }}" = "thumb" ]; then F="out/thumb.jpg out/thumb.json"; elif [ "${{ inputs.kind }}" = "meo" ]; then F="out/m*.jpg"; else F="out/out.mp4"; [ -f out/qc.jpg ] && F="$F out/qc.jpg"; [ -f out/qc.json ] && F="$F out/qc.json"; [ -f out/cover.png ] && F="$F out/cover.png"; fi
+          gh release create "ent-${{ inputs.job_id }}" $F --title "ent ${{ inputs.job_id }}" --notes "auto"

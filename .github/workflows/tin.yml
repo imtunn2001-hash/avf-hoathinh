@@ -1,0 +1,47 @@
+name: AVF Tin Viego
+run-name: "tin ${{ inputs.job_id }}"
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:    { description: "ma job duy nhat", required: true, type: string }
+      spec_json: { description: "tin + anh + giong (JSON)", required: true, type: string }
+permissions:
+  contents: write
+defaults:
+  run:
+    working-directory: ent
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cai dat
+        timeout-minutes: 8
+        run: |
+          pip install -q pillow yt-dlp
+          if ! command -v ffmpeg >/dev/null 2>&1; then timeout 200 bash -c 'sudo apt-get -o Acquire::Retries=2 update -y && sudo apt-get install -y --no-install-recommends ffmpeg'; fi
+          mkdir -p ~/.local/share/fonts
+          curl -fsSL --max-time 60 -o ~/.local/share/fonts/Anton-Regular.ttf https://github.com/google/fonts/raw/main/ofl/anton/Anton-Regular.ttf || true
+          curl -fsSL --max-time 60 -o ~/.local/share/fonts/BeVietnamPro-ExtraBold.ttf https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-ExtraBold.ttf || true
+          fc-cache -f >/dev/null 2>&1 || true
+      - name: Dung
+        env:
+          SPEC_JSON: ${{ inputs.spec_json }}
+          AVF_TTS_URL: ${{ secrets.AVF_TTS_URL }}
+          AVF_KEY: ${{ secrets.AVF_KEY }}
+          TIN_CLIP_KEY: ${{ secrets.TIN_CLIP_KEY }}
+          AVF_MEDIA_BASE: ${{ secrets.AVF_MEDIA_BASE }}
+        run: python3 editor/tin.py
+      - name: Anh kiem tra (QC)
+        continue-on-error: true
+        run: |
+          D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 out/out.mp4); echo "thoi luong $D giay"
+          FPS=$(python3 -c "print(12/max(float('$D'),1))")
+          ffmpeg -v error -y -i out/out.mp4 -vf "fps=$FPS,scale=270:480,tile=4x3:padding=6:color=white" -frames:v 1 -q:v 4 out/qc.jpg || true
+      - name: Dua len Release
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          gh release delete "ent-${{ inputs.job_id }}" -y --cleanup-tag 2>/dev/null || true
+          F="out/out.mp4"; [ -f out/qc.jpg ] && F="$F out/qc.jpg"
+          gh release create "ent-${{ inputs.job_id }}" $F --title "tin ${{ inputs.job_id }}" --notes "auto"
