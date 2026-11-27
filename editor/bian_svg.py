@@ -206,6 +206,11 @@ def icon(kind, x, y, s=1.0):
     if k == 'envelope':   # phong bi
         return (f'<rect x="{f_(x - 75 * s)}" y="{f_(y - 48 * s)}" width="{f_(150 * s)}" height="{f_(96 * s)}" rx="{f_(4 * s)}" fill="#f6f0dc" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
                 f'<path d="M{f_(x - 75 * s)},{f_(y - 48 * s)} L{f_(x)},{f_(y + 8 * s)} L{f_(x + 75 * s)},{f_(y - 48 * s)}" fill="none" stroke="{INK}" stroke-width="{f_(5 * s)}" stroke-linejoin="round"/>')
+    if k == 'packet':   # goi giay nho buoc lat (goi ba cho - Lao Hac P2), khong ve chat ben trong
+        return (f'<path d="M{f_(x - 62 * s)},{f_(y - 30 * s)} Q{f_(x)},{f_(y - 52 * s)} {f_(x + 62 * s)},{f_(y - 30 * s)} L{f_(x + 52 * s)},{f_(y + 40 * s)} Q{f_(x)},{f_(y + 54 * s)} {f_(x - 52 * s)},{f_(y + 40 * s)} Z" fill="#d9c9a0" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 58 * s)},{f_(y + 2 * s)} Q{f_(x)},{f_(y - 12 * s)} {f_(x + 58 * s)},{f_(y + 2 * s)}" stroke="#7a5a2a" stroke-width="{f_(7 * s)}" fill="none"/>'
+                f'<path d="M{f_(x)},{f_(y - 8 * s)} q{f_(-22 * s)},{f_(-34 * s)} {f_(-30 * s)},{f_(-14 * s)} q{f_(14 * s)},{f_(16 * s)} {f_(30 * s)},{f_(14 * s)} q{f_(22 * s)},{f_(-34 * s)} {f_(30 * s)},{f_(-14 * s)} q{f_(-14 * s)},{f_(16 * s)} {f_(-30 * s)},{f_(14 * s)}" stroke="#7a5a2a" stroke-width="{f_(5 * s)}" fill="none" stroke-linejoin="round"/>'
+                f'<path d="M{f_(x - 30 * s)},{f_(y + 22 * s)} l{f_(20 * s)},{f_(4 * s)} M{f_(x + 10 * s)},{f_(y + 28 * s)} l{f_(22 * s)},{f_(-4 * s)}" stroke="#a8946a" stroke-width="{f_(4 * s)}" stroke-linecap="round"/>')
     if k == 'giftbag':   # tui qua
         return (f'<path d="M{f_(x - 60 * s)},{f_(y - 40 * s)} L{f_(x + 60 * s)},{f_(y - 40 * s)} L{f_(x + 70 * s)},{f_(y + 70 * s)} L{f_(x - 70 * s)},{f_(y + 70 * s)} Z" fill="#c4281f" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
                 f'<path d="M{f_(x - 30 * s)},{f_(y - 40 * s)} q{f_(30 * s)},{f_(-60 * s)} {f_(60 * s)},0" fill="none" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
