@@ -23,6 +23,7 @@ CREAM = (226, 218, 204); DARK = (9, 9, 11)
 Y_TXT = int(H * 0.382)          # tam khoi chu (ti le vang)
 FLOOR = 1430                    # mat san (chan nhan vat); nhan vat chiem quanh 0,618
 U = 470                         # chieu cao nguoi dung (px)
+R0, RH = FLOOR - 720, 780       # vung ve nguoi (cat nho cho nhanh)
 _fc = {}
 
 
@@ -138,8 +139,8 @@ def pose_at(kind, lt, dur):
 
 def draw_person(pose, props, alpha=1.0, cx=540):
     """ve o 2x roi thu nho cho min; tra layer RGBA full khung"""
-    S = 2; im = Image.new('RGBA', (W * S, H * S), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
-    u = U * S; X = lambda p: (cx * S + p[0] * u, FLOOR * S + p[1] * u)
+    S = 2; im = Image.new('RGBA', (W * S, RH * S), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    u = U * S; X = lambda p: (cx * S + p[0] * u, (FLOOR - R0) * S + p[1] * u)
     col = CREAM + (255,); dim = (150, 144, 134, 255)
     lw = int(.072 * u); tw = int(.13 * u)
     # do vat phia sau
@@ -181,21 +182,21 @@ def draw_person(pose, props, alpha=1.0, cx=540):
         for sx in (-1, 1):
             for off, hh in ((.40, .11), (.45, .08), (.50, .05)):
                 xx = cx * S + sx * off * u; d.rectangle([xx - .012 * u, y - hh * u, xx + .012 * u, y + hh * u], fill=col)
-    im = im.resize((W, H), Image.LANCZOS)
+    im = im.resize((W, RH), Image.LANCZOS)
     if props.get('phone'):   # dien thoai sang lanh tren tu
-        ph = Image.new('RGBA', (W, H), (0, 0, 0, 0)); pd = ImageDraw.Draw(ph); x0, y0 = cx + -.80 * U, FLOOR - .30 * U
+        ph = Image.new('RGBA', (W, RH), (0, 0, 0, 0)); pd = ImageDraw.Draw(ph); x0, y0 = cx + -.80 * U, FLOOR - R0 - .30 * U
         pd.ellipse([x0 - 70, y0 - 70, x0 + 70, y0 + 40], fill=(150, 190, 255, 70)); ph = ph.filter(ImageFilter.GaussianBlur(26))
         pd = ImageDraw.Draw(ph); pd.rounded_rectangle([x0 - 22, y0 - 10, x0 + 22, y0 + 4], 4, fill=(200, 225, 255, 255))
         im = Image.alpha_composite(ph, im)
     if props.get('lamp'):
-        g = Image.new('RGBA', (W, H), (0, 0, 0, 0)); gd = ImageDraw.Draw(g); x0, y0 = cx + .47 * U, FLOOR - .62 * U
+        g = Image.new('RGBA', (W, RH), (0, 0, 0, 0)); gd = ImageDraw.Draw(g); x0, y0 = cx + .47 * U, FLOOR - R0 - .62 * U
         gd.ellipse([x0 - 160, y0 - 40, x0 + 160, y0 + 240], fill=(255, 196, 120, int(60 * props['lamp']))); g = g.filter(ImageFilter.GaussianBlur(50))
         im = Image.alpha_composite(g, im)
     if props.get('road') is not None:   # vach duong troi ve sau
-        r_ = Image.new('RGBA', (W, H), (0, 0, 0, 0)); rd = ImageDraw.Draw(r_); off = (props['road'] * 160) % 240
+        r_ = Image.new('RGBA', (W, RH), (0, 0, 0, 0)); rd = ImageDraw.Draw(r_); off = (props['road'] * 160) % 240
         for i in range(-1, 6):
             x = 540 + 520 - i * 240 + off - 260
-            rd.rectangle([x, FLOOR + 14, x + 120, FLOOR + 22], fill=(120, 114, 104, 200))
+            rd.rectangle([x, FLOOR - R0 + 14, x + 120, FLOOR - R0 + 22], fill=(120, 114, 104, 200))
         im = Image.alpha_composite(r_, im)
     if alpha < 1: im.putalpha(im.getchannel('A').point(lambda v: int(v * alpha)))
     return im
@@ -232,13 +233,13 @@ class Line:
         self.lead = ' '.join(ws[:n_lead]).upper().rstrip(',')
         self.body = ws[n_lead:]; self.times = times[n_lead:] if times else [0] * len(self.body)
         d = ImageDraw.Draw(Image.new('L', (8, 8)))
-        fl = lora(112 if big else 88, 'Bold')
+        fl = lora(98 if big else 76, 'Bold')
         llines = [' '.join(x) for x in wrap_words(d, self.lead.split(), fl, 780)] if self.lead else []
         while self.lead and (len(llines) > 2 or any(d.textlength(x, font=fl) > 780 for x in llines)) and fl.size > 54:
             fl = lora(fl.size - 4, 'Bold'); llines = [' '.join(x) for x in wrap_words(d, self.lead.split(), fl, 780)]
         self.lead_imgs = [gold_text(s, fl) for s in llines]; self.lh = int(fl.size * 1.18)
-        self.fb = lora(66, 'SemiBold')
-        self.blines = wrap_words(d, self.body, self.fb, 780)[:3]; self.bh = 84
+        self.fb = lora(56, 'SemiBold')
+        self.blines = wrap_words(d, self.body, self.fb, 780)[:3]; self.bh = 72
         tot = len(self.lead_imgs) * self.lh + len(self.blines) * self.bh + (16 if self.lead_imgs and self.blines else 0)
         self.y0 = int(Y_TXT - tot / 2)
         safezone.check_box(150, self.y0, 930, self.y0 + tot, 'chu cau: ' + text[:30])
@@ -345,8 +346,8 @@ def main():
         fa = min(1.0, lt / .35) if k else 1.0
         if k and lt < .35:   # chuyen dang: mo dan nguoi cu -> nguoi moi
             pa, pb_ = pose_at(spans[k - 1][2], t - spans[k - 1][0], 1)
-            im.alpha_composite(draw_person(pa, pb_, 1 - fa))
-        im.alpha_composite(draw_person(pose, props, fa))
+            im.alpha_composite(draw_person(pa, pb_, 1 - fa), (0, R0))
+        im.alpha_composite(draw_person(pose, props, fa), (0, R0))
         if t >= T_END:   # the ket
             te = t - T_END; al = ez(te / .6)
             g, _ = gold_text(sp.get('end_title', 'MỖI NGÀY MỘT BƯỚC'), lora(84, 'Bold'))
