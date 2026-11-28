@@ -462,9 +462,10 @@ def main():
     if at:
         for j, x in enumerate(at.split(',')): frame(float(x)).save(os.path.join(OUT, f'at_{j:02d}.png'))
         print('spans', [(round(a, 1), n) for a, b, n in spans], 'D', round(D, 1)); return
+    VK = int(min(3000, 42 * 8 * 1000 / max(10.0, D)))   # kho Supabase ~50MB: tap dai thi ha bitrate
     raw = os.path.join(OUT, 'v_tmp.mp4')
     p = subprocess.Popen(['ffmpeg', '-y', '-v', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-                          '-c:v', 'libx264', '-preset', 'medium', '-crf', '22', '-maxrate', '3M', '-bufsize', '6M', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
+                          '-c:v', 'libx264', '-preset', 'medium', '-crf', '22', '-maxrate', f'{VK}k', '-bufsize', f'{2 * VK}k', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
     for fi in range(int(D * FPS)): p.stdin.write(frame(fi / FPS).tobytes())
     p.stdin.close(); p.wait()
     # ---- am thanh: giong + nen dem (gio + de keu nhe tu tao) ----
