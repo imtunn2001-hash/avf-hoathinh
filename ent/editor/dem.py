@@ -41,7 +41,7 @@ def lightmap(lights, amb):
 
 
 def vignette():
-    v = 1 - 0.55 * np.clip((((XX - W / 2) / (W * .62)) ** 2 + ((YY - H * .5) / (H * .6)) ** 2), 0, 1)
+    v = 1 - 0.72 * np.clip((((XX - W / 2) / (W * .62)) ** 2 + ((YY - H * .5) / (H * .6)) ** 2), 0, 1)
     return v[..., None].astype(np.float32)
 
 
@@ -293,18 +293,53 @@ CAM = {'quan': (1.15, 560, 1000), 'quan_vao': (1.15, 600, 1000), 'quan_hai': (1.
 
 
 def make_amb(path, D, hits, sr=44100):
-    """nen am thanh dem (tu tao): u tram 2 tang song + gio nau loc thap, phong to dan; 'thinh' trầm o canh danh dau '!'."""
+    """nen am thanh dem tu tao (28/11 chu chot 'ron hon'): u tram + cap not nghich tai mo, gio giat tung con,
+    tieng ken ket, tieng thi tham mo, cho tru xa, nhip tim + tieng 'thinh' o canh danh dau '!'."""
     import wave
-    n = int(D * sr); t = np.arange(n) / sr; rng = np.random.default_rng(5)
+    n = int(D * sr); t = np.arange(n) / sr; rng = np.random.default_rng(5); R = random.Random(9)
+
+    def env(i0, L):
+        return max(0, min(n, i0)), max(0, min(n, i0 + L))
+
+    def lowpass(x, k):
+        return np.convolve(x, np.ones(k) / k, 'same')
     lfo = 0.6 + 0.4 * np.sin(2 * np.pi * t / 9.0)
-    drone = (np.sin(2 * np.pi * 55 * t) * .5 + np.sin(2 * np.pi * 82.4 * t + 1) * .3 + np.sin(2 * np.pi * 110.3 * t) * .12) * lfo * .16
-    wn = np.cumsum(rng.normal(0, 1, n)); wn -= np.convolve(wn, np.ones(4000) / 4000, 'same'); wn /= (np.abs(wn).max() + 1e-6)
-    wind = wn * (0.5 + 0.5 * np.sin(2 * np.pi * t / 13.0 + 2)) * .12
-    x = drone + wind
-    for h in hits:
-        i0 = int(h * sr); L = int(2.2 * sr); tt = np.arange(min(L, n - i0)) / sr
-        if len(tt) <= 0: continue
-        x[i0:i0 + len(tt)] += np.sin(2 * np.pi * (48 - 14 * tt) * tt) * np.exp(-tt * 2.2) * .9
+    x = (np.sin(2 * np.pi * 55 * t) * .5 + np.sin(2 * np.pi * 82.4 * t + 1) * .3 + np.sin(2 * np.pi * 58.3 * t) * .25) * lfo * .14
+    x += (np.sin(2 * np.pi * 440 * t) + np.sin(2 * np.pi * 466.2 * t)) * (0.5 + 0.5 * np.sin(2 * np.pi * t / 17)) * .006   # not nghich rat mo
+    wn = rng.normal(0, 1, n); gust = lowpass(lowpass(wn, 60), 60); gust /= (np.abs(gust).max() + 1e-6)
+    gm = np.clip(np.sin(2 * np.pi * t / 11.0 + 1) * 1.4, 0, 1) ** 2
+    x += gust * (0.25 + 0.75 * gm) * .22
+    tt_ = 6.0
+    while tt_ < D - 3:   # ken ket go: chuoi xung loc
+        i0, i1 = env(int(tt_ * sr), int(R.uniform(.5, 1.1) * sr)); L = i1 - i0
+        if L > 0:
+            k = np.arange(L); f = R.uniform(180, 320)
+            cr = np.sin(2 * np.pi * (f + 60 * np.sin(k / L * 6)) * k / sr) * (np.sin(np.pi * k / L) ** 2) * (rng.random(L) > .55)
+            x[i0:i1] += lowpass(cr, 6) * .10
+        tt_ += R.uniform(9, 16)
+    tt_ = 14.0
+    while tt_ < D - 3:   # thi tham: nhieu loc dai giong
+        i0, i1 = env(int(tt_ * sr), int(R.uniform(1.2, 2.2) * sr)); L = i1 - i0
+        if L > 0:
+            k = np.arange(L); w = rng.normal(0, 1, L); w = lowpass(w, 3) - lowpass(w, 14)
+            am = (np.sin(np.pi * k / L) ** 2) * (0.5 + 0.5 * np.sin(2 * np.pi * k / sr * 5.5))
+            x[i0:i1] += w * am * .05
+        tt_ += R.uniform(16, 26)
+    for fr in (.27, .68):   # cho tru xa
+        i0, i1 = env(int(D * fr * sr), int(2.6 * sr)); L = i1 - i0
+        if L > 0:
+            k = np.arange(L) / sr; f = 480 + 220 * np.sin(np.pi * k / 2.6) + 8 * np.sin(2 * np.pi * 5 * k)
+            h = np.sin(2 * np.pi * np.cumsum(f) / sr) * np.sin(np.pi * k / 2.6) ** 1.5
+            h = lowpass(h, 8) * .05; x[i0:i1] += h
+            j0, j1 = env(i0 + int(.35 * sr), L)   # vong
+            x[j0:j1] += h[:j1 - j0] * .4
+    for hh in hits:
+        i0 = int(hh * sr); L = int(2.2 * sr); k = np.arange(min(L, max(0, n - i0))) / sr
+        if len(k): x[i0:i0 + len(k)] += np.sin(2 * np.pi * (48 - 14 * k) * k) * np.exp(-k * 2.2) * .9
+        for b_ in range(5):   # nhip tim
+            for off, a_ in ((0, 1.0), (.22, .7)):
+                j = int((hh + .3 + b_ * .85 + off) * sr); L2 = int(.18 * sr); k2 = np.arange(min(L2, max(0, n - j))) / sr
+                if len(k2): x[j:j + len(k2)] += np.sin(2 * np.pi * 52 * k2) * np.exp(-k2 * 28) * .5 * a_ * (1 - b_ * .15)
     fade = np.minimum(1, t / 1.5) * np.minimum(1, (D - t) / 2.0); x = np.clip(x * fade, -1, 1)
     y = (np.stack([x, x], 1) * 32767 * .8).astype(np.int16)
     with wave.open(path, 'wb') as w: w.setnchannels(2); w.setsampwidth(2); w.setframerate(sr); w.writeframes(y.tobytes())
@@ -371,7 +406,7 @@ def main():
     def render_scene(k, t):
         a, b, name = spans[k]; obj, st = get_scene(name); lt = t - a
         im = obj.bg.copy(); st = dict(st, dur=b - a); obj.draw(im, lt, st)
-        arr = np.asarray(im).astype(np.float32) * obj.L * 1.3
+        arr = np.asarray(im).astype(np.float32) * obj.L * 1.05   # 28/11 chu chot 'am toi hon'
         flick = 1 + 0.025 * math.sin(t * 9.1) * math.sin(t * 3.7)
         arr = arr * flick * VIG
         g = GRAIN[int(t * FPS / 3) % len(GRAIN)]   # hat phim doi 10 lan/giay (nhe file)
@@ -441,7 +476,7 @@ def main():
         subprocess.check_call(['ffmpeg', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', lst, '-c', 'copy', voice])
         mus = os.path.join(ROOT, 'editor', 'story', sp.get('music', 'music_b.mp3'))
         ins = ['-i', voice, '-i', amb] + (['-stream_loop', '-1', '-i', mus] if os.path.exists(mus) else [])
-        mix = '[1:a]adelay=300|300[v];[2:a]volume=0.9[n];' + ('[3:a]volume=0.05[m];[v][n][m]amix=inputs=3' if os.path.exists(mus) else '[v][n]amix=inputs=2') + \
+        mix = '[1:a]adelay=300|300[v];[2:a]volume=1.1[n];' + ('[3:a]volume=0.05[m];[v][n][m]amix=inputs=3' if os.path.exists(mus) else '[v][n]amix=inputs=2') + \
               ':duration=longest:normalize=0,apad,loudnorm=I=-16:TP=-1.5[a]'
     else:
         ins = ['-i', amb]; mix = '[1:a]anull[a]'

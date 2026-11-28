@@ -566,7 +566,7 @@ def register(SCENES, CAM):
     def mk(name, seed, base, bg, lights, amb, dyn=None, post=None, st=None, cam=None):
         SCENES[name] = lambda: (Set(seed, base, bg, lights, amb, dyn, post), dict(st or {}))
         if cam: CAM[name] = cam
-    A = (0.22, 0.23, 0.29)
+    A = (0.15, 0.15, 0.2)
     mk('g_cho', 21, (24, 24, 30), _cho, [M(820, 420, 300, .9), Wm(730, 1050, 260, 1.0)], A, _cho_dyn, st={'tn': True}, cam=(1.1, 560, 1000))
     mk('g_gap', 22, (20, 22, 30), _bo_song, [M(240, 430, 380, 1.1), M(560, 1000, 420, .5)], A, _gap_dyn, cam=(1.08, 560, 1000))
     mk('g_thuyen', 23, (18, 18, 24), _thuyen_dem, [Wm(730, 1050, 300, 1.3), M(860, 380, 260, .7)], A, _thuyen_dyn, st={'hai': True}, cam=(1.15, 560, 1040))
