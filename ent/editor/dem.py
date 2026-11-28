@@ -429,7 +429,7 @@ def main():
         print('spans', [(round(a, 1), n) for a, b, n in spans], 'D', round(D, 1)); return
     raw = os.path.join(OUT, 'v_tmp.mp4')
     p = subprocess.Popen(['ffmpeg', '-y', '-v', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-                          '-c:v', 'libx264', '-preset', 'medium', '-crf', '21', '-maxrate', '6M', '-bufsize', '12M', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
+                          '-c:v', 'libx264', '-preset', 'medium', '-crf', '22', '-maxrate', '3M', '-bufsize', '6M', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
     for fi in range(int(D * FPS)): p.stdin.write(frame(fi / FPS).tobytes())
     p.stdin.close(); p.wait()
     # ---- am thanh: giong + nen dem (gio + de keu nhe tu tao) ----
