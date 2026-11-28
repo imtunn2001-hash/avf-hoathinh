@@ -1,0 +1,222 @@
+{
+ "pack": "gao",
+ "title": "Chuyện cây gạo",
+ "source": "Truyền kỳ mạn lục – Nguyễn Dữ (Mộc miên thụ truyện)",
+ "parts": [
+  {
+   "job": "dem-gao3-p1w",
+   "speed": 0.9,
+   "provider": "vbee",
+   "voice_code": "n_hn_male_ngankechuyen_ytstable_vc",
+   "hook": "Một tháng yêu người đã chết",
+   "cover": "g_bia1",
+   "kicker": "CHUYỆN ĐÊM · CÂY GẠO 1/3",
+   "pack": "gao",
+   "text": "Hơn một tháng trời, đêm nào chàng cũng chung thuyền với một người đã chết. [nghỉ 1.0] Chuyện này được Nguyễn Dữ chép lại trong Truyền kỳ mạn lục từ thế kỷ mười sáu. Trình Trung Ngộ là con nhà giàu ở đất Bắc Hà. Chàng thuê thuyền xuôi về phương nam buôn bán. Thuyền đỗ dưới cầu Liễu Khê, rồi chàng đi bộ vào chợ Nam Xang. Dọc đường chàng hay gặp một người con gái rất đẹp từ Đông thôn đi ra. Theo sau nàng lúc nào cũng có một ả thị nữ cúi đầu lặng lẽ. Một lần chàng định bắt chuyện thì nàng quay mặt đi. Nhưng chàng nghe được nàng dặn thị nữ rằng đêm nay ra cầu Liễu Khê cho khuây khỏa. Đêm ấy chàng nấp sẵn trên cầu. Nàng tới, ôm theo một cây đàn hồ cầm. Gảy vài khúc xong, nàng than rằng tiếc thay chẳng có ai tri âm. [nghỉ 0.6] Trung Ngộ bước ra và nói, có tôi đây. Nàng kể mình tên Nhị Khanh, cháu gái ông cụ Hối, một nhà danh giá ở Đông thôn. Cha mẹ mất sớm, lại bị chồng ruồng bỏ, nàng phải ra ở một mình ngoài lũy làng. Nàng bảo đời người như giấc chiêm bao. Sống được ngày nào thì vui ngày ấy. Đêm đó nàng xuống thuyền của chàng. Nàng làm hai bài thơ tặng chàng. Trong thơ có một lời nguyện. Sống chung thuyền, chết chung huyệt. [nghỉ 1.0] Gà gáy thì nàng đi. Đêm sau nàng lại tới. Cứ thế hơn một tháng. Bạn buôn bắt đầu thấy lạ. Họ bảo người con gái này không rõ lai lịch, phải tìm cho ra gốc gác. Trung Ngộ hỏi nhà nàng. Nàng ngập ngừng mãi rồi mới gật đầu. Canh ba, trời tối đen như mực. Nàng dẫn chàng tới một túp nhà sau hàng rào tre. Lau khô mọc quanh, dây bìm bìm phủ kín mái. Nàng bảo chàng ngồi chờ để nàng đi lấy lửa. Trong bóng tối, chàng ngửi thấy một mùi tanh thối. [nghỉ 1.5] Lửa thắp lên. Giữa nhà là một cỗ quan tài sơn son phủ tấm the đỏ. Trên đó đề mấy chữ. [nghỉ 0.8] Linh cữu của Nhị Khanh. [nghỉ 1.5] Bên cạnh là một hình người con gái nặn bằng đất, ôm đàn đứng hầu. Chàng chợt nhớ tới ả thị nữ cúi đầu vẫn đi sau nàng mỗi ngày. [nghỉ 1.2] Trung Ngộ quay người bỏ chạy. Nhị Khanh chặn ngay cửa, níu lấy vạt áo chàng, nhắc lại lời hẹn chết chung một huyệt. Áo cũ rách toạc. Chàng giằng ra, chạy một mạch về cầu Liễu Khê. Nhưng lời nguyện chung huyệt ấy, nàng chưa quên. [nghỉ 0.8] Phần hai, mình kể tiếp.",
+   "scenes": [
+    [
+     "Hơn một tháng trời, đêm nào chàng cũng chung thuyền với một người đã chết",
+     "g_quantai_ma!"
+    ],
+    [
+     "Trình Trung Ngộ là con nhà giàu ở đất Bắc Hà",
+     "g_cho"
+    ],
+    [
+     "Dọc đường chàng hay gặp một người con gái rất đẹp từ Đông thôn đi ra",
+     "g_duong"
+    ],
+    [
+     "Đêm ấy chàng nấp sẵn trên cầu",
+     "g_cau"
+    ],
+    [
+     "Trung Ngộ bước ra và nói, có tôi đây",
+     "g_cau_tn"
+    ],
+    [
+     "Đêm đó nàng xuống thuyền của chàng",
+     "g_thuyen"
+    ],
+    [
+     "Nàng làm hai bài thơ tặng chàng",
+     "g_tho"
+    ],
+    [
+     "Gà gáy thì nàng đi",
+     "g_sang"
+    ],
+    [
+     "Bạn buôn bắt đầu thấy lạ",
+     "g_banbuon"
+    ],
+    [
+     "Canh ba, trời tối đen như mực",
+     "g_leu"
+    ],
+    [
+     "Nàng bảo chàng ngồi chờ để nàng đi lấy lửa",
+     "g_toi"
+    ],
+    [
+     "Lửa thắp lên",
+     "g_quantai!"
+    ],
+    [
+     "Bên cạnh là một hình người con gái nặn bằng đất, ôm đàn đứng hầu",
+     "g_tuong_cl!"
+    ],
+    [
+     "Trung Ngộ quay người bỏ chạy",
+     "g_niu"
+    ],
+    [
+     "Áo cũ rách toạc",
+     "g_chay"
+    ],
+    [
+     "Nhưng lời nguyện chung huyệt ấy, nàng chưa quên",
+     "g_quantai_ma"
+    ]
+   ]
+  },
+  {
+   "job": "dem-gao3-p2",
+   "speed": 0.9,
+   "provider": "vbee",
+   "voice_code": "n_hn_male_ngankechuyen_ytstable_vc",
+   "hook": "Chàng chết ôm quan tài người tình",
+   "cover": "g_bia2",
+   "kicker": "CHUYỆN ĐÊM · CÂY GẠO 2/3",
+   "pack": "gao",
+   "text": "Sáng ra người ta thấy chàng nằm chết, hai tay ôm chặt một cỗ quan tài. [nghỉ 1.0] Phần trước, Trình Trung Ngộ thấy linh cữu của Nhị Khanh rồi bỏ chạy về thuyền. Sáng hôm sau chàng tới Đông thôn hỏi chuyện. Người làng kể cháu gái ông cụ Hối đã chết được nửa năm, khi mới hai mươi tuổi. Linh cữu còn quàn tạm đó, chưa đem chôn. Nghe xong chàng lạnh toát cả người. Trung Ngộ về thuyền thì đổ bệnh nặng. Đêm đến có tiếng gọi tên chàng từ ngoài bãi sông. Có đêm tiếng thì thầm ở ngay sát mạn thuyền. Là giọng Nhị Khanh. [nghỉ 1.0] Chàng thều thào đáp lại rồi cứ đòi đứng dậy đi theo. Người trong thuyền sợ quá, phải lấy dây trói chàng lại. Một đêm cả thuyền ngủ say. Sáng ra không thấy chàng đâu nữa. [nghỉ 0.8] Họ chạy một mạch tới Đông thôn. Trung Ngộ đã chết, hai tay vẫn ôm chặt cỗ quan tài. [nghỉ 1.5] Lời nguyện sống chung thuyền chết chung huyệt đã thành sự thật. Người ta đành chôn chàng ngay ở đó. Nhưng chuyện chưa dừng lại. Từ ấy cứ đêm tối dân làng lại thấy hai bóng người dắt tay nhau đi. Khi thì hát. Khi thì khóc. Chúng bắt dân làng phải cúng lễ. Nhà nào làm không vừa ý thì liền gặp tai vạ. Không chịu nổi nữa, dân làng kéo nhau đi đào mả, phá quan tài. Họ vứt cả hai bộ hài cốt xuống dòng sông. Họ tưởng như thế là xong. [nghỉ 1.0] Nhưng ven sông ấy có một ngôi chùa cổ. Trong sân chùa có một cây gạo đã sống hơn trăm năm. [nghỉ 0.8] Phần ba, mình kể nốt.",
+   "scenes": [
+    [
+     "Sáng ra người ta thấy chàng nằm chết, hai tay ôm chặt một cỗ quan tài",
+     "g_chet!"
+    ],
+    [
+     "Phần trước, Trình Trung Ngộ thấy linh cữu của Nhị Khanh rồi bỏ chạy về thuyền",
+     "g_quantai_ma"
+    ],
+    [
+     "Sáng hôm sau chàng tới Đông thôn hỏi chuyện",
+     "g_onggia2"
+    ],
+    [
+     "Trung Ngộ về thuyền thì đổ bệnh nặng",
+     "g_benh"
+    ],
+    [
+     "Đêm đến có tiếng gọi tên chàng từ ngoài bãi sông",
+     "g_baisong!"
+    ],
+    [
+     "Chàng thều thào đáp lại rồi cứ đòi đứng dậy đi theo",
+     "g_benh"
+    ],
+    [
+     "Người trong thuyền sợ quá, phải lấy dây trói chàng lại",
+     "g_troi"
+    ],
+    [
+     "Một đêm cả thuyền ngủ say",
+     "g_thuyen_trong"
+    ],
+    [
+     "Trung Ngộ đã chết, hai tay vẫn ôm chặt cỗ quan tài",
+     "g_chet!"
+    ],
+    [
+     "Từ ấy cứ đêm tối dân làng lại thấy hai bóng người dắt tay nhau đi",
+     "g_langma"
+    ],
+    [
+     "Không chịu nổi nữa, dân làng kéo nhau đi đào mả, phá quan tài",
+     "g_daomo"
+    ],
+    [
+     "Họ vứt cả hai bộ hài cốt xuống dòng sông",
+     "g_nemsong"
+    ],
+    [
+     "Nhưng ven sông ấy có một ngôi chùa cổ",
+     "g_cay"
+    ]
+   ]
+  },
+  {
+   "job": "dem-gao3-p3",
+   "speed": 0.9,
+   "provider": "vbee",
+   "voice_code": "n_hn_male_ngankechuyen_ytstable_vc",
+   "hook": "Cây gạo chém gãy dao, bổ mẻ rìu",
+   "cover": "g_bia3",
+   "kicker": "CHUYỆN ĐÊM · CÂY GẠO 3/3",
+   "pack": "gao",
+   "text": "Có một cây gạo mà dao chém vào thì gãy, rìu bổ vào thì mẻ. [nghỉ 1.0] Phần trước, hài cốt Trung Ngộ và Nhị Khanh bị dân làng vứt xuống sông. Nhưng hai hồn ma không đi đâu cả. Chúng nương vào cây gạo hơn trăm năm tuổi trong ngôi chùa ven sông. Ai động tới cành lá thì dao gãy rìu mẻ, không ai đốn nổi. Năm Canh Ngọ niên hiệu Khai Hựu đời Trần, tức năm một nghìn ba trăm ba mươi. Có một đạo nhân đi qua, xin nghỉ đêm trong chùa. Nửa đêm có một đôi trai gái lạ tới gõ cửa gọi ông. [nghỉ 1.0] Đạo nhân cho là kẻ lẳng lơ nên nằm im không đáp. Sáng ra một ông già trong làng tìm tới, kể hết đầu đuôi. Ông già nói đó là yêu quỷ, ở trên cây gạo đã mấy năm nay. Đạo nhân nhận lời giúp dân làng. Ông lập đàn tràng, viết ba đạo bùa. Một đạo dán vào thân cây gạo. Một đạo thả chìm xuống sông. Một đạo đốt giữa trời. Rồi ông quát lớn gọi thần linh tới trừ loài yêu quái. Lập tức mây đen kéo tới. Gió nổi. Sóng sông cuộn lên. Một hồi lâu gió lặng mây tan. Cây gạo đã bị nhổ bật gốc, cành gãy nát. [nghỉ 1.0] Trên không có tiếng roi vọt quất xuống. Có tiếng khóc than. [nghỉ 0.8] Dân làng ngẩng lên. Sáu bảy trăm quân lính đầu trâu đang gông trói hai người giải đi. Từ đó bên chùa ven sông không còn ma quấy nữa. Dân làng mang tiền của tới tạ ơn. Đạo nhân không nhận gì. Ông phất áo đi thẳng vào núi sâu. Nguyễn Dữ để lại lời bình rằng ma quỷ chưa đáng sợ bằng lòng ham muốn của chính con người. Người xưa vẫn dặn nhau, hồn cây đa, ma cây gạo. Nửa đêm đi ngang một cây gạo già mà nghe ai gảy đàn than không có tri âm. [nghỉ 1.2] Đừng bước ra.",
+   "scenes": [
+    [
+     "Có một cây gạo mà dao chém vào thì gãy, rìu bổ vào thì mẻ",
+     "g_riu!"
+    ],
+    [
+     "Phần trước, hài cốt Trung Ngộ và Nhị Khanh bị dân làng vứt xuống sông",
+     "g_nemsong"
+    ],
+    [
+     "Nhưng hai hồn ma không đi đâu cả",
+     "g_cay"
+    ],
+    [
+     "Ai động tới cành lá thì dao gãy rìu mẻ, không ai đốn nổi",
+     "g_riu"
+    ],
+    [
+     "Năm Canh Ngọ niên hiệu Khai Hựu đời Trần, tức năm một nghìn ba trăm ba mươi",
+     "g_gocua"
+    ],
+    [
+     "Sáng ra một ông già trong làng tìm tới, kể hết đầu đuôi",
+     "g_onggia"
+    ],
+    [
+     "Ông lập đàn tràng, viết ba đạo bùa",
+     "g_bua"
+    ],
+    [
+     "Rồi ông quát lớn gọi thần linh tới trừ loài yêu quái",
+     "g_dante"
+    ],
+    [
+     "Lập tức mây đen kéo tới",
+     "g_bao!"
+    ],
+    [
+     "Trên không có tiếng roi vọt quất xuống",
+     "g_trau!"
+    ],
+    [
+     "Từ đó bên chùa ven sông không còn ma quấy nữa",
+     "g_binhyen"
+    ],
+    [
+     "Dân làng mang tiền của tới tạ ơn",
+     "g_tuchoi"
+    ],
+    [
+     "Ông phất áo đi thẳng vào núi sâu",
+     "g_vaonui"
+    ],
+    [
+     "Nguyễn Dữ để lại lời bình rằng ma quỷ chưa đáng sợ bằng lòng ham muốn của chính con người",
+     "g_binhyen"
+    ],
+    [
+     "Người xưa vẫn dặn nhau, hồn cây đa, ma cây gạo",
+     "g_cay2"
+    ]
+   ]
+  }
+ ]
+}
