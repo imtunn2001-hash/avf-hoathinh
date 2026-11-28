@@ -50,11 +50,7 @@ P1 = [
       say='Rồi hắn đặt quà xuống, kèm một lời nhờ vả. Hắn nói có 10.000 đô la, muốn xin một chỗ làm. Quà biếu, người quen, chuyện xin việc. Đủ để chủ nhà không nghi ngờ.'),
  dict(type='stage', label='NGÔI NHÀ IM LẶNG', bg='room', mood='soc', night=True,
       icons=[dict(icon='clock', x=540, y=820, s=2.0, at=0)],
-      say='Chuyện xảy ra sau đó mình sẽ không kể chi tiết. Bà Thủ bị sát hại ngay trong ngôi nhà của mình. /// Và kẻ lạ chưa rời đi ngay. Hắn còn lên tầng 2, nơi có một chiếc két sắt. Phần 2, mình kể tiếp.'),
-]
-P2 = [
- dict(type='stage', label='', bg='room', mood='cang', icons=[dict(icon='safe', x=540, y=960, s=2.2, at=0), dict(icon='corkscrew', x=680, y=820, s=1.2, at=0)],
-      say='Một cái mở nút chai rượu, cạy vào một chiếc két sắt. Phần trước, kẻ lạ đã vào được nhà bà Thủ bằng một phong bì giả.'),
+      say='Chuyện xảy ra sau đó mình sẽ không kể chi tiết. Bà Thủ bị sát hại ngay trong ngôi nhà của mình. /// Và kẻ lạ chưa rời đi ngay.'),
  dict(type='stage', label='TẦNG 2', bg='room', mood='cang',
       cast=[dict(c='bong', x=330, D=160, expr='angry', tag=False)],
       icons=[dict(icon='shirt', x=760, y=1040, s=1.1, at=0), dict(icon='safe', x=780, y=830, s=1.7, at=2), dict(icon='corkscrew', x=560, y=720, s=1.1, at=3)],
@@ -84,7 +80,7 @@ P2 = [
       icons=[dict(icon='safe', x=760, y=860, s=1.8, at=0), dict(icon='drop', x=830, y=760, s=.8, at=1), dict(icon='fingerprint', x=690, y=960, s=.9, at=2)],
       say='Pháp y lên tầng 2, đứng trước chiếc két sắt bị cạy dở. Trên cánh két có một vệt máu còn mới. /// {chậm: Và vệt máu ấy không phải của bà Thủ.} Phần 2, mình kể tiếp.'),
 ]
-EP = [('p1', P1, 'PHẦN 1', 'PHONG BÌ 10.000 ĐÔ TOÀN GIẤY', 'Phần 2: Chiếc két sắt ở tầng 2'), ('p2', P2, 'PHẦN 2', 'CẠY KÉT BẰNG MỞ NÚT CHAI', 'Phần 3: Vết máu trên két')]
+EP = [('p1', P1, 'PHẦN 1', 'PHONG BÌ 10.000 ĐÔ TOÀN GIẤY', 'Phần 2: Vết máu trên két sắt')]   # 15 canh ~ 465 tu ~ 110 s (giong Nhat Khoa 0.92 ~ 4,2 tu/giay)
 KH = re.compile(r'\s*(///|//|\[nghỉ\s*[\d.,]+\s*\])\s*|\{(?:nhanh|chậm|rất chậm|hạ|cao|nhấn):\s*|\}')
 for name, S, badge, hook, nxt in EP:
     sp = dict(engine='vh', chars='roinuoc', format='vertical', style='cck2', series='VẾT MÁU TRÊN KÉT SẮT', badge=badge, hook_text=hook,
