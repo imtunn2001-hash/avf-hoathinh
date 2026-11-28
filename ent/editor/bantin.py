@@ -24,8 +24,11 @@ W, H, FPS = 1080, 1920, 30
 SX0, SY0, SX1, SY1 = safezone.SAFE
 ROOT = os.getcwd(); OUT = os.path.join(ROOT, 'out'); os.makedirs(OUT, exist_ok=True)
 WHITE = (255, 255, 255); BLACK = (0, 0, 0); UP = (34, 197, 94); DN = (239, 68, 68); MUTED = (170, 178, 196)
-BAND_Y0, BAND_Y1 = 470, 1370          # dai anh giua
-SW, SH_ = 1080, BAND_Y1 - BAND_Y0      # kich thuoc anh (900)
+# 28/11 FULL KHUNG (chu chot): bo dai anh giua + nen mo; moi anh ve tren nen tran 1080x1920,
+# noi dung dat tu OY xuong; chu trong SAFE (x 80-940, y 260-1460), nen chart tran xuong day.
+OY = 440
+SW, SH_ = 1080, 1000                   # lop noi dung (chart: cao toi day khung)
+LYMAX = 1380 - OY                      # chu trong lop phai < y nay
 
 
 def tup(x, d): return tuple(x) if x else d
@@ -42,12 +45,17 @@ def wrap(d, txt, f, maxw):
 
 
 # ---------------- ve tung anh (1080 x 900) ----------------
-def slide_bg(P):
-    im = Image.new('RGB', (SW, SH_), P['bg']); d = ImageDraw.Draw(im)
-    for y in range(SH_):   # gradient nhe
-        k = y / SH_; c = tuple(int(P['bg'][i] * (1 - .35 * k) + P['accent'][i] * .10 * (1 - k)) for i in range(3))
-        d.line([(0, y), (SW, y)], fill=c)
-    return im, d
+def full_bg(P):
+    im = Image.new('RGB', (W, H), P['bg']); d = ImageDraw.Draw(im)
+    for y in range(H):   # gradient nhe tran khung
+        k = y / H; c = tuple(int(P['bg'][i] * (1 - .35 * k) + P['accent'][i] * .14 * (1 - k)) for i in range(3))
+        d.line([(0, y), (W, y)], fill=c)
+    mp = map_pattern(P, W, H, seed=11); a = mp.getchannel('A').point(lambda v: v // 2); mp.putalpha(a)
+    im = im.convert('RGBA'); im.alpha_composite(mp); return im.convert('RGB')
+
+
+def slide_bg(P, h=SH_):
+    im = Image.new('RGBA', (SW, h), (0, 0, 0, 0)); return im, ImageDraw.Draw(im)
 
 
 def s_board(P, s):
@@ -56,19 +64,21 @@ def s_board(P, s):
         d.text((70, 60), s.get('title', ''), font=F(True, 58), fill=P['accent2'])
         d.text((70, 132), s.get('sub', ''), font=F(False, 34), fill=MUTED)
         y = 260
-        d.text((470, y), 'MUA VÀO', font=F(True, 34), fill=MUTED); d.text((770, y), 'BÁN RA', font=F(True, 34), fill=MUTED)
+        d.text((430, y), 'MUA VÀO', font=F(True, 34), fill=MUTED); d.text((690, y), 'BÁN RA', font=F(True, 34), fill=MUTED)
         y += 64
         for r in s.get('rows', []):
-            d.rounded_rectangle([50, y - 14, SW - 50, y + 150], 24, fill=tuple(min(255, c + 18) for c in P['bg']))
+            d.rounded_rectangle([50, y - 14, SW - 50, y + 150], 24, fill=tuple(min(255, c + 22) for c in P['bg']) + (235,))
             d.text((80, y + 6), r['name'], font=F(True, 40), fill=WHITE)
             d.text((80, y + 64), r.get('note', ''), font=F(False, 30), fill=MUTED)
-            for x, k in ((470, 'buy'), (770, 'sell')):
-                d.text((x, y + 4), r[k], font=F(True, 50), fill=WHITE)
+            for x, k in ((430, 'buy'), (690, 'sell')):
+                fv = F(True, 50)
+                while d.textlength(r[k], font=fv) > 240 and fv.size > 34: fv = F(True, fv.size - 2)
+                d.text((x, y + 4), r[k], font=fv, fill=WHITE)
                 ch = r.get(k + '_ch', '')
                 if ch: d.text((x, y + 72), ch, font=F(True, 36), fill=DN if ch.startswith(('−', '-')) else UP)
             y += 190
         if s.get('foot'):
-            d.text((70, SH_ - 90), s['foot'], font=F(True, 38), fill=P['accent2'])
+            d.text((70, SH_ - 150), s['foot'], font=F(True, 38), fill=P['accent2'])
     return im
 
 
@@ -102,12 +112,12 @@ def s_news(P, s):
 
 
 def s_chart(P, s, C):
-    im, d = slide_bg(P)
+    CHH = H - OY; im, d = slide_bg(P, CHH)
     i0, i1 = int(s.get('i0', 0)), int(s.get('i1', len(C) - 1)); cs = C[i0:i1 + 1]
     lv = s.get('levels', [])
     lo = min([c['l'] for c in cs] + [x['price'] for x in lv]); hi = max([c['h'] for c in cs] + [x['price'] for x in lv])
     pad = (hi - lo) * .14; lo -= pad; hi += pad
-    X0, X1, Y0, Y1 = 60, SW - 170, 230, SH_ - 150
+    X0, X1, Y0, Y1 = 0, 820, 260, CHH - 60
     Y = lambda v: Y1 - (v - lo) / (hi - lo) * (Y1 - Y0)
     slot = (X1 - X0) / len(cs); bw = max(4, slot * .62)
     with safezone.decor():
@@ -117,7 +127,8 @@ def s_chart(P, s, C):
         g = math.ceil(lo / step) * step
         while g < hi:
             d.line([(X0, Y(g)), (X1 + 8, Y(g))], fill=tuple(min(255, c + 26) for c in P['bg']), width=1)
-            d.text((X1 + 18, Y(g) - 16), vn(g, 0), font=F(False, 28), fill=MUTED); g += step
+            if Y(g) < LYMAX - 30: d.text((X1 + 18, Y(g) - 16), vn(g, 0), font=F(False, 28), fill=MUTED)
+            g += step
         for k, c in enumerate(cs):
             x = X0 + (k + .5) * slot; col = UP if c['c'] >= c['o'] else DN
             d.line([(x, Y(c['h'])), (x, Y(c['l']))], fill=col, width=3)
@@ -125,8 +136,8 @@ def s_chart(P, s, C):
         for x_ in lv:
             y = Y(x_['price']); xx = X0
             while xx < X1: d.line([(xx, y), (min(xx + 16, X1), y)], fill=P['accent'], width=4); xx += 28
-            lab = x_['label']; lw = d.textlength(lab, font=F(True, 34))
-            d.rounded_rectangle([X1 - lw - 30, y + 8, X1 - 6, y + 56], 10, fill=P['accent']); d.text((X1 - lw - 18, y + 12), lab, font=F(True, 34), fill=WHITE)
+            lab = x_['label']; lw = d.textlength(lab, font=F(True, 34)); yt = min(y + 8, LYMAX - 60)
+            d.rounded_rectangle([X1 - lw - 30, yt, X1 - 6, yt + 48], 10, fill=P['accent']); d.text((X1 - lw - 18, yt + 4), lab, font=F(True, 34), fill=WHITE)
         for m in s.get('marks', []):
             k = int(m['i']) - i0
             if not 0 <= k < len(cs): continue
@@ -134,18 +145,19 @@ def s_chart(P, s, C):
             yb = Y(c['l']) + 12 if low else Y(c['h']) - 12; ya = yb + (60 if low else -60)
             d.line([(x, ya), (x, yb)], fill=P['accent2'], width=5)
             d.polygon([(x, yb), (x - 13, yb + (22 if low else -22)), (x + 13, yb + (22 if low else -22))], fill=P['accent2'])
-            f = F(True, 40); tw = d.textlength(m['text'], font=f); tx = min(max(X0, x - tw / 2), X1 - tw); ty = ya + (8 if low else -54)
+            f = F(True, 40); tw = d.textlength(m['text'], font=f); tx = min(max(80, x - tw / 2), X1 - tw); ty = ya + (8 if low else -54)
+            if ty > LYMAX - 60: ty = Y(c['h']) - 70   # day qua thap -> nhan len tren nen
+            ty = min(ty, LYMAX - 60)
             d.rounded_rectangle([tx - 12, ty - 4, tx + tw + 12, ty + 50], 12, fill=BLACK, outline=P['accent2'], width=2)
             d.text((tx, ty), m['text'], font=f, fill=WHITE)
-        d.text((X0, Y1 + 14), cs[0]['t'], font=F(False, 26), fill=MUTED)
-        if not any(int(m['i']) - i0 >= len(cs) * .8 and m.get('side', 'low') == 'low' for m in s.get('marks', [])):
-            d.text((X1 - d.textlength(cs[-1]['t'], font=F(False, 26)), Y1 + 14), cs[-1]['t'], font=F(False, 26), fill=MUTED)
+        d.text((60, 150), cs[0]['t'] + '  →  ' + cs[-1]['t'], font=F(False, 28), fill=MUTED)
     return im
 
 
 def make_slide(P, s, C):
     k = s['kind']
-    return {'board': s_board, 'big': s_big, 'news': s_news}[k](P, s) if k != 'chart' else s_chart(P, s, C)
+    lay = {'board': s_board, 'big': s_big, 'news': s_news}[k](P, s) if k != 'chart' else s_chart(P, s, C)
+    im = full_bg(P).convert('RGBA'); im.alpha_composite(lay, (0, OY)); return im.convert('RGB')
 
 
 # ---------------- khung hinh ----------------
@@ -230,15 +242,13 @@ def main():
 
     raw = os.path.join(OUT, 'v_tmp.mp4')
     p = subprocess.Popen(['ffmpeg', '-y', '-v', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-                          '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
+                          '-c:v', 'libx264', '-preset', 'fast', '-crf', '16', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
 
-    def band(k, t):   # anh k tai thoi diem t (zoom nhe 1.0 -> 1.07)
-        dur = (t0s[k + 1] if k + 1 < len(t0s) else D) - t0s[k]; q = ease((t - t0s[k]) / max(1.0, dur)); z = 1.0 + .07 * q
-        im = imgs[k]; w, h = int(SW / z), int(SH_ / z); x0 = (SW - w) // 2; y0 = (SH_ - h) // 2
-        return im.crop((x0, y0, x0 + w, y0 + h)).resize((SW, SH_), Image.BILINEAR)
+    def band(k, t):   # phan noi dung anh k (cho canh mo)
+        return imgs[k].crop((0, OY - 40, W, OY + 860))
 
-    def body(k, t):
-        fr = bgs[k].copy(); fr.paste(band(k, t), (0, BAND_Y0)); return fr
+    def body(k, t):   # full khung, khong zoom (zoom day chu ra ngoai vung an toan)
+        return imgs[k]
 
     for fi in range(int(D * FPS)):
         t = fi / FPS; k = max(i for i in range(len(t0s)) if t0s[i] <= t)
@@ -246,7 +256,7 @@ def main():
         if k > 0 and t - t0s[k] < .25: fr = Image.blend(body(k - 1, t), fr, ease((t - t0s[k]) / .25))
         if t < COVER:   # canh mo: anh chinh nua tren + the tieu de nua duoi
             b0 = band(0, t); fr = bgs[0].copy()
-            sc = b0.resize((W, int(SH_ * .7)), Image.BILINEAR); fr.paste(sc, (0, TOP - sc.height - 10))   # anh chinh nam duoi dong nguon
+            sc = b0.resize((W, int(900 * .7)), Image.LANCZOS); fr.paste(sc, (0, TOP - sc.height - 10))   # anh chinh nam duoi dong nguon
             q = ease(min(1.0, t / .3)); cv = cov if q >= 1 else Image.blend(Image.new('RGBA', (W, H), (0, 0, 0, 0)), cov, q)
             fr = fr.convert('RGBA'); fr.alpha_composite(cv); fr = fr.convert('RGB')
             if t > COVER - .3: fr = Image.blend(fr, body(k, t), ease((t - (COVER - .3)) / .3))
