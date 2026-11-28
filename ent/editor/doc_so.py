@@ -61,6 +61,8 @@ def _so_thuc(s):
     if re.fullmatch(r'\d{1,3}(\.\d{3})+(,\d+)?', s): s = s.replace('.', '')
     if ',' in s:
         a, b = s.split(',', 1)
+        b = b.rstrip('0')   # 28/11 chu chot: 5,0 -> 'năm', 5,10 -> 'năm phẩy một'
+        if not b: return so_chu(a)
         bb = ' '.join(CS[int(c)] for c in b) if b.startswith('0') or len(b) > 2 else so_chu(b)
         return so_chu(a) + ' phẩy ' + bb
     return so_chu(s)
