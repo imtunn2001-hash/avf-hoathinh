@@ -279,7 +279,7 @@ SCENES = {
     'mua_phan': lambda: (Quan('mua'), {'cover': True, 'muc': True}),
     'sang_me': lambda: (Quan('sang'), {'me': True}),
     'anh_con': lambda: (Can('dem', 8), {'k': 'anh'}),
-    'mo_hop': lambda: (Can('dem', 5), {'k': 'hop', 'mo': lambda t: min(1.0, t / 1.2)}),
+    'mo_hop': lambda: (Can('dem', 5), {'k': 'hop', 'wet': True, 'mo': lambda t: min(1.0, t / 1.2)}),
     'quan_hai': lambda: (Quan('dem'), {'bowls': 2, 'muc': True}),
     'bat_dem': lambda: (Can('dem', 9), {'k': 'bat', 'spoon': 1}),
     'bat_sang': lambda: (Can('sang', 9), {'k': 'bat', 'spoon': 1}),
@@ -303,7 +303,7 @@ def wrap(d, s, f, mw):
 
 def main():
     sp = json.loads(os.environ['SPEC_JSON']) if os.environ.get('SPEC_JSON', '').strip().startswith('{') else json.load(open(os.environ['SPEC_JSON']))
-    S = sp['sentences']; DRY = os.environ.get('DRY') == '1'
+    S = sp.get('sentences') or sp.get('texts'); DRY = os.environ.get('DRY') == '1'
     # ---- giong: moi doan W87 -> (bat dau, ket thuc, chu, cau) ----
     segs, off, parts = [], 0.3, []
     if DRY:
@@ -322,9 +322,19 @@ def main():
     for a, b, _, si in segs: st0.setdefault(si, a)
     # ---- canh ----
     sc = sp['scenes']; spans = []
+    last = [0.0]
+
+    def start_of(key):   # key: so thu tu cau, hoac cum chu DAU doan (khop texts cua W87), tim tu sau canh truoc
+        if isinstance(key, int): return st0.get(key, 0)
+        kk = key.lower().strip('“"')
+        for test in (lambda tx: tx.startswith(kk), lambda tx: kk in tx):
+            for a_, _, tx, _ in segs:
+                if a_ >= last[0] - 1e-6 and test(tx.lower().strip('“"')): return a_
+        raise SystemExit('khong thay cum canh: ' + key)
     for k, (si, name) in enumerate(sc):
-        a = 0.0 if k == 0 else st0.get(si, 0) - 0.15
-        b = st0.get(sc[k + 1][0], D) - 0.15 if k + 1 < len(sc) else D
+        a = 0.0 if k == 0 else start_of(si) - 0.15
+        last[0] = a + 0.2
+        b = start_of(sc[k + 1][0]) - 0.15 if k + 1 < len(sc) else D
         spans.append((a, b, name))
     built = {}
 
