@@ -304,6 +304,8 @@ def wrap(d, s, f, mw):
 
 def main():
     sp = json.loads(os.environ['SPEC_JSON']) if os.environ.get('SPEC_JSON', '').strip().startswith('{') else json.load(open(os.environ['SPEC_JSON']))
+    if sp.get('pack'):   # bo canh rieng tung truyen: editor/dem_<pack>.py co ham register(SCENES, CAM)
+        __import__('dem_' + sp['pack']).register(SCENES, CAM)
     S = sp.get('sentences') or sp.get('texts'); DRY = os.environ.get('DRY') == '1'
     # ---- giong: moi doan W87 -> (bat dau, ket thuc, chu, cau) ----
     segs, off, parts = [], 0.3, []
@@ -351,11 +353,13 @@ def main():
     def render_scene(k, t):
         a, b, name = spans[k]; obj, st = get_scene(name); lt = t - a
         im = obj.bg.copy(); st = dict(st, dur=b - a); obj.draw(im, lt, st)
-        arr = np.asarray(im).astype(np.float32) * obj.L * 1.15
+        arr = np.asarray(im).astype(np.float32) * obj.L * 1.3
         flick = 1 + 0.025 * math.sin(t * 9.1) * math.sin(t * 3.7)
         arr = arr * flick * VIG
-        g = GRAIN[int(t * FPS / 3) % len(GRAIN)]   # hat phim doi 10 lan/giay (nhe file); arr += np.repeat(np.repeat(g, 2, 0), 2, 1)
+        g = GRAIN[int(t * FPS / 3) % len(GRAIN)]   # hat phim doi 10 lan/giay (nhe file)
+        arr += np.repeat(np.repeat(g, 2, 0), 2, 1)
         out = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
+        if hasattr(obj, 'post'): obj.post(out, lt, st)   # bong ma / chop sang ve SAU anh sang
         z0, cx, cy = CAM.get(name, (1.0, 540, 960)); q = lt / max(1.0, b - a); z = z0 * (1 + .07 * q)
         w, h = W / z, H / z; x0 = min(max(0, cx - w / 2), W - w); y0 = min(max(0, cy - h / 2), H - h)
         return out.resize((W, H), Image.BILINEAR, box=(x0, y0, x0 + w, y0 + h))
