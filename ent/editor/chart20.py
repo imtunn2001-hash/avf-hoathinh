@@ -28,6 +28,14 @@ BG = (8, 12, 24); PANEL_BG = (14, 20, 36); GRID = (32, 42, 66)
 GOLD = (245, 196, 66); GOLD2 = (255, 228, 140); WHITE = (255, 255, 255); MUTED = (150, 160, 185)
 UP = (34, 197, 94); DN = (239, 68, 68); INK = (16, 16, 24); KEY = (255, 90, 90)
 ON_ACC = INK   # mau chu tren nen mau nhan (accent)
+# 28/11 FULL KHUNG (chu chot): nen ve tran ngang 0..820, cao 580..1300; truc gia 830-935 (trong SAFE);
+# phu de 1320-1452 (2 dong x 46px); so gia lon 404-560. Khong con panel bo goc.
+PY0 = 404
+CX0, CX1 = 0, 820
+CY0, CY1 = 580, 1680   # nen tran xuong ca vung caption app (chi hinh, khong chu)
+LY1 = 1300   # nhan chu chi o tren 1300 (duoi la phu de / caption)
+SUB_PX, SUB_LINES = 46, 2
+MAXLAB = 2   # toi da 2 nhan vung/moc hien cung luc
 
 
 def apply_theme(th):
@@ -98,12 +106,13 @@ def free_y(placed, x0, x1, h, cands, dy=0, gap=6):
     best, bo = None, None
     for y in cands:
         top = y + dy
-        if top < 572 or top + h > 1180: continue   # CY0 = 404+168, day panel 1182
+        if top < CY0 or top + h > LY1: continue
         ov = sum(max(0, min(x1, b[2]) - max(x0, b[0]) + gap) * max(0, min(top + h, b[3]) - max(top, b[1]) + gap)
                  for b in placed if min(x1, b[2]) + gap > max(x0, b[0]) and min(top + h, b[3]) + gap > max(top, b[1]))
         if ov == 0: return y
         if bo is None or ov < bo: best, bo = y, ov
-    return best if best is not None else cands[0]
+    y = best if best is not None else cands[0]
+    return min(max(y + dy, CY0), LY1 - h) - dy
 
 
 def load_spec():
@@ -207,9 +216,7 @@ def main():
         if not ZOOM or tv <= ZS: return float(WIN)
         return WIN - (WIN - ZT) * ease((tv - ZS) / ZD)
     # KHOA CUNG 20/11: panel nam tron trong SAFE; tren 260-400 la tieu de, duoi 1190-1455 la phu de
-    PX0, PY0, PX1, PY1 = SX0, 404, SX1, 1182
-    CX0, CX1 = PX0 + 18, PX1 - 150   # vung ve nen, ben phai la truc gia (ket thuc truoc x=940)
-    CY0, CY1 = PY0 + 168, PY1 - 30
+    PX0, PX1 = SX0, SX1
     wts = word_times(srt)
     hook = (sp.get('hook_text') or '').strip().upper()
     sym = sp.get('symbol', 'XAU/USD'); tf = sp.get('tf', 'M15'); date = sp.get('date', '')
@@ -227,11 +234,12 @@ def main():
     while bd.textlength(r, font=fr) > SX1 - SX0 - 20 and fr.size > 22: fr = F(True, fr.size - 2)
     bd.text((bx, 346), r, font=fr, fill=GOLD2)
     bd.rectangle([SX0, 392, SX1, 396], fill=GOLD)
-    bd.rounded_rectangle([PX0, PY0, PX1, PY1], 30, fill=PANEL_BG)
+    for yy in range(CY0 - 20, H):   # nen toi dan xuong duoi cho phu de noi ro
+        k = min(1.0, max(0.0, (yy - 1500) / 400)); bd.line([(0, yy), (W, yy)], fill=tuple(int(BG[i] * (1 - 0.5 * k)) for i in range(3)))
     lo_s = hi_s = None
     raw = os.path.join(OUT, 'v_tmp.mp4')
     p = subprocess.Popen(['ffmpeg', '-y', '-v', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-                          '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
+                          '-c:v', 'libx264', '-preset', 'fast', '-crf', '16', '-tune', 'animation', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
     for fi in range(int(D * FPS)):
         t = fi / FPS; tv = t - LEAD
         im = base.copy(); d = ImageDraw.Draw(im)
@@ -264,8 +272,8 @@ def main():
         while g < hi_s:
             y = Y(g)
             if CY0 - 5 < y < CY1 + 5:
-                d.line([(CX0, y), (CX1 + 10, y)], fill=GRID, width=1)
-                d.text((CX1 + 20, y - 15), vn(g, 0 if step >= 1 else 1), font=F(False, 26), fill=MUTED)
+                d.line([(0, y), (CX1 + 10, y)], fill=GRID, width=1)
+                if y < LY1: d.text((CX1 + 20, y - 15), vn(g, 0 if step >= 1 else 1), font=F(False, 26), fill=MUTED)
             g += step
         slot = (CX1 - CX0) / (wf + FUT); bw = max(4, min(slot * 0.62, 40))
         X = lambda j: CX0 + (j - i0f + 0.5) * slot
@@ -281,11 +289,11 @@ def main():
                 xb = xa + (CX1 - xa) * q
                 od.rectangle([xa, ya, xb, yb], fill=col + (70,), outline=col + (200,), width=2)
             im.paste(Image.alpha_composite(im.convert('RGBA'), ov).convert('RGB')); d = ImageDraw.Draw(im)
-            for e in zs:
+            for e in zs[-MAXLAB:]:
                 if tv - e['t'] < 0.3 or not e.get('label'): continue
                 col = tuple(e.get('color') or GOLD); ya = max(CY0, min(Y(e['p0']), Y(e['p1'])))
                 xa = max(CX0, X(int(e['i0'])) - slot / 2) if 'i0' in e else CX0
-                f_ = F(True, 30); lab = e['label']; lw = d.textlength(lab, font=f_)
+                f_ = F(True, 30); lab = e['label']; lw = d.textlength(lab, font=f_); xa = max(SX0, xa)
                 ly = free_y(placed0, xa + 6, xa + lw + 30, 40, [ya + 6, ya - 46, ya + 52])
                 placed0.append((xa + 6, ly, xa + lw + 30, ly + 40))
                 d.rounded_rectangle([xa + 6, ly, xa + lw + 30, ly + 40], 10, fill=(0, 0, 0), outline=col, width=2)
@@ -303,9 +311,9 @@ def main():
         for e in lv:
             q = ease((tv - e['t']) / 0.5); y = Y(e['price'])
             col = tuple(e.get('color') or (UP if 'HỖ TRỢ' in e.get('label', '').upper() else (DN if 'KHÁNG' in e.get('label', '').upper() else GOLD)))
-            dashed(d, CX0, CX0 + (CX1 - CX0) * q, y, col, 4)
+            dashed(d, CX0, CX0 + (CX1 - CX0) * q, y, col, 4 if e in lv[-MAXLAB:] else 2)
             lab = f"{e.get('label', '')} {vn(e['price'])}".strip()
-            if q > 0.3:
+            if q > 0.3 and e in lv[-MAXLAB:]:
                 lw = d.textlength(lab, font=F(True, 32)); lx = CX1 - lw - 30
                 # 25/11: QC 24h nhieu lan 'nhan vung gia de nhau' -> tim cho trong (duoi vach, tren vach, roi xa dan)
                 ly = free_y(placed, lx - 12, lx + lw + 12, 42, [y + 8, y - 50, y + 54, y - 96, y + 100, y - 142])
@@ -320,14 +328,15 @@ def main():
             c = vis[j]; x = X(j); age = tv - e['t']; q = ease(age / 0.35)
             low = e.get('side', 'low') == 'low'
             yb = Y(c['l']) + 14 if low else Y(c['h']) - 14
-            if age > 6:
+            mk = [m for m in active if m['type'] == 'mark' and tv - m['t'] <= 4][-MAXLAB:]
+            if age > 4 or e not in mk:
                 d.polygon([(x, yb), (x - 9, yb + (16 if low else -16)), (x + 9, yb + (16 if low else -16))], fill=GOLD); continue
             ya = yb + (56 if low else -56) * q
             d.line([(x, ya), (x, yb)], fill=GOLD, width=5)
             d.polygon([(x, yb), (x - 14, yb + (22 if low else -22)), (x + 14, yb + (22 if low else -22))], fill=GOLD)
-            f_ = F(True, 36); tw = d.textlength(e['text'], font=f_); tx = min(max(CX0, x - tw / 2), CX1 - tw)
+            f_ = F(True, 36); tw = d.textlength(e['text'], font=f_); tx = min(max(SX0 + 14, x - tw / 2), CX1 - tw)
             ty = ya + (8 if low else -52)
-            ty = min(max(ty, CY0 + 4), CY1 + 10)
+            ty = min(max(ty, CY0 + 4), LY1 - 50)
             sg = 1 if low else -1
             ty = free_y(placed, tx - 14, tx + tw + 14, 50, [ty + sg * k * 54 for k in range(4)] + [ty - sg * k * 54 for k in range(1, 4)], dy=-4)
             placed.append((tx - 14, ty - 4, tx + tw + 14, ty + 46))
@@ -348,10 +357,10 @@ def main():
                 lay = Image.new('RGBA', (tw, 36), (0, 0, 0, 0)); ImageDraw.Draw(lay).text((4, 1), lab, font=f_, fill=WHITE + (255,), stroke_width=2, stroke_fill=(0, 0, 0, 255))
                 lay = lay.rotate(90 if up else -90, expand=True)
                 ym = (Y(e['p0']) + Y(e['p1'])) / 2 - lay.size[1] / 2
-                xm = int(min(x + 10, CX1 - lay.size[0])); ym = int(min(max(ym, CY0), CY1 - lay.size[1]))
+                xm = int(max(SX0, min(x + 10, CX1 - lay.size[0]))); ym = int(min(max(ym, CY0), LY1 - lay.size[1]))
                 lw_, lh_ = lay.size
                 ym = int(free_y(placed, xm, xm + lw_, lh_, [ym] + [ym + sg_ * k_ * 30 for k_ in range(1, 8) for sg_ in (-1, 1)]))
-                ym = int(min(max(ym, CY0), CY1 - lh_)); placed.append((xm, ym, xm + lw_, ym + lh_))
+                ym = int(min(max(ym, CY0), LY1 - lh_)); placed.append((xm, ym, xm + lw_, ym + lh_))
                 im.paste(lay, (xm, ym), lay); d = ImageDraw.Draw(im)
         # 28/11: duong du bao net dut tu nen cuoi sang vung trong ben phai (kich ban co dieu kien)
         for e in active:
@@ -374,10 +383,10 @@ def main():
                 (ax_, ay_), (bx2, by2) = pts[-2], pts[-1]; ang = math.atan2(by2 - ay_, bx2 - ax_)
                 d.polygon([(bx2, by2), (bx2 - 22 * math.cos(ang - 0.45), by2 - 22 * math.sin(ang - 0.45)), (bx2 - 22 * math.cos(ang + 0.45), by2 - 22 * math.sin(ang + 0.45))], fill=col)
                 if e.get('label'):
-                    f_ = F(True, 30); lw = d.textlength(e['label'], font=f_); lx = min(bx2 - lw / 2, CX1 - lw); ly = by2 + (-50 if by2 > ay_ else 14)
+                    f_ = F(True, 30); lw = d.textlength(e['label'], font=f_); lx = max(SX0, min(bx2 - lw / 2, CX1 - lw)); ly = min(max(CY0, by2 + (-50 if by2 > ay_ else 14)), LY1 - 40)
                     d.text((lx, ly), e['label'], font=f_, fill=col, stroke_width=3, stroke_fill=(0, 0, 0))
         # the gia hien tai ben phai
-        yl = Y(last['c']); colL = UP if last['c'] >= last['o'] else DN
+        yl = min(Y(last['c']), LY1 - 24); colL = UP if last['c'] >= last['o'] else DN
         dashed(d, X(len(vis) - 1) + bw, CX1 + 10, yl, colL, 2, 8, 8)
         fT = F(True, 28); tag = vn(last['c']); tw = d.textlength(tag, font=fT)
         while CX1 + 18 + tw > SX1 - 4 and fT.size > 20: fT = F(True, fT.size - 2); tw = d.textlength(tag, font=fT)
@@ -413,7 +422,7 @@ def main():
             txt = e['text'].upper(); f2 = F(True, max(40, sz)); tw = d.textlength(txt, font=f2)
             while tw > TW - 60 and f2.size > 36: f2 = F(True, f2.size - 4); tw = d.textlength(txt, font=f2)
             ov = Image.new('RGBA', (W, H), (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
-            yc = (CY0 + CY1) / 2 - 70
+            yc = (CY0 + LY1) / 2 - 70
             od.rounded_rectangle([(W - tw) / 2 - 40, yc - 20, (W + tw) / 2 + 40, yc + f2.size + 40], 28, fill=(0, 0, 0, int(200 * a)))
             od.text(((W - tw) / 2, yc), txt, font=f2, fill=(*(GOLD if e.get('color') != 'red' else KEY), int(255 * a)), stroke_width=4, stroke_fill=(0, 0, 0, int(255 * a)))
             im.paste(ov, (0, 0), ov); d = ImageDraw.Draw(im)
@@ -427,9 +436,9 @@ def main():
             hl = wrap_bal(d, hook, fHk, TW - 60)[:4]; lhk = int(fHk.size * 1.18)
             kick = (news.get('kicker') or 'BẢN TIN VÀNG') + ('  ·  ' + news['date'] if news.get('date') else '')
             fK = F(True, 38); kw = d.textlength(kick, font=fK)
-            hh = lhk * len(hl) + 60; y0 = (CY0 + CY1) / 2 - hh / 2 - 10
+            hh = lhk * len(hl) + 60; y0 = (CY0 + LY1) / 2 - hh / 2 - 10
             ov = Image.new('RGBA', (W, H), (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
-            od.rectangle([0, PY0, W, PY1], fill=(*BG, int(150 * q)))
+            od.rectangle([0, PY0, W, CY1], fill=(*BG, int(150 * q)))
             od.rounded_rectangle([SX0, y0, SX1, y0 + hh], 18, fill=(*GOLD, int(245 * q)))
             od.rounded_rectangle([SX0, y0 - 74, SX0 + kw + 44, y0 - 10], 14, fill=(255, 255, 255, int(250 * q)))
             im.paste(ov, (0, 0), ov); d = ImageDraw.Draw(im)
@@ -444,7 +453,7 @@ def main():
             fHk = F(True, 88)
             while len(wrap_bal(d, hook, fHk, TW - 40)) > 3 and fHk.size > 56: fHk = F(True, fHk.size - 4)
             hl = wrap_bal(d, hook, fHk, TW - 40)[:3]; lhk = int(fHk.size * 1.2); hh = lhk * len(hl) + 56
-            y0 = (CY0 + CY1) / 2 - hh / 2 - 40
+            y0 = (CY0 + LY1) / 2 - hh / 2 - 40
             ov = Image.new('RGBA', (W, H), (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
             od.rounded_rectangle([SX0, y0, SX1, y0 + hh], 30, fill=(10, 10, 16, int(225 * q)))
             od.rounded_rectangle([SX0, y0, SX1, y0 + hh], 30, outline=(*GOLD, int(255 * q)), width=5)
@@ -455,10 +464,22 @@ def main():
         # phu de karaoke
         cur = next((s for s in wts if s[0] - 0.05 <= tv < s[1] + 0.1), None)
         if cur and t < D - TAIL:
-            ws = cur[2]; txt = ' '.join(w for _, _, w in ws); fC = F(True, 66)  # 23/11: 56->66 (QC 24h: phu de ~2.5% khung, nho tren dien thoai)
-            while len(wrap_bal(d, txt, fC, TW)) > 3 and fC.size > 40: fC = F(True, fC.size - 2)  # 3 dong x LH 87 -> dinh 1191, khong cham panel 1182
-            lines = wrap_bal(d, txt, fC, TW)[:3]; LH = int(fC.size * 1.32)
-            y = SY1 - 8 - len(lines) * LH; wi = 0   # neo day 1452, tren vung caption
+            # 28/11 chu chot: phu de nho lai (46px), toi da 2 dong, vien mong + nen toi -> net tren dien thoai
+            ws = cur[2]; txt = ' '.join(w for _, _, w in ws); fC = F(True, SUB_PX)
+            allL = wrap_bal(d, txt, fC, TW - 40); LH = int(fC.size * 1.3)
+            # dong co tu dang doc -> hien trang 2 dong chua no
+            cnt_, cw = 0, 0
+            for j, ln in enumerate(allL):
+                n_ = len(ln.split(' '))
+                if any(a_ <= tv for a_, _, _ in ws[cnt_:cnt_ + n_]): cw = j
+                cnt_ += n_
+            pg = cw // SUB_LINES; lines = allL[pg * SUB_LINES:(pg + 1) * SUB_LINES]
+            wi = sum(len(l_.split(' ')) for l_ in allL[:pg * SUB_LINES])
+            y = SY1 - 8 - len(lines) * LH
+            bwm = max(d.textlength(l_, font=fC) for l_ in lines)
+            ov = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+            ImageDraw.Draw(ov).rounded_rectangle([(W - bwm) / 2 - 24, y - 12, (W + bwm) / 2 + 24, y + len(lines) * LH + 4], 16, fill=(0, 0, 0, 170))
+            im.paste(ov, (0, 0), ov); d = ImageDraw.Draw(im)
             for j, ln in enumerate(lines):
                 x = (W - d.textlength(ln, font=fC)) / 2
                 for wd in ln.split(' '):
@@ -467,12 +488,11 @@ def main():
                     key = (s_.isupper() and len(s_) > 1) or re.match(r'^[\d.,%+\-]+$', s_ or 'x')
                     wl = d.textlength(wd, font=fC)
                     if a_ <= tv < b_ + 0.02:
-                        pq = ease(min(1.0, (tv - a_) / 0.08))
-                        d.rounded_rectangle([x - 8, y + j * LH - 4 - 4 * pq, x + wl + 8, y + j * LH + LH - 6], 12, fill=GOLD)
-                        d.text((x, y + j * LH - 4 * pq), wd, font=fC, fill=ON_ACC)
+                        d.rounded_rectangle([x - 5, y + j * LH - 2, x + wl + 5, y + j * LH + LH - 6], 8, fill=GOLD)
+                        d.text((x, y + j * LH), wd, font=fC, fill=ON_ACC)
                     else:
-                        col = (GOLD2 if key else (WHITE if tv >= a_ else (215, 220, 232)))
-                        d.text((x, y + j * LH), wd, font=fC, fill=col, stroke_width=4, stroke_fill=(0, 0, 0))
+                        col = (GOLD2 if key else (WHITE if tv >= a_ else (200, 206, 220)))
+                        d.text((x, y + j * LH), wd, font=fC, fill=col, stroke_width=1, stroke_fill=(0, 0, 0))
                     x += d.textlength(wd + ' ', font=fC)
         # ket: vong lap + theo doi
         if t >= D - TAIL:
