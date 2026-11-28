@@ -13,14 +13,17 @@ LOOK = {
     'dl': dict(robe=(86, 66, 50), long=False, pant=(34, 32, 32), acc='khan', acc_c=(66, 56, 48)),
     'dl2': dict(robe=(70, 74, 62), long=False, pant=(34, 32, 32), acc='buito', acc_c=(12, 10, 10)),
     'ds': dict(robe=(96, 104, 112), long=True, acc='buito', acc_c=(12, 10, 10), beard=True),
+    'tuong': dict(robe=(150, 112, 80), long=True, acc='tocdai', acc_c=(120, 88, 62), skin=(150, 112, 80), head=(132, 98, 70)),
+    'thinu': dict(robe=(150, 112, 80), long=True, acc='tocdai', acc_c=(14, 12, 12)),   # cung mau tuong dat (cai bay cho cu lat)
+    'gia': dict(robe=(82, 70, 58), long=True, acc='khan', acc_c=(200, 196, 186), beard=True),
     'trau': dict(robe=(60, 34, 28), long=False, pant=(30, 22, 20), acc='sung', acc_c=(200, 190, 170)),
 }
 SK = (128, 96, 76)
 
 
-def person2(im, x, fy, h, who, flip=1, ph=0.0, pose='down', ghost=0.0, lie=False, rot=0):
+def person2(im, x, fy, h, who, flip=1, ph=0.0, pose='down', ghost=0.0, lie=False, rot=0, dan=False, cui=False):
     """ve len lop rieng roi dan vao im (ho tro nam ngang, bong ma trong suot)."""
-    L = LOOK[who]; s = h / 100.0; S = int(h * 1.5)
+    L = LOOK[who]; s = h / 100.0; S = int(h * 1.5); SKc = L.get('skin', SK); HD = L.get('head', HEAD)
     lay = Image.new('RGBA', (S, S), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
     cx, cy = S / 2, S * .82          # chan nhan vat tren lop
     bob = abs(math.sin(ph * math.pi)) * 1.2 * s if ph else 0
@@ -59,19 +62,23 @@ def person2(im, x, fy, h, who, flip=1, ph=0.0, pose='down', ghost=0.0, lie=False
             sw_ = math.sin((ph + (sg > 0) * .5) * math.pi * 2) * 5 * s if ph else 0
             ex, ey = ax + sg * 3 * s + sw_, sh + 34 * s
         d.line([(ax, sh + 3 * s), (ex, ey)], fill=robe, width=int(5.5 * s))
-        d.ellipse([ex - 3 * s, ey - 3 * s, ex + 3 * s, ey + 3 * s], fill=SK)
+        d.ellipse([ex - 3 * s, ey - 3 * s, ex + 3 * s, ey + 3 * s], fill=SKc)
         if who == 'ds' and sg == flip:   # phat tran
             d.line([(ex, ey), (ex + flip * 3 * s, ey - 10 * s)], fill=(150, 120, 80), width=max(2, int(1.4 * s)))
             for j in range(6): d.line([(ex + flip * 3 * s, ey - 10 * s), (ex + flip * (j - 1) * 1.2 * s, ey + 14 * s)], fill=(214, 210, 198), width=max(1, int(.8 * s)))
+    if dan:   # dan ho cam om truoc nguc
+        d.ellipse([cx - 9 * s, sh + 16 * s, cx + 9 * s, sh + 32 * s], fill=(120, 78, 44), outline=INK, width=2)
+        d.line([(cx, sh + 18 * s), (cx + flip * 16 * s, sh - 4 * s)], fill=(90, 60, 34), width=max(2, int(2 * s)))
     # dau
-    d.line([(cx, sh), (cx, hy + r * .6)], fill=HEAD, width=int(4 * s))
+    if cui: hy += 4 * s; cx_h = cx + flip * 4 * s
+    d.line([(cx, sh), (cx, hy + r * .6)], fill=HD, width=int(4 * s))
     if L['acc'] == 'sung':   # dau trau
         d.ellipse([cx - r * 1.2, hy - r * 1.1, cx + r * 1.2, hy + r * 1.1], fill=(52, 34, 28))
         d.ellipse([cx + flip * r * .4 - r * .7, hy, cx + flip * r * .4 + r * .9, hy + r * 1.2], fill=(70, 48, 40))
         for sg in (-1, 1):
             d.polygon([(cx + sg * r * .6, hy - r * .8), (cx + sg * r * 2.4, hy - r * 1.6), (cx + sg * r * 2.0, hy - r * 2.4), (cx + sg * r * 1.2, hy - r * .9)], fill=L['acc_c'], outline=INK)
     else:
-        d.ellipse([cx - r, hy - r, cx + r, hy + r], fill=HEAD)
+        d.ellipse([cx - r, hy - r, cx + r, hy + r], fill=HD)
         c = L['acc_c']
         if L['acc'] == 'khandong':
             d.ellipse([cx - r * 1.15, hy - r * 1.05, cx + r * 1.15, hy - r * .1], fill=c, outline=(50, 56, 70), width=max(1, int(s)))
@@ -439,6 +446,120 @@ def _by_dyn(im, t, st):
     ripples(ImageDraw.Draw(im), 1190, 1500, t, col=(110, 126, 140))
 
 
+def _duong(d, im):   # duong lang luc chieu, bui tre
+    d.rectangle([0, 0, W, 1000], fill=(70, 56, 52)); d.rectangle([0, 1000, W, H], fill=(56, 46, 38))
+    for j in range(9):
+        x = j * 130 - 20; d.line([(x, 1000), (x + 30, 380)], fill=(40, 46, 34), width=10)
+        for k in range(6): d.line([(x + 30 * k / 6, 1000 - 100 * k), (x + 30 * k / 6 + 70, 960 - 100 * k)], fill=(44, 52, 36), width=5)
+
+
+def _duong_dyn(im, t, st):
+    q = min(1.0, t / max(1.0, st['dur']))
+    person2(im, 700 - 260 * q, 1300, 470, 'nk', -1, ph=t * 1.1)
+    person2(im, 860 - 260 * q, 1300, 420, 'thinu', -1, ph=t * 1.1 + .4, cui=True)
+    person2(im, 150, 1330, 500, 'tn', 1)
+
+
+def _cau(d, im):   # cau Lieu Khe dem trang
+    d.rectangle([0, 0, W, 1100], fill=(14, 18, 28)); moon(d, 820, 470, 50); river(d, 1100, H, (18, 24, 34))
+    d.arc([60, 860, 1020, 1400], 200, 340, fill=(70, 58, 46), width=40)
+    for j in range(9): d.line([(180 + j * 90, 905 - abs(4 - j) * 6), (180 + j * 90, 850 - abs(4 - j) * 6)], fill=(60, 48, 38), width=8)
+
+
+def _cau_dyn(im, t, st):
+    ripples(ImageDraw.Draw(im), 1120, 1500, t)
+    person2(im, 560, 920, 360, 'nk', 1, dan=True)
+    person2(im, 700, 916, 330, 'thinu', -1, cui=True)
+    if st.get('tn'): person2(im, 140, 1320, 520, 'tn', 1, pose='point' if t > 1.5 else 'down')
+
+
+def _toi_dyn(im, t, st):   # nha toi om: chi thay vien quan tai mo
+    d = ImageDraw.Draw(im); d.rectangle([0, 0, W, H], fill=(8, 8, 8))
+    person2(im, 300, 1290, 520, 'tn', 1)
+
+
+def _tuong_dyn(im, t, st):
+    _qt_dyn(im, t, st)
+    person2(im, 880, 1110, 380, 'tuong', -1, dan=True, cui=True)
+
+
+def _baisong_post(im, t, st):
+    person2(im, 760, 1250, 470, 'nk', -1, ghost=.32 + .12 * math.sin(t * 1.5))
+
+
+def _baisong_dyn(im, t, st):
+    ripples(ImageDraw.Draw(im), 910, 1150, t, n=16)
+
+
+def _thuyen_trong(im, t, st):
+    d = ImageDraw.Draw(im); ripples(d, 1010, 1500, t); boat(d, 540, 1170, 620)
+    d.line([(380, 1150), (460, 1130), (520, 1160)], fill=(170, 150, 110), width=6)   # day troi bo lai
+
+
+def _riu_dyn(im, t, st):
+    _gao_dyn(im, t, st)
+    sw = (t * 1.4) % 1
+    a = -60 + 100 * min(1.0, sw * 2.5)
+    person2(im, 610, 1330, 500, 'dl', -1, pose='reach')
+    d = ImageDraw.Draw(im); hx, hy = 520, 1030
+    ex, ey = hx + 120 * math.cos(math.radians(a + 180)), hy + 120 * math.sin(math.radians(a + 180))
+    d.line([(hx, hy), (ex, ey)], fill=(110, 84, 54), width=10)
+    if sw < .5: d.polygon([(ex, ey), (ex - 20, ey - 30), (ex + 20, ey - 30)], fill=(170, 170, 170))
+    else:   # rìu gãy
+        d.polygon([(470, 1000), (450, 960), (490, 970)], fill=(170, 170, 170))
+
+
+def _riu_post(im, t, st):
+    sw = (t * 1.4) % 1
+    if .38 < sw < .5:
+        d = ImageDraw.Draw(im)
+        for k in range(10):
+            a = k * 36; d.line([(450, 1000), (450 + 70 * math.cos(math.radians(a)), 1000 + 70 * math.sin(math.radians(a)))], fill=(255, 230, 160), width=4)
+
+
+def _gocua_post(im, t, st):
+    a = .3 + .1 * math.sin(t * 2)
+    person2(im, 700, 1200, 360, 'tn', 1, ghost=a); person2(im, 780, 1200, 330, 'nk', 1, ghost=a, pose='reach')
+
+
+def _gocua_dyn(im, t, st):
+    d = ImageDraw.Draw(im); d.rectangle([780, 1040, 860, 1180], fill=(240, 190, 110))   # den trong chua
+    kapok(im, 300, 1200, t, 1.0)
+
+
+def _onggia_dyn(im, t, st):
+    person2(im, 330, 1330, 520, 'gia', 1, pose='point'); person2(im, 760, 1330, 560, 'ds', -1)
+
+
+def _bua_dyn(im, t, st):
+    _te_dyn(im, t, st)
+    d = ImageDraw.Draw(im)
+    for j in range(3): d.rectangle([420 + j * 70, 1010, 460 + j * 70, 1080], fill=(230, 200, 60), outline=(150, 40, 30), width=3)
+    fl = 40 + 14 * math.sin(t * 13)
+    d.polygon([(780, 1050), (800, 1050 - fl * 2), (820, 1050)], fill=(255, 170, 60)); d.polygon([(788, 1050), (800, 1050 - fl), (812, 1050)], fill=(255, 236, 160))
+
+
+def _nui(d, im):
+    d.rectangle([0, 0, W, H], fill=(110, 116, 132))
+    for k, (y, c) in enumerate([(820, (84, 92, 110)), (930, (66, 74, 90)), (1040, (50, 58, 70))]):
+        pts = [(0, H)] + [(x, y - 120 * abs(math.sin(x / 210 + k))) for x in range(0, W + 1, 60)] + [(W, H)]
+        d.polygon(pts, fill=c)
+    d.polygon([(0, H), (W, H), (600, 1050), (560, 1050)], fill=(70, 66, 60))
+
+
+def _nui_dyn(im, t, st):
+    q = min(1.0, t / max(1.0, st['dur']))
+    person2(im, 600 - 30 * q, 1500 - 420 * q, 460 * (1 - .65 * q), 'ds', 1, ph=t * 1.1)
+
+
+def _onggia2_dyn(im, t, st):
+    person2(im, 330, 1330, 520, 'gia', 1, pose='point'); person2(im, 760, 1330, 540, 'tn', -1)
+
+
+def _trau_dyn2(im, t, st):
+    _trau_dyn(im, t, st)
+
+
 def register(SCENES, CAM):
     M = lambda x, y, r, k=1.0: (x, y, r, MOON, k)
     Wm = lambda x, y, r, k=1.0: (x, y, r, WARM, k)
@@ -465,12 +586,27 @@ def register(SCENES, CAM):
     mk('g_cay', 33, (16, 18, 24), _gao_chua, [M(900, 720, 300, .8), (380, 820, 480, (.9, .55, .5), .7)], A, _gao_dyn, _gao_post, st={'hon': True}, cam=(1.0, 540, 960))
     mk('g_daosi', 33, (16, 18, 24), _gao_chua, [M(900, 720, 300, .8), (380, 820, 480, (.9, .55, .5), .7)], A, _ds_dyn, _gao_post, st={'hon': True, 'chi': True}, cam=(1.0, 540, 960))
     mk('g_dante', 34, (20, 18, 18), _dan_te, [Wm(540, 980, 420, 1.4)], A, _te_dyn, cam=(1.05, 540, 1060))
-    mk('g_bao', 35, (8, 10, 14), _bao, [(540, 400, 600, (.6, .66, .8), .5)], (0.12, 0.12, 0.16), _bao_dyn, _bao_post)
+    mk('g_bao', 35, (8, 10, 14), _bao, [(540, 400, 600, (.6, .66, .8), .8), (420, 1000, 500, (.6, .66, .8), .6)], (0.2, 0.2, 0.26), _bao_dyn, _bao_post)
     mk('g_trau', 36, (12, 10, 10), _trau, [(540, 1000, 600, (.9, .4, .3), .8)], (0.1, 0.07, 0.07), _trau_dyn, _trau_post, cam=(1.05, 540, 1060))
     mk('g_tuchoi', 37, (64, 70, 84), _tu_choi, [(560, 800, 700, (.8, .82, .9), .7)], (0.42, 0.44, 0.5), _tc_dyn)
     mk('g_binhyen', 38, (96, 104, 120), _binh_yen, [(540, 500, 800, (1.0, .9, .78), .6)], (0.5, 0.52, 0.58), _by_dyn)
     mk('g_cay2', 33, (16, 18, 24), _gao_chua, [M(900, 720, 300, .8), (380, 820, 480, (.9, .55, .5), .7)], A, _gao_dyn, cam=(1.0, 540, 960))
     mk('g_quantai_ma', 27, (30, 30, 30), _quan_tai, [(560, 980, 360, COLDG, 1.1)], (0.1, 0.12, 0.12), _qt_dyn, _qt_post, st={'hon': True}, cam=(1.3, 560, 1020))
+    mk('g_duong', 41, (70, 56, 52), _duong, [(700, 600, 700, (1.0, .8, .62), .9)], (0.3, 0.27, 0.27), _duong_dyn, cam=(1.05, 520, 1020))
+    mk('g_cau', 42, (14, 18, 28), _cau, [M(820, 470, 340, 1.0), M(600, 900, 360, .6)], A, _cau_dyn, cam=(1.05, 540, 1000))
+    mk('g_cau_tn', 42, (14, 18, 28), _cau, [M(820, 470, 340, 1.0), M(600, 900, 360, .6)], A, _cau_dyn, st={'tn': True}, cam=(1.05, 520, 1020))
+    mk('g_toi', 27, (8, 8, 8), _quan_tai, [(560, 1000, 200, COLDG, .25)], (0.05, 0.05, 0.06), _toi_dyn, cam=(1.1, 480, 1060))
+    mk('g_tuong', 27, (30, 30, 30), _quan_tai, [(560, 980, 380, COLDG, 1.1), Wm(880, 900, 220, .6)], (0.1, 0.12, 0.12), _tuong_dyn, st={'tn': True}, cam=(1.05, 560, 1050))
+    mk('g_tuong_cl', 27, (30, 30, 30), _quan_tai, [(700, 980, 380, COLDG, 1.0), (880, 900, 260, COLDG, .6)], (0.08, 0.1, 0.1), _tuong_dyn, cam=(1.7, 860, 900))
+    mk('g_niu', 27, (30, 30, 30), _quan_tai, [(560, 980, 360, COLDG, 1.1)], (0.1, 0.12, 0.12), _qt_dyn, st={'tn': True, 'nk': True}, cam=(1.35, 300, 1020))
+    mk('g_baisong', 22, (20, 22, 30), _bo_song, [M(240, 430, 380, 1.0)], A, _baisong_dyn, _baisong_post, cam=(1.08, 600, 1000))
+    mk('g_thuyen_trong', 23, (14, 16, 22), _thuyen_dem, [M(860, 380, 300, .8)], (0.16, 0.17, 0.22), _thuyen_trong, cam=(1.15, 540, 1060))
+    mk('g_riu', 33, (16, 18, 24), _gao_chua, [M(900, 720, 300, .8), (380, 820, 480, (.9, .55, .5), .7)], A, _riu_dyn, _riu_post, cam=(1.05, 480, 980))
+    mk('g_gocua', 33, (16, 18, 24), _gao_chua, [M(900, 720, 300, .6), Wm(820, 1100, 260, 1.0)], A, _gocua_dyn, _gocua_post, cam=(1.2, 700, 1040))
+    mk('g_onggia', 37, (64, 70, 84), _tu_choi, [(560, 800, 700, (.8, .82, .9), .7)], (0.42, 0.44, 0.5), _onggia_dyn, cam=(1.05, 540, 1050))
+    mk('g_bua', 34, (20, 18, 18), _dan_te, [Wm(540, 980, 420, 1.4), Wm(800, 1000, 200, 1.0)], A, _bua_dyn, cam=(1.05, 560, 1060))
+    mk('g_vaonui', 43, (110, 116, 132), _nui, [(540, 500, 800, (1.0, .9, .8), .5)], (0.5, 0.52, 0.58), _nui_dyn)
+    mk('g_onggia2', 41, (70, 56, 52), _duong, [(700, 600, 700, (.85, .85, .9), .8)], (0.36, 0.36, 0.4), _onggia2_dyn, cam=(1.05, 540, 1050))
     mk('g_bia1', 27, (30, 30, 30), _quan_tai, [(560, 980, 360, COLDG, 1.1)], (0.1, 0.12, 0.12), _qt_dyn, _qt_post, st={'tn': True, 'hon': True}, cam=(1.05, 560, 1050))
     mk('g_bia2', 29, (36, 32, 28), _giuong, [Wm(880, 980, 380, 1.2)], (0.12, 0.11, 0.12), _giuong_dyn, _giuong_post, st={'hon': True}, cam=(1.08, 540, 1000))
     mk('g_bia3', 33, (16, 18, 24), _gao_chua, [M(900, 720, 300, .8), (380, 820, 480, (.9, .55, .5), .7)], A, _gao_dyn, _gao_post, st={'hon': True})

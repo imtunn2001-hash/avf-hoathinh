@@ -292,6 +292,24 @@ CAM = {'quan': (1.15, 560, 1000), 'quan_vao': (1.15, 600, 1000), 'quan_hai': (1.
        'mua_phan': (1.35, 470, 1010), 'quan_an': (1.05, 640, 1050), 'sang_me': (1.1, 640, 1000)}
 
 
+def make_amb(path, D, hits, sr=44100):
+    """nen am thanh dem (tu tao): u tram 2 tang song + gio nau loc thap, phong to dan; 'thinh' trầm o canh danh dau '!'."""
+    import wave
+    n = int(D * sr); t = np.arange(n) / sr; rng = np.random.default_rng(5)
+    lfo = 0.6 + 0.4 * np.sin(2 * np.pi * t / 9.0)
+    drone = (np.sin(2 * np.pi * 55 * t) * .5 + np.sin(2 * np.pi * 82.4 * t + 1) * .3 + np.sin(2 * np.pi * 110.3 * t) * .12) * lfo * .16
+    wn = np.cumsum(rng.normal(0, 1, n)); wn -= np.convolve(wn, np.ones(4000) / 4000, 'same'); wn /= (np.abs(wn).max() + 1e-6)
+    wind = wn * (0.5 + 0.5 * np.sin(2 * np.pi * t / 13.0 + 2)) * .12
+    x = drone + wind
+    for h in hits:
+        i0 = int(h * sr); L = int(2.2 * sr); tt = np.arange(min(L, n - i0)) / sr
+        if len(tt) <= 0: continue
+        x[i0:i0 + len(tt)] += np.sin(2 * np.pi * (48 - 14 * tt) * tt) * np.exp(-tt * 2.2) * .9
+    fade = np.minimum(1, t / 1.5) * np.minimum(1, (D - t) / 2.0); x = np.clip(x * fade, -1, 1)
+    y = (np.stack([x, x], 1) * 32767 * .8).astype(np.int16)
+    with wave.open(path, 'wb') as w: w.setnchannels(2); w.setsampwidth(2); w.setframerate(sr); w.writeframes(y.tobytes())
+
+
 def wrap(d, s, f, mw):
     out, cur = [], ''
     for w in s.split():
@@ -347,7 +365,7 @@ def main():
 
     def get_scene(name):
         if name not in built:
-            obj, st = SCENES[name](); built[name] = (obj, st)
+            obj, st = SCENES[name.rstrip('!')](); built[name] = (obj, st)
         return built[name]
 
     def render_scene(k, t):
@@ -360,7 +378,7 @@ def main():
         arr += np.repeat(np.repeat(g, 2, 0), 2, 1)
         out = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
         if hasattr(obj, 'post'): obj.post(out, lt, st)   # bong ma / chop sang ve SAU anh sang
-        z0, cx, cy = CAM.get(name, (1.0, 540, 960)); q = lt / max(1.0, b - a); z = z0 * (1 + .07 * q)
+        z0, cx, cy = CAM.get(name.rstrip('!'), (1.0, 540, 960)); q = lt / max(1.0, b - a); z = z0 * (1 + .07 * q)
         w, h = W / z, H / z; x0 = min(max(0, cx - w / 2), W - w); y0 = min(max(0, cy - h / 2), H - h)
         return out.resize((W, H), Image.BILINEAR, box=(x0, y0, x0 + w, y0 + h))
 
@@ -393,10 +411,9 @@ def main():
                 x = (W - od.textlength(ln, font=fH)) / 2
                 od.text((x, y0 + j * lh), ln, font=fH, fill=(255, 226, 160, int(255 * a_)), stroke_width=5, stroke_fill=(0, 0, 0, int(255 * a_)))
             im.paste(ov, (0, 0), ov)
-        cur = next((s_ for s_ in segs if s_[0] - .05 <= t < s_[1] + .25), None)
-        if cur and hk and t < hook_end - .35: cur = None
+        cur = next((s_ for s_ in reversed(segs) if s_[0] - .12 <= t < s_[1] + .25), None)   # 28/11: phu de ra TRUOC loi 0,12s, khong mo dan
         if cur:
-            d = ImageDraw.Draw(im); a_ = min(1.0, (t - cur[0] + .05) / .25) * min(1.0, (cur[1] + .25 - t) / .2)
+            d = ImageDraw.Draw(im); a_ = min(1.0, (cur[1] + .25 - t) / .15)
             ls = wrap(d, cur[2], fS, 760)[:3]; y = 1444 - len(ls) * 56
             ov = Image.new('RGBA', (W, H), (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
             for j, ln in enumerate(ls):
@@ -416,8 +433,7 @@ def main():
     for fi in range(int(D * FPS)): p.stdin.write(frame(fi / FPS).tobytes())
     p.stdin.close(); p.wait()
     # ---- am thanh: giong + nen dem (gio + de keu nhe tu tao) ----
-    amb = os.path.join(OUT, 'amb.wav')
-    subprocess.check_call(['ffmpeg', '-y', '-v', 'error', '-f', 'lavfi', '-i', f'anoisesrc=c=brown:a=0.05:d={D:.2f}', '-af', 'lowpass=f=500,volume=0.5', '-ar', '44100', '-ac', '2', amb])
+    amb = os.path.join(OUT, 'amb.wav'); make_amb(amb, D, [a for a, b, n in spans if n.endswith('!')])
     tmp = os.path.join(OUT, 'out.tmp.mp4')
     if parts:
         lst = os.path.join(OUT, 'vlist.txt'); open(lst, 'w').write(''.join(f"file '{x}'\n" for x in parts))
@@ -425,7 +441,7 @@ def main():
         subprocess.check_call(['ffmpeg', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', lst, '-c', 'copy', voice])
         mus = os.path.join(ROOT, 'editor', 'story', sp.get('music', 'music_b.mp3'))
         ins = ['-i', voice, '-i', amb] + (['-stream_loop', '-1', '-i', mus] if os.path.exists(mus) else [])
-        mix = '[1:a]adelay=300|300[v];[2:a]volume=0.6[n];' + ('[3:a]volume=0.05[m];[v][n][m]amix=inputs=3' if os.path.exists(mus) else '[v][n]amix=inputs=2') + \
+        mix = '[1:a]adelay=300|300[v];[2:a]volume=0.9[n];' + ('[3:a]volume=0.05[m];[v][n][m]amix=inputs=3' if os.path.exists(mus) else '[v][n]amix=inputs=2') + \
               ':duration=longest:normalize=0,apad,loudnorm=I=-16:TP=-1.5[a]'
     else:
         ins = ['-i', amb]; mix = '[1:a]anull[a]'
