@@ -46,7 +46,7 @@ def vignette():
 
 
 VIG = vignette()
-GRAIN = [np.random.default_rng(i).normal(0, 6, (H // 2, W // 2, 1)).astype(np.float32) for i in range(6)]
+GRAIN = [np.random.default_rng(i).normal(0, 3.5, (H // 2, W // 2, 1)).astype(np.float32) for i in range(4)]
 
 
 def person(d, x, fy, h, kind, flip=1, ph=0.0, pose='down', bow=0.0):
@@ -349,7 +349,7 @@ def main():
         arr = np.asarray(im).astype(np.float32) * obj.L * 1.15
         flick = 1 + 0.025 * math.sin(t * 9.1) * math.sin(t * 3.7)
         arr = arr * flick * VIG
-        g = GRAIN[int(t * FPS) % len(GRAIN)]; arr += np.repeat(np.repeat(g, 2, 0), 2, 1)
+        g = GRAIN[int(t * FPS / 3) % len(GRAIN)]   # hat phim doi 10 lan/giay (nhe file); arr += np.repeat(np.repeat(g, 2, 0), 2, 1)
         out = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
         z0, cx, cy = CAM.get(name, (1.0, 540, 960)); q = lt / max(1.0, b - a); z = z0 * (1 + .07 * q)
         w, h = W / z, H / z; x0 = min(max(0, cx - w / 2), W - w); y0 = min(max(0, cy - h / 2), H - h)
@@ -386,7 +386,7 @@ def main():
         print('spans', [(round(a, 1), n) for a, b, n in spans], 'D', round(D, 1)); return
     raw = os.path.join(OUT, 'v_tmp.mp4')
     p = subprocess.Popen(['ffmpeg', '-y', '-v', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-                          '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
+                          '-c:v', 'libx264', '-preset', 'medium', '-crf', '21', '-maxrate', '6M', '-bufsize', '12M', '-pix_fmt', 'yuv420p', raw], stdin=subprocess.PIPE)
     for fi in range(int(D * FPS)): p.stdin.write(frame(fi / FPS).tobytes())
     p.stdin.close(); p.wait()
     # ---- am thanh: giong + nen dem (gio + de keu nhe tu tao) ----
