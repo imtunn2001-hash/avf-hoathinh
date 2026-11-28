@@ -649,9 +649,18 @@ def split_lines(txt, maxc=28):
     return lines
 
 
+STYLE = ''   # 28/11: 'cck2' = Chuyen Chua Ke dang moi (phu de vang vien den karaoke, it mau, vien manh, nhan vat nho, anh bia khung dau)
+SUBF = 'Montserrat, Be Vietnam Pro, Inter'
+YEL = '#ffd21f'
+
+
+def sub_fs():
+    return 44 if FMT == 'square' else (44 if STYLE == 'cck2' else 50)
+
+
 def sub_top(txt):
     if not txt: return H
-    lines = split_lines(txt, 28); fs = 44 if FMT == 'square' else 50
+    lines = split_lines(txt, 30 if STYLE == 'cck2' else 28); fs = sub_fs()
     while max(len(l) for l in lines) * fs * .56 > (900 if FMT == 'square' else TW) and fs > 40: fs -= 2
     bot = 1052 if FMT == 'square' else SAFE[3] - 12
     return bot - fs * 1.3 * len(lines) - 16
@@ -660,6 +669,7 @@ def sub_top(txt):
 def sub_svg(txt, cur=None, tv=None):
     """cur=(a,b,txt), tv: 23/11 chu nhay theo tu: tu da doc sang ro, tu dang doc nhac len + vang, tu chua doc mo 45%."""
     if not txt: return ''
+    if STYLE == 'cck2': return sub_cck2(txt, cur, tv)
     lines = split_lines(txt, 28); fs = 44 if FMT == 'square' else 50
     while max(len(l) for l in lines) * fs * .56 > (900 if FMT == 'square' else TW) and fs > 40: fs -= 2
     lh = fs * 1.3; bot = 1052 if FMT == 'square' else SAFE[3] - 12; x0, x1 = (60, 1020) if FMT == 'square' else (SAFE[0], SAFE[2]); y0 = bot - lh * len(lines)
@@ -687,6 +697,79 @@ def sub_svg(txt, cur=None, tv=None):
                 spans.append(f'<tspan fill="{"#ffd400" if yel else "#fff"}" fill-opacity="{op}">{esc(w.replace(JN, " "))}</tspan>')
         out.append(f'<text xml:space="preserve" x="540" y="{f_(y0 + fs + j * lh)}" font-family="{FONT}" font-weight="800" font-size="{fs}" text-anchor="middle" stroke="#111" stroke-width="5" paint-order="stroke">{" ".join(spans)}</text>')
     return ''.join(out)
+
+
+def sub_cck2(txt, cur=None, tv=None):
+    """28/11 chu chot CCK: chu VANG ro, vien DEN, KHONG khung mo; karaoke: doc toi chu nao chu do sang TRANG (nhac nhe)."""
+    lines = split_lines(txt, 30); fs = sub_fs()
+    while max(len(l) for l in lines) * fs * .6 > TW and fs > 36: fs -= 2
+    lh = fs * 1.28; bot = SAFE[3] - 12; y0 = bot - lh * len(lines)
+    allw = txt.split(); wt = None; ci = -1
+    if cur is not None and tv is not None:
+        wt = fx.word_times(allw, cur[0], cur[1]); ci = max([i for i, t0 in enumerate(wt) if t0 <= tv] or [-1])
+    out = []; wi = 0
+    for j, ln in enumerate(lines):
+        spans = []
+        for w in ln.split(' '):
+            i_ = wi; wi += 1; ww = esc(w.replace(JN, ' '))
+            if i_ == ci and wt is not None:
+                q = max(0.0, min(1.0, (tv - wt[i_]) / .14)); lift = 5 * (1 - q * q)
+                spans.append(f'<tspan fill="#ffffff" dy="{f_(-lift)}">{ww}</tspan><tspan dy="{f_(lift)}"></tspan>')
+            else:
+                spans.append(f'<tspan fill="{YEL}">{ww}</tspan>')
+        out.append(f'<text xml:space="preserve" x="540" y="{f_(y0 + fs + j * lh)}" font-family="{SUBF}" font-weight="800" font-size="{fs}" text-anchor="middle" '
+                   f'stroke="#000" stroke-width="{f_(fs * .2)}" stroke-linejoin="round" paint-order="stroke">{" ".join(spans)}</text>')
+    return ''.join(out)
+
+
+def cover_cck2(sp, q):
+    """ANH BIA khung dau (0-2,5 s) cho CCK: chu hook to giua man hinh noi ro noi dung, nhan PHAN, nen lam toi nhe."""
+    if q <= 0: return ''
+    txt = sp.get('hook_text', ''); sub = sp.get('cover_sub', '')
+    fs = 104
+    while True:
+        maxc = max(6, int((TW + 40) / (fs * .64)))
+        lines = split_lines(txt.upper(), maxc)
+        if (len(lines) <= 3 and max(len(l) for l in lines) <= maxc) or fs <= 56: break
+        fs -= 4
+    lh = fs * 1.12; top = 640
+    o = [f'<g opacity="{f_(q)}"><defs><radialGradient id="cvg" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#000" stop-opacity=".35"/>'
+         f'<stop offset="1" stop-color="#000" stop-opacity=".78"/></radialGradient></defs><rect x="0" y="0" width="{W}" height="{H}" fill="url(#cvg)"/>']
+    b = sp.get('badge', '')
+    if b:
+        bw = 30 * .7 * len(b) + 60
+        o.append(f'<rect x="{f_(540 - bw / 2)}" y="550" width="{f_(bw)}" height="58" rx="29" fill="#c4281f"/>'
+                 f'<text x="540" y="591" font-family="{SUBF}" font-weight="800" font-size="32" fill="#fff" text-anchor="middle">{esc(b)}</text>')
+    for j_, ln in enumerate(lines):
+        o.append(f'<text x="540" y="{f_(top + fs + j_ * lh)}" font-family="{SUBF}" font-weight="900" font-size="{fs}" fill="{YEL}" text-anchor="middle" '
+                 f'stroke="#000" stroke-width="{f_(fs * .16)}" stroke-linejoin="round" paint-order="stroke">{esc(ln)}</text>')
+    if sub:
+        o.append(f'<text x="540" y="{f_(top + lh * len(lines) + 70)}" font-family="{SUBF}" font-weight="700" font-size="48" fill="#fff" text-anchor="middle" '
+                 f'stroke="#000" stroke-width="8" paint-order="stroke">{esc(sub)}</text>')
+    return ''.join(o) + '</g>'
+
+
+_SW = re.compile(r'stroke="#111"( [^>]*?)?stroke-width="([\d.]+)"')
+
+
+def mute_world(w):
+    """cck2: vien manh lai (x0.5). Mau giam bang bo loc #mute boc ngoai."""
+    return _SW.sub(lambda m: f'stroke="#111"{m.group(1) or ""}stroke-width="{float(m.group(2)) * .5:.1f}"', w)
+
+
+MUTE_DEFS = ('<defs><filter id="mute" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="'
+             '0.55 0.30 0.10 0 0.01  0.22 0.62 0.10 0 0.01  0.18 0.26 0.48 0 0  0 0 0 1 0"/></filter></defs>')
+
+
+def dust_cck2(tt):
+    """hat bui bay cham trong anh den (them chuyen dong nen)"""
+    o = []
+    for k in range(26):
+        r = random.Random(k); x = (r.uniform(0, W) + tt * r.uniform(-14, 14)) % W
+        y = (r.uniform(300, 1500) - tt * r.uniform(8, 26)) % 1300 + 260
+        a = .10 + .14 * (.5 + .5 * osc(tt, r.uniform(.2, .6), r.random()))
+        o.append(f'<circle cx="{f_(x)}" cy="{f_(y)}" r="{f_(r.uniform(1.6, 4.2))}" fill="#fff6dc" opacity="{f_(a)}"/>')
+    return ''.join(o)
 
 
 def hook_svg(txt, q):
@@ -755,11 +838,12 @@ def frame_svg(fi):
         if sh['type'] == 'items': world = DD.items_world(sh, ts, dk)
         z, cx, cy = DD.cam(sh, ts, dk, (z, cx, cy))
     tags = CH.TAGS; CH.TAGS = None
+    if STYLE == 'cck2': world = f'<g filter="url(#mute)">{mute_world(world)}</g>'; z = z * .92
     r = random.Random(fi); ox = r.uniform(-shake, shake); oy = r.uniform(-shake, shake)
     Y0 = 600 if FMT == 'square' else 830
     if FMT == 'square': cy = GROUND.get(sh['type'], cy) - 170 / z
     cam = f'translate({f_(540 + ox)} {f_(Y0 + oy)}) scale({f_(z)}) translate({f_(-cx)} {f_(-cy)})'
-    o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}"><rect width="{W}" height="{H}" fill="#2a2a30"/>']
+    o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}"><rect width="{W}" height="{H}" fill="#2a2a30"/>' + (MUTE_DEFS if STYLE == 'cck2' else '')]
     # 23/11 chuyen canh whip (chi khi doi boi canh): 0.12s cuoi canh cu + 0.16s dau canh moi, nhoe ngang theo huong lao
     TA, TB = .12, .16; wp = None
     if not sp.get('no_whip'):
@@ -787,10 +871,12 @@ def frame_svg(fi):
                 if shk['type'] == 'items': wk = DD.items_world(shk, tk, dk_)
                 zk, cxk, cyk = DD.cam(shk, tk, dk_, (zk, cxk, cyk))
             if FMT == 'square': cyk = GROUND.get(shk['type'], cyk) - 170 / zk
+            if STYLE == 'cck2': wk = f'<g filter="url(#mute)">{mute_world(wk)}</g>'; zk = zk * .92
             camk = f'translate(540 {f_(Y0)}) scale({f_(zk)}) translate({f_(-cxk)} {f_(-cyk)})'   # moi canh bi cat dung khung roi moi truot
             o.append(f'<g filter="url(#mb)"><g transform="translate({f_(off)} 0)"><g clip-path="url(#cw)"><g transform="{camk}">{wk}</g></g></g></g>')
         tags = []
     if DD: o.append(DD.overlay(sh, tt, z, cx, W, H)); o.append(DD.so_svg(sh, ts, W))
+    if STYLE == 'cck2': o.append(dust_cck2(tt))
     if flash > 0: o.append(f'<rect width="{W}" height="{H}" fill="#fff" opacity="{f_(min(.6, flash))}"/>')   # loe trang DUOI lop chu
     o.append(header_svg(sp))
     hooking = bool(sp.get('hook_text')) and tv < 2.6
@@ -803,7 +889,9 @@ def frame_svg(fi):
         bot = (sub_top(cur[2]) - 8) if cur else H - 20
         o.append(tags_svg(tags, z, cx, cy, 540 + ox, Y0 + oy, top, bot))
     if cur: o.append(sub_svg(cur[2], cur, tv))
-    if hooking: o.append(hook_svg(sp.get('hook_text', ''), 1.0 if tv < 2.3 else max(0, 1 - (tv - 2.3) / .3)))
+    if hooking:
+        hq = 1.0 if tv < 2.3 else max(0, 1 - (tv - 2.3) / .3)
+        o.append(cover_cck2(sp, hq) if STYLE == 'cck2' else hook_svg(sp.get('hook_text', ''), hq))
     if tt >= D - TAIL: o.append(end_svg(sp, ease((tt - (D - TAIL)) / .35)))
     o.append('</svg>')
     return ''.join(o)
@@ -819,7 +907,9 @@ DD = None   # 24/11 dao dien (editor/dao_dien.py) khi spec.dao_dien = true
 
 def _init(g):
     global FMT, W, H, DD
+    global STYLE
     G.update(g); FMT = g.get('fmt', 'vertical'); W, H = (1080, 1080) if FMT == 'square' else (1080, 1920)
+    STYLE = g.get('sp', {}).get('style', '')
     if g.get('sp', {}).get('dao_dien', True):   # 25/11 chu chot: dung kieu moi cho moi kenh hoat hinh (CCK, KSC, LT); spec.dao_dien=false de tat
         import dao_dien as DD
         DD.install_bg()
@@ -829,6 +919,7 @@ def _init(g):
         import vh_svg; vh_svg.install(sys.modules[__name__])
     if g.get('sp', {}).get('chars') == 'roinuoc':
         import rn_chars; rn_chars.install(sys.modules[__name__], g['sp'].get('cast'))
+        if STYLE == 'cck2': rn_chars.SCALE, rn_chars.ANIM = .78, 1.8
 
 
 TRIM = ('silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.04,areverse,'
@@ -865,6 +956,8 @@ def tts_shots(sp):
     def one(i):
         sh = sp['shots'][i]; src = sh.get('tts') or sh['say']
         # 24/11: ky hieu ngat nghi (skill giong-doc-ngat-nghi) -> W87 v3. Giu nguyen [nghỉ x] khi doi so -> chu.
+        if sp.get('style') == 'cck2':   # 28/11: giu 1 tong giong - bo cac ky hieu doi cao do ({hạ:} {cao:} {nhấn:}), chi giu nhip nghi va {chậm:}
+            src = re.sub(r'\{(?:hạ|cao|nhấn)\s*:\s*([^}]*)\}', r'\1', src)
         txt = ''.join(x if re.fullmatch(r'\[nghỉ\s*[\d.,]+\s*\]', x) else doc_so.doc_tts(x) for x in re.split(r'(\[nghỉ\s*[\d.,]+\s*\])', src))
         body = json.dumps({'text': txt, 'speed': sp.get('speed', 1.0), 'tag': f"{sp.get('tag', 'ksc')}-{i}"}).encode()
         for k in range(3):

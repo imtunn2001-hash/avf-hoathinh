@@ -97,7 +97,7 @@ def doc_tts(text):
         if pre.lower().startswith('mồng'): dd = dd.replace('mồng ', '')
         return f'{pre}{dd} tháng {_thang(m[3])}'
     t = re.sub(r'((?:[Mm]ồng) )?\b(\d{1,2})/(\d{1,2})\b(?!/)', _dm, t)   # d/m
-    t = re.sub(r'\b[Tt]háng (\d{1,2})/(\d{3,4})\b', lambda m: f'tháng {_thang(m[1])} năm {so_chu(m[2])}', t)
+    t = re.sub(r'\b([Tt])háng (\d{1,2})/(\d{3,4})\b', lambda m: f'{m[1]}háng {_thang(m[2])} năm {so_chu(m[3])}', t)   # 28/11 giu chu hoa dau cau
     # gio: 19:19:51, 19:20, 17h05, 7h
     t = re.sub(r'\b(\d{1,2}):(\d{2}):(\d{2})\b', lambda m: f'{so_chu(m[1])} giờ {so_chu(m[2])} phút {so_chu(m[3])} giây', t)
     t = re.sub(r'\b(\d{1,2}):(\d{2})\b', lambda m: f'{so_chu(m[1])} giờ' + ((f' {so_chu(m[2])}' + (' phút' if int(m[2]) < 10 else '')) if int(m[2]) else ''), t)

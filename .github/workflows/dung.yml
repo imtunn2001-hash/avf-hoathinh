@@ -22,6 +22,7 @@ jobs:
           pip install -q numpy pillow
           mkdir -p ~/.local/share/fonts
           for w in SemiBold Bold ExtraBold; do curl -fsSL --max-time 60 -o ~/.local/share/fonts/BeVietnamPro-$w.ttf https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-$w.ttf || true; done
+          cp ent/editor/fonts/*.ttf ~/.local/share/fonts/ 2>/dev/null || true   # 28/11: Montserrat cho phu de CCK cck2
           fc-cache -f >/dev/null 2>&1 || true
       - name: Lay ban thu da duyet (up-<tag release>) thay vi dung lai
         if: startsWith(inputs.job_id, 'up-')

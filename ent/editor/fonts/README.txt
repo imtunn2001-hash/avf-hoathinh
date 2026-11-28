@@ -1,3 +1,4 @@
 Font chu video (27/11): Fira Sans (Black/ExtraBold/SemiBold) va Barlow Condensed ExtraBold.
 Ca hai la Google Fonts, giay phep SIL Open Font License 1.1 (OFL), du dau tieng Viet.
 Lora-Variable.ttf: Lora (Cyreal), SIL Open Font License 1.1 – chu co chan cho MNMB dang moi (mnmb2.py, 28/11).
+Montserrat-Variable.ttf: Montserrat, SIL OFL 1.1 – phu de/anh bia CCK dang cck2 (28/11).

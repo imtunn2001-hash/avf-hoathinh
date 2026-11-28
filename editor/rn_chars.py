@@ -257,12 +257,19 @@ def _head(c, hx, hy, rx, ry, D, facing):
     return ''.join(back), ''.join(front), extra
 
 
+SCALE, ANIM = 1.0, 1.0   # 28/11 CCK dang cck2: nhan vat nho lai (0.78), cu dong nhieu hon (ANIM 1.8)
+
+
 def character(name, x, y, D, facing=1, expr='normal', hands=None, head_rot=0.0, lean=0.0, tag=True, t=0.0, hidden_below=None):
+    D = D * SCALE
     c = dict(CH.CHARS.get(name) or EXTRA[name]); s = D / 150; ow = D * .045
     tq = int(t * 12) / 12.0                       # nhip giat kieu roi
     seed = sum(map(ord, name))
-    bob = math.sin(t * 4.2 + seed) * D * .035      # nhap nho tren mat nuoc
-    sway = math.sin(t * 2.1 + seed * .7) * 2.2 + lean
+    bob = math.sin(t * 4.2 + seed) * D * .035 * ANIM      # nhap nho tren mat nuoc
+    sway = math.sin(t * 2.1 + seed * .7) * 2.2 * ANIM + lean
+    if ANIM > 1:   # roi lac dau, nghieng nguoi theo nhip (them hoat anh)
+        head_rot = head_rot + math.sin(t * 3.3 + seed * 1.3) * 5 * (ANIM - 1)
+        x = x + math.sin(t * .9 + seed) * D * .06 * (ANIM - 1)
     wm = c.get('w', 1.0)
     o = [f'<g transform="rotate({_f(sway * facing)} {_f(x)} {_f(y)})">']
     if hidden_below is not None:
