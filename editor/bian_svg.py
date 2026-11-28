@@ -250,6 +250,27 @@ def icon(kind, x, y, s=1.0):
                 f'<path d="M{f_(x - 58 * s)},{f_(y + 2 * s)} Q{f_(x)},{f_(y - 12 * s)} {f_(x + 58 * s)},{f_(y + 2 * s)}" stroke="#7a5a2a" stroke-width="{f_(7 * s)}" fill="none"/>'
                 f'<path d="M{f_(x)},{f_(y - 8 * s)} q{f_(-22 * s)},{f_(-34 * s)} {f_(-30 * s)},{f_(-14 * s)} q{f_(14 * s)},{f_(16 * s)} {f_(30 * s)},{f_(14 * s)} q{f_(22 * s)},{f_(-34 * s)} {f_(30 * s)},{f_(-14 * s)} q{f_(-14 * s)},{f_(16 * s)} {f_(-30 * s)},{f_(14 * s)}" stroke="#7a5a2a" stroke-width="{f_(5 * s)}" fill="none" stroke-linejoin="round"/>'
                 f'<path d="M{f_(x - 30 * s)},{f_(y + 22 * s)} l{f_(20 * s)},{f_(4 * s)} M{f_(x + 10 * s)},{f_(y + 28 * s)} l{f_(22 * s)},{f_(-4 * s)}" stroke="#a8946a" stroke-width="{f_(4 * s)}" stroke-linecap="round"/>')
+    if k == 'cart':   # xe bo cho thoc (Vo nhat P1, 28/11): thung go, 2 bao thoc, banh go, cang keo ben trai
+        w = 150 * s
+        return (f'<path d="M{f_(x - w - 90 * s)},{f_(y - 30 * s)} L{f_(x - w)},{f_(y - 10 * s)}" stroke="#6a4a2a" stroke-width="{f_(12 * s)}" stroke-linecap="round"/>'
+                f'<ellipse cx="{f_(x - 40 * s)}" cy="{f_(y - 72 * s)}" rx="{f_(62 * s)}" ry="{f_(46 * s)}" fill="#d9b86a" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
+                f'<ellipse cx="{f_(x + 60 * s)}" cy="{f_(y - 66 * s)}" rx="{f_(58 * s)}" ry="{f_(42 * s)}" fill="#cfae5e" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
+                f'<path d="M{f_(x - 60 * s)},{f_(y - 112 * s)} l{f_(18 * s)},{f_(10 * s)} M{f_(x + 44 * s)},{f_(y - 104 * s)} l{f_(18 * s)},{f_(10 * s)}" stroke="#8a6a2a" stroke-width="{f_(4 * s)}"/>'
+                f'<rect x="{f_(x - w)}" y="{f_(y - 34 * s)}" width="{f_(2 * w)}" height="{f_(52 * s)}" rx="{f_(6 * s)}" fill="#8a5e34" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<path d="M{f_(x - w + 10 * s)},{f_(y - 8 * s)} L{f_(x + w - 10 * s)},{f_(y - 8 * s)}" stroke="#6a4626" stroke-width="{f_(4 * s)}"/>'
+                + ''.join(f'<circle cx="{f_(x + d * 95 * s)}" cy="{f_(y + 42 * s)}" r="{f_(44 * s)}" fill="#7a5230" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                          f'<circle cx="{f_(x + d * 95 * s)}" cy="{f_(y + 42 * s)}" r="{f_(10 * s)}" fill="#3a2a1a"/>'
+                          f'<path d="M{f_(x + d * 95 * s - 40 * s)},{f_(y + 42 * s)} l{f_(80 * s)},0 M{f_(x + d * 95 * s)},{f_(y + 2 * s)} l0,{f_(80 * s)}" stroke="#4a3220" stroke-width="{f_(4 * s)}"/>' for d in (-1, 1)))
+    if k == 'lamp':   # den dau (Vo nhat P1, 28/11)
+        return (f'<ellipse cx="{f_(x)}" cy="{f_(y + 30 * s)}" rx="{f_(46 * s)}" ry="{f_(34 * s)}" fill="#b8892e" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<rect x="{f_(x - 14 * s)}" y="{f_(y - 10 * s)}" width="{f_(28 * s)}" height="{f_(16 * s)}" fill="#8a6a2a" stroke="{INK}" stroke-width="{f_(4 * s)}"/>'
+                f'<path d="M{f_(x - 22 * s)},{f_(y - 10 * s)} Q{f_(x - 30 * s)},{f_(y - 70 * s)} {f_(x)},{f_(y - 92 * s)} Q{f_(x + 30 * s)},{f_(y - 70 * s)} {f_(x + 22 * s)},{f_(y - 10 * s)} Z" fill="#eef4f0" fill-opacity=".55" stroke="{INK}" stroke-width="{f_(4 * s)}"/>'
+                f'<path d="M{f_(x)},{f_(y - 16 * s)} q{f_(-12 * s)},{f_(-20 * s)} 0,{f_(-40 * s)} q{f_(12 * s)},{f_(20 * s)} 0,{f_(40 * s)} Z" fill="#f4b33a" stroke="#c4581f" stroke-width="{f_(3 * s)}"/>')
+    if k == 'clapper':   # bang clapper phim (chuyen ngoai sach: nha van dong phim)
+        return (f'<rect x="{f_(x - 90 * s)}" y="{f_(y - 30 * s)}" width="{f_(180 * s)}" height="{f_(110 * s)}" rx="{f_(6 * s)}" fill="#2a2a2a" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
+                f'<path d="M{f_(x - 70 * s)},{f_(y + 10 * s)} l{f_(140 * s)},0 M{f_(x - 70 * s)},{f_(y + 45 * s)} l{f_(140 * s)},0" stroke="#e8e4da" stroke-width="{f_(4 * s)}"/>'
+                f'<g transform="rotate(-14 {f_(x - 90 * s)} {f_(y - 34 * s)})"><rect x="{f_(x - 90 * s)}" y="{f_(y - 66 * s)}" width="{f_(180 * s)}" height="{f_(32 * s)}" fill="#e8e4da" stroke="{INK}" stroke-width="{f_(5 * s)}"/>'
+                + ''.join(f'<path d="M{f_(x - 80 * s + i * 40 * s)},{f_(y - 66 * s)} l{f_(20 * s)},0 l{f_(-16 * s)},{f_(32 * s)} l{f_(-20 * s)},0 Z" fill="#2a2a2a"/>' for i in range(4)) + '</g>')
     if k == 'giftbag':   # tui qua
         return (f'<path d="M{f_(x - 60 * s)},{f_(y - 40 * s)} L{f_(x + 60 * s)},{f_(y - 40 * s)} L{f_(x + 70 * s)},{f_(y + 70 * s)} L{f_(x - 70 * s)},{f_(y + 70 * s)} Z" fill="#c4281f" stroke="{INK}" stroke-width="{f_(6 * s)}" stroke-linejoin="round"/>'
                 f'<path d="M{f_(x - 30 * s)},{f_(y - 40 * s)} q{f_(30 * s)},{f_(-60 * s)} {f_(60 * s)},0" fill="none" stroke="{INK}" stroke-width="{f_(6 * s)}"/>'
