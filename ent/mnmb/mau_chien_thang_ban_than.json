@@ -1,0 +1,128 @@
+{
+ "texts": [
+  "Bạn không thua ai cả.",
+  "Bạn thua chính mình mỗi sáng chuông báo thức reo.",
+  "Bạn bấm tắt và tự nhủ năm phút nữa thôi.",
+  "Năm phút đó không làm bạn khỏe hơn.",
+  "Nhưng nó dạy não bạn một điều.",
+  "Khi khó chịu thì mình được phép bỏ cuộc.",
+  "Não không phân biệt việc lớn hay việc nhỏ.",
+  "Nó chỉ ghi nhớ điều bạn lặp lại.",
+  "Bỏ cuộc lúc sáng thì chiều bạn bỏ cuộc dễ hơn.",
+  "Rồi bỏ cuộc trở thành con người bạn.",
+  "Thế nên chiến thắng bản thân không phải một trận lớn.",
+  "Nó là hàng trăm trận nhỏ không ai nhìn thấy.",
+  "Đứng dậy khi chuông reo lần đầu.",
+  "Viết thêm một trang khi bạn muốn dừng.",
+  "Mỗi lần thắng dù rất nhỏ là bạn dạy não một điều mới.",
+  "Mình là người làm đến cùng.",
+  "Sáng mai chuông reo lần đầu là dậy.",
+  "Chỉ một lần thôi.",
+  "Mỗi ngày, một bước."
+ ],
+ "pauses": [
+  0.45,
+  0.8,
+  0.45,
+  0.45,
+  0.6,
+  0.8,
+  0.45,
+  0.45,
+  0.45,
+  1,
+  0.45,
+  0.45,
+  0.45,
+  0.45,
+  0.6,
+  1,
+  0.45,
+  0.6,
+  0
+ ],
+ "hook": "Bạn không thua ai cả",
+ "hook_sub": "Bạn chỉ thua chính mình.",
+ "leads": [
+  5,
+  4,
+  3,
+  3,
+  1,
+  3,
+  1,
+  4,
+  4,
+  3,
+  2,
+  5,
+  2,
+  4,
+  3,
+  6,
+  2,
+  4,
+  5
+ ],
+ "poses": [
+  [
+   0,
+   "ngu"
+  ],
+  [
+   2,
+   "bat"
+  ],
+  [
+   4,
+   "ngoi"
+  ],
+  [
+   8,
+   "guc"
+  ],
+  [
+   10,
+   "ta"
+  ],
+  [
+   12,
+   "dungday"
+  ],
+  [
+   13,
+   "viet"
+  ],
+  [
+   14,
+   "ta"
+  ],
+  [
+   16,
+   "di"
+  ]
+ ],
+ "sents": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18
+ ],
+ "_ghi_chu": "Mau da duyet 28/11 (job mnmb2-thu2, 57 s). voice_urls/pauses/texts/sents lay tu W87 (tag mnmb-..., provider vbee, voice s_sg_male_thientam_ytstable_vc, speed 1, comma:false).",
+ "_loi_doc": "Bạn không thua ai cả. Bạn thua chính mình mỗi sáng chuông báo thức reo. [nghỉ 0.8] Bạn bấm tắt và tự nhủ năm phút nữa thôi. Năm phút đó không làm bạn khỏe hơn. Nhưng nó dạy não bạn một điều. [nghỉ 0.6] Khi khó chịu thì mình được phép bỏ cuộc. [nghỉ 0.8] Não không phân biệt việc lớn hay việc nhỏ. Nó chỉ ghi nhớ điều bạn lặp lại. Bỏ cuộc lúc sáng thì chiều bạn bỏ cuộc dễ hơn. Rồi bỏ cuộc trở thành con người bạn. [nghỉ 1.0] Thế nên chiến thắng bản thân không phải một trận lớn. Nó là hàng trăm trận nhỏ không ai nhìn thấy. Đứng dậy khi chuông reo lần đầu. Viết thêm một trang khi bạn muốn dừng. Mỗi lần thắng dù rất nhỏ là bạn dạy não một điều mới. [nghỉ 0.6] Mình là người làm đến cùng. [nghỉ 1.0] Sáng mai chuông reo lần đầu là dậy. Chỉ một lần thôi. [nghỉ 0.6] Mỗi ngày, một bước."
+}
