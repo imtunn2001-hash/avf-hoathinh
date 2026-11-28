@@ -20,7 +20,8 @@ from thumb import make_thumb  # noqa: E402
 import ngat  # noqa: E402
 
 OUT = 'out'
-BIA_SAN = {'cd', 'mnmb'}   # dang moi 28/11: khung dau video da la anh bia + hook
+# 28/11 22:29 chu chot: MOI KENH lay khung dau video (da co hook tu khung 0) lam anh bia, khong ve/chen bia them
+BIA_SAN = None   # None = tat ca kenh
 # dai hinh "sach" (khong chu) cua tung loai video, toa do tren khung 1080x1920
 BAND = {'mnmb': (650, 1170), 'cd': (520, 1080), 'cck': (430, 1300), 'lt': (430, 1300), 'ksc': (430, 1300),
         'war': (440, 1150)}
@@ -81,12 +82,12 @@ def main():
     else:
         vp = src
     d = dur(vp)
-    if ch in BIA_SAN and sp.get('t') is None:
+    if (BIA_SAN is None or ch in BIA_SAN) and sp.get('t') is None and not sp.get('ve_bia'):
         # 28/11 chu chot: kenh da co ANH BIA + HOOK ngay khung dau -> lay luon khung 0,05 s lam bia, khong ve them, khong chen bia vao video
         frame(vp, 0.05).save(os.path.join(OUT, 'thumb.jpg'), quality=90)
         json.dump({'t': 0.05, 'bia_san': True}, open(os.path.join(OUT, 'thumb.json'), 'w'))
         import shutil; shutil.copyfile(vp, os.path.join(OUT, 'out.mp4'))
-        print('anh bia: lay khung dau 0,05 s (kenh co bia san)'); return
+        print('anh bia: lay khung dau 0,05 s'); return
     y0, y1 = sp.get('band') or BAND.get(ch, (430, 1300))
     if sp.get('t') is not None:
         ts = [float(sp['t'])]
