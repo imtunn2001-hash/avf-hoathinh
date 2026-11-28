@@ -534,8 +534,18 @@ def sfx_events(sh, t0, d):
 
 
 # ---------------- lop chu (overlay, khong bi camera zoom) ----------------
+def header_cck2(sp):
+    """28/11 23:24: bang tieu de gon (256-338) de khung giua rong hon"""
+    ser = esc(sp.get('series', '')); b = esc(sp.get('badge', ''))
+    fs = 40 if len(ser) <= 26 else max(30, int(40 * 26 / len(ser)))
+    return (f'<rect x="0" y="256" width="{W}" height="78" fill="#3a0e0c" opacity=".92"/><rect x="0" y="334" width="{W}" height="4" fill="{YEL}"/>'
+            f'<text x="540" y="{f_(290 + fs * .35)}" font-family="{SUBF}" font-weight="800" font-size="{fs}" fill="{YEL}" text-anchor="middle">{ser}'
+            + (f'<tspan font-size="{f_(fs * .62)}" fill="#fff" dx="14">· {b}</tspan>' if b else '') + '</text>')
+
+
 def header_svg(sp):
     if FMT == 'square': return header_sq(sp)
+    if STYLE == 'cck2': return header_cck2(sp)
     ser = esc(sp.get('series', '')); fs = 56 if len(ser) <= 22 else max(40, int(56 * 22 / len(ser)))
     b = esc(sp.get('badge', 'MỔ XẺ CHIẾN THUẬT')); bw = 30 * .72 * len(b) + 50
     return (f'<defs><linearGradient id="hd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#46100e"/><stop offset="1" stop-color="#781f16"/></linearGradient></defs>'
@@ -569,6 +579,12 @@ def label_sq(txt, q):
 def label_svg(txt, q):
     if not txt or q <= 0: return ''
     if FMT == 'square': return label_sq(txt, q)
+    if STYLE == 'cck2':   # nhan canh nho, sat bang tieu de
+        t = esc(txt.upper()); fs = 40
+        while fs * .72 * len(t) + 40 > TW and fs > 28: fs -= 2
+        bw = fs * .72 * len(t) + 40
+        return (f'<g opacity="{f_(min(1, q / .2))}"><rect x="{f_(540 - bw / 2)}" y="352" width="{f_(bw)}" height="{fs + 22}" rx="14" fill="#111" opacity=".8"/>'
+                f'<text x="540" y="{f_(352 + fs + 3)}" font-family="{SUBF}" font-weight="800" font-size="{fs}" fill="{YEL}" text-anchor="middle">{t}</text></g>')
     t = esc(txt.upper()); fs = 62
     while fs * .72 * len(t) + 50 > TW and fs > 36: fs -= 2
     bw = fs * .72 * len(t) + 50; sc = 1.15 - .15 * min(1, q / .18 * 1.0) if q < .18 else 1.0
@@ -654,15 +670,18 @@ SUBF = 'Montserrat, Be Vietnam Pro, Inter'
 YEL = '#ffd21f'
 
 
+SUB_BOT2 = 1512   # 28/11 23:24 chu: phu de CCK thap xuong de khung giua rong hon
+
+
 def sub_fs():
-    return 44 if FMT == 'square' else (44 if STYLE == 'cck2' else 50)
+    return 44 if FMT == 'square' else (40 if STYLE == 'cck2' else 50)
 
 
 def sub_top(txt):
     if not txt: return H
     lines = split_lines(txt, 30 if STYLE == 'cck2' else 28); fs = sub_fs()
     while max(len(l) for l in lines) * fs * .56 > (900 if FMT == 'square' else TW) and fs > 40: fs -= 2
-    bot = 1052 if FMT == 'square' else SAFE[3] - 12
+    bot = 1052 if FMT == 'square' else (SUB_BOT2 if STYLE == 'cck2' else SAFE[3] - 12)
     return bot - fs * 1.3 * len(lines) - 16
 
 
@@ -703,7 +722,7 @@ def sub_cck2(txt, cur=None, tv=None):
     """28/11 chu chot CCK: chu VANG ro, vien DEN, KHONG khung mo; karaoke: doc toi chu nao chu do sang TRANG (nhac nhe)."""
     lines = split_lines(txt, 30); fs = sub_fs()
     while max(len(l) for l in lines) * fs * .6 > TW and fs > 36: fs -= 2
-    lh = fs * 1.28; bot = SAFE[3] - 12; y0 = bot - lh * len(lines)
+    lh = fs * 1.28; bot = SUB_BOT2; y0 = bot - lh * len(lines)
     allw = txt.split(); wt = None; ci = -1
     if cur is not None and tv is not None:
         wt = fx.word_times(allw, cur[0], cur[1]); ci = max([i for i, t0 in enumerate(wt) if t0 <= tv] or [-1])
@@ -838,9 +857,9 @@ def frame_svg(fi):
         if sh['type'] == 'items': world = DD.items_world(sh, ts, dk)
         z, cx, cy = DD.cam(sh, ts, dk, (z, cx, cy))
     tags = CH.TAGS; CH.TAGS = None
-    if STYLE == 'cck2': world = f'<g filter="url(#mute)">{mute_world(world)}</g>'; z = z * .92
+    if STYLE == 'cck2': world = f'<g filter="url(#mute)">{mute_world(world)}</g>'; z = min(z, 1.12) * .92; cx = min(max(cx, 540 / z - 40), 1080 - 540 / z + 40)
     r = random.Random(fi); ox = r.uniform(-shake, shake); oy = r.uniform(-shake, shake)
-    Y0 = 600 if FMT == 'square' else 830
+    Y0 = 600 if FMT == 'square' else (930 if STYLE == 'cck2' else 830)   # cck2: day canh xuong giua khung (phu de da thap xuong)
     if FMT == 'square': cy = GROUND.get(sh['type'], cy) - 170 / z
     cam = f'translate({f_(540 + ox)} {f_(Y0 + oy)}) scale({f_(z)}) translate({f_(-cx)} {f_(-cy)})'
     o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}"><rect width="{W}" height="{H}" fill="#2a2a30"/>' + (MUTE_DEFS if STYLE == 'cck2' else '')]
@@ -871,7 +890,7 @@ def frame_svg(fi):
                 if shk['type'] == 'items': wk = DD.items_world(shk, tk, dk_)
                 zk, cxk, cyk = DD.cam(shk, tk, dk_, (zk, cxk, cyk))
             if FMT == 'square': cyk = GROUND.get(shk['type'], cyk) - 170 / zk
-            if STYLE == 'cck2': wk = f'<g filter="url(#mute)">{mute_world(wk)}</g>'; zk = zk * .92
+            if STYLE == 'cck2': wk = f'<g filter="url(#mute)">{mute_world(wk)}</g>'; zk = min(zk, 1.12) * .92
             camk = f'translate(540 {f_(Y0)}) scale({f_(zk)}) translate({f_(-cxk)} {f_(-cyk)})'   # moi canh bi cat dung khung roi moi truot
             o.append(f'<g filter="url(#mb)"><g transform="translate({f_(off)} 0)"><g clip-path="url(#cw)"><g transform="{camk}">{wk}</g></g></g></g>')
         tags = []
@@ -919,7 +938,7 @@ def _init(g):
         import vh_svg; vh_svg.install(sys.modules[__name__])
     if g.get('sp', {}).get('chars') == 'roinuoc':
         import rn_chars; rn_chars.install(sys.modules[__name__], g['sp'].get('cast'))
-        if STYLE == 'cck2': rn_chars.SCALE, rn_chars.ANIM = .78, 1.8
+        if STYLE == 'cck2': rn_chars.SCALE, rn_chars.ANIM = .86, 1.8
 
 
 TRIM = ('silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.04,areverse,'
@@ -1085,6 +1104,13 @@ def main():
     for k, sh in enumerate(shots): ev += sfx_events(sh, LEAD + st[k], ends[k] - st[k])
     sw = mix_audio(ev, D, path=os.path.join(OUT, 'sfx.wav'))
     mus = os.path.join(ROOT, 'editor', 'story', sp.get('music', 'music_b.mp3')); tmp = os.path.join(OUT, 'out.tmp.mp4')
+    if sp.get('style') == 'cck2':   # 28/11: nhac theo tinh tiet - moi canh co 'mood' (giu mood canh truoc neu khong ghi)
+        import nhac_cam
+        marks, last = [], None
+        for k, sh in enumerate(shots):
+            m = sh.get('mood') or last or 'mo'
+            if m != last: marks.append((LEAD + st[k], m)); last = m
+        mus = nhac_cam.build(os.path.join(OUT, 'nhac.wav'), marks, D); print('nhac theo tinh tiet:', marks)
     if voice:
         fc = (f'[1:a]adelay={int(LEAD*1000)}|{int(LEAD*1000)},highpass=f=85,equalizer=f=3200:t=q:w=1.2:g=2.5,acompressor=threshold=-20dB:ratio=3:attack=8:release=120:makeup=2[vx];'
               '[vx]asplit=2[v][vk];[2:a]volume=0.6[s];[3:a]volume=0.13[m0];[m0][vk]sidechaincompress=threshold=0.03:ratio=8:attack=25:release=450[m];'   # 23/11: nhac tu ha khi co loi, len lai khi nghi

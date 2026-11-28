@@ -677,6 +677,14 @@ def beat(sh, t, d):
         cam = (1.0, 540, 900)
     elif ty == 'stage':
         s.append(BG.get(sh.get('bg', 'paper'), BG['paper'])(t))
+        for k, ex in enumerate(sh.get('extras', [])):   # 28/11 CCK: nguoi qua duong / dam dong o nen (nho, khong bang ten, di cham)
+            ta = V.at(sh, int(ex.get('at', 0)), 0) if ex.get('at') else 0
+            if t < ta: continue
+            sp_ = ex.get('v', 60) * (1 if ex.get('x1', 540) >= ex.get('x0', 540) else -1)
+            x = ex.get('x0', 540) + sp_ * (t - ta) if 'x1' in ex else ex.get('x0', 540)
+            if 'x1' in ex: x = min(x, ex['x1']) if sp_ > 0 else max(x, ex['x1'])
+            s.append(ch(ex['c'], x, ex.get('y', GY + 10) - (V.walk(t + k) if 'x1' in ex else 0), ex.get('D', 110), 1 if sp_ > 0 else -1,
+                        ex.get('expr', 'normal'), ex.get('hands'), t=t + k * .7, tag=False))
         for k, c in enumerate(sh.get('cast', [])):
             ta = V.at(sh, int(c.get('at', 0)), 0) if c.get('at') else -1
             if t < ta: continue
