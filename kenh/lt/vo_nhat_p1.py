@@ -65,7 +65,7 @@ S = [
       say='Trẻ con trong xóm thấy lạ, chạy theo trêu. // Người lớn đứng ở cửa nhìn ra, thì thầm, có người thở dài. /// {hạ: Đói thế này, lại còn rước thêm người về.}'),
  dict(type='stage', label='CÁI GIÁ MỘT CON NGƯỜI', bg='village_night',
       cast=[dict(c='thi', x=540, D=185, expr='sad')],
-      say='Cô theo một người lạ, đâu phải vì yêu. // Ở chợ tỉnh năm ấy, một bữa no đã giống một lời hứa. /// {chậm: Cái tên Vợ nhặt nghe như đùa, mà nói đúng giá một con người năm đói.}'),
+      say='Cô theo một người lạ, đâu phải vì yêu. // Năm ấy ở chợ tỉnh, một bữa no ngang một lời hứa. /// {chậm: Cái tên Vợ nhặt nghe như đùa, mà nói đúng giá một con người năm đói.}'),
  dict(type='stage', label='NGOÀI SÁCH', bg='village',
       cast=[dict(c='kimlan', x=420, D=180, expr='normal')],
       icons=[dict(icon='clapper', x=720, y=1130, s=.85, at=1)],
@@ -73,9 +73,9 @@ S = [
  dict(type='stage', label='NHÀ VĂN THÀNH LÃO HẠC', bg='village',
       cast=[dict(c='laohac', x=380, D=175, expr='sad')],
       icons=[dict(icon='dog_sad', x=690, y=1170, s=1.2, at=1)],
-      say='Đạo diễn Phạm Văn Khoa mời ông vào vai. // Vai ấy làm ông nổi tiếng trên màn ảnh. /// {chậm: Người viết anh cu Tràng, lại thành ông lão bán chó mà ta vừa kể.}'),
+      say='Đạo diễn Phạm Văn Khoa mời ông vào vai. // Vai ấy làm ông nổi tiếng trên màn ảnh. /// {chậm: Người viết ra anh cu Tràng, lại thành ông lão bán chó trên phim.}'),
  dict(type='ke', label='TẬP SAU', board='PHẦN 2|BÀ CỤ TỨ', expr='normal',
-      say='Về tới nhà, mẹ Tràng chưa về. {cao: Bà cụ sẽ nói gì, khi thấy một người đàn bà lạ ngồi trong nhà mình?} [nghỉ 1.0] Bình luận nhé. // Phần 2, Liên Thiên kể tiếp, cả nồi cháo cám bà gọi là chè khoán. Theo dõi Liên Thiên để xem nhé.'),
+      say='Về tới nhà, mẹ Tràng chưa về. {cao: Bà cụ sẽ nói gì, khi thấy một người đàn bà lạ ngồi trong nhà mình?} [nghỉ 1.0] Đoán đi, rồi bình luận cho Liên Thiên. // Phần 2, Liên Thiên kể tiếp, cả nồi cháo cám bà gọi là chè khoán. Theo dõi Liên Thiên để xem nhé.'),
 ]
 NAMES = ['Tràng', 'Kim Lân', 'Nguyễn Văn Tài', 'Liên Thiên', 'Vợ nhặt', 'Lão Hạc', 'lão Hạc', 'Làng Vũ Đại', 'Phạm Văn Khoa']
 def tts(x):
