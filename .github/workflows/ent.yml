@@ -21,7 +21,7 @@ jobs:
         timeout-minutes: 8
         run: |
           pip install -q pillow
-          if [ "${{ inputs.kind }}" = "wb" ] || [ "${{ inputs.kind }}" = "story" ] || [ "${{ inputs.kind }}" = "nhip" ] || [ "${{ inputs.kind }}" = "nd" ] || [ "${{ inputs.kind }}" = "series" ] || [ "${{ inputs.kind }}" = "chart20" ] || [ "${{ inputs.kind }}" = "bantin" ] || [ "${{ inputs.kind }}" = "sad" ] || [ "${{ inputs.kind }}" = "couple" ] || [ "${{ inputs.kind }}" = "motiv" ] || [ "${{ inputs.kind }}" = "horror" ] || [ "${{ inputs.kind }}" = "dem" ] || [ "${{ inputs.kind }}" = "warmap" ] || [ "${{ inputs.kind }}" = "ksc_svg" ] || [ "${{ inputs.kind }}" = "aff_sketch" ] || [ "${{ inputs.kind }}" = "vtd" ] || [ "${{ inputs.kind }}" = "meo" ] || [ "${{ inputs.kind }}" = "thumb" ]; then pip install -q numpy pyyaml; fi
+          if [ "${{ inputs.kind }}" = "wb" ] || [ "${{ inputs.kind }}" = "story" ] || [ "${{ inputs.kind }}" = "nhip" ] || [ "${{ inputs.kind }}" = "nd" ] || [ "${{ inputs.kind }}" = "series" ] || [ "${{ inputs.kind }}" = "chart20" ] || [ "${{ inputs.kind }}" = "bantin" ] || [ "${{ inputs.kind }}" = "sad" ] || [ "${{ inputs.kind }}" = "couple" ] || [ "${{ inputs.kind }}" = "motiv" ] || [ "${{ inputs.kind }}" = "horror" ] || [ "${{ inputs.kind }}" = "dem" ] || [ "${{ inputs.kind }}" = "mnmb2" ] || [ "${{ inputs.kind }}" = "warmap" ] || [ "${{ inputs.kind }}" = "ksc_svg" ] || [ "${{ inputs.kind }}" = "aff_sketch" ] || [ "${{ inputs.kind }}" = "vtd" ] || [ "${{ inputs.kind }}" = "meo" ] || [ "${{ inputs.kind }}" = "thumb" ]; then pip install -q numpy pyyaml; fi
           if { [ "${{ inputs.kind }}" = "ksc_svg" ] || [ "${{ inputs.kind }}" = "aff_sketch" ] || [ "${{ inputs.kind }}" = "vtd" ] || [ "${{ inputs.kind }}" = "meo" ]; } && ! command -v rsvg-convert >/dev/null 2>&1; then timeout 240 bash -c 'sudo apt-get -o Acquire::Retries=2 update -y && sudo apt-get install -y --no-install-recommends librsvg2-bin' || true; fi
           if [ "${{ inputs.kind }}" != "card" ] && ! command -v ffmpeg >/dev/null 2>&1; then
             if ! timeout 150 bash -c 'sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 update -y && sudo apt-get -o Acquire::http::Timeout=20 install -y --no-install-recommends ffmpeg'; then
@@ -72,6 +72,7 @@ jobs:
             motiv) python3 editor/motiv.py ;;
             horror) python3 editor/horror.py ;;
             dem) python3 editor/dem.py ;;
+            mnmb2) python3 editor/mnmb2.py ;;
             warmap) python3 editor/warmap.py ;;
             ksc_svg) NPROC=4 python3 editor/ksc_svg.py ;;
             aff_sketch) NPROC=4 python3 editor/aff_sketch.py ;;
