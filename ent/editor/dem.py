@@ -263,11 +263,12 @@ class Cong:
         s.L = lightmap([(540, 840, 320, (1.0, .86, .62), 1.4), (540, 1300, 300, (1.0, .8, .6), .45)], (0.14, 0.14, 0.17))
 
     def draw(s, im, t, st):
-        d = ImageDraw.Draw(im); q = min(1.0, t / max(1.0, st['dur'])); y = 1500 - 420 * q; sc = 1 - .55 * q
-        person(d, 540, y, 420 * sc, 'be', 1, ph=t * 1.4, pose='hold')
+        d = ImageDraw.Draw(im); q = 0.55 if st.get('bia') else min(1.0, t / max(1.0, st['dur'])); y = 1500 - 420 * q; sc = 1 - .55 * q
+        person(d, 540, y, 420 * sc, 'be', 1, ph=0 if st.get('bia') else t * 1.4, pose='hold')
 
 
 SCENES = {
+    'bia': lambda: (Cong(), {'bia': True}),
     'xu_uot': lambda: (Can('dem', 5), {'k': 'hop', 'wet': True}),
     'quan': lambda: (Quan('dem'), {}),
     'quan_vao': lambda: (Quan('dem'), {'be': 'vao'}),
@@ -336,6 +337,10 @@ def main():
         last[0] = a + 0.2
         b = start_of(sc[k + 1][0]) - 0.15 if k + 1 < len(sc) else D
         spans.append((a, b, name))
+    COVER = float(sp.get('cover_sec', 0.7)) if sp.get('cover') else 0.0
+    if COVER:
+        spans[0] = (COVER, spans[0][1], spans[0][2]); spans.insert(0, (0.0, COVER, sp['cover']))
+    hook_end = max((b_ for a_, b_, _, si in segs if si == segs[0][3]), default=3.0) + .3
     built = {}
 
     def get_scene(name):
@@ -360,7 +365,7 @@ def main():
     def frame(t):
         k = max(i for i in range(len(spans)) if spans[i][0] <= t + 1e-6)
         im = render_scene(k, t)
-        if k > 0 and t - spans[k][0] < .6:
+        if k > 0 and t - spans[k][0] < .6 and not (COVER and k == 1):
             im = Image.blend(render_scene(k - 1, t), im, (t - spans[k][0]) / .6)
         if t > D - TAIL + .4:   # ket: toi dan + ten kenh
             q = min(1.0, (t - (D - TAIL + .4)) / 1.2)
@@ -368,7 +373,24 @@ def main():
             d = ImageDraw.Draw(im); tt = sp.get('title', 'CHUYỆN ĐÊM'); f = F(True, 56)
             d.text(((W - d.textlength(tt, font=f)) / 2, 880), tt, font=f, fill=tuple(int(c * q) for c in (220, 200, 160)))
             return im
+        hk = (sp.get('hook') or '').strip().upper()
+        if hk and t < hook_end:
+            a_ = 1.0 if t < hook_end - .35 else max(0.0, (hook_end - t) / .35)
+            ov = Image.new('RGBA', (W, H), (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
+            from series import wrap_bal
+            fH = F(True, 100)
+            while len(wrap_bal(od, hk, fH, 780)) > 2 and fH.size > 60: fH = F(True, fH.size - 4)
+            ls = wrap_bal(od, hk, fH, 780); lh = int(fH.size * 1.16); y0 = 372
+            od.rectangle([0, 268, W, y0 + len(ls) * lh + 30], fill=(0, 0, 0, int(120 * a_)))
+            kick = sp.get('kicker', 'CHUYỆN ĐÊM'); fK = F(True, 38); kw = od.textlength(kick, font=fK)
+            od.rounded_rectangle([(W - kw) / 2 - 22, y0 - 88, (W + kw) / 2 + 22, y0 - 28], 10, fill=(150, 28, 26, int(235 * a_)))
+            od.text(((W - kw) / 2, y0 - 84), kick, font=fK, fill=(250, 240, 226, int(255 * a_)))
+            for j, ln in enumerate(ls):
+                x = (W - od.textlength(ln, font=fH)) / 2
+                od.text((x, y0 + j * lh), ln, font=fH, fill=(255, 226, 160, int(255 * a_)), stroke_width=5, stroke_fill=(0, 0, 0, int(255 * a_)))
+            im.paste(ov, (0, 0), ov)
         cur = next((s_ for s_ in segs if s_[0] - .05 <= t < s_[1] + .25), None)
+        if cur and hk and t < hook_end - .35: cur = None
         if cur:
             d = ImageDraw.Draw(im); a_ = min(1.0, (t - cur[0] + .05) / .25) * min(1.0, (cur[1] + .25 - t) / .2)
             ls = wrap(d, cur[2], fS, 760)[:3]; y = 1444 - len(ls) * 56
